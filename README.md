@@ -17,6 +17,34 @@ import emm.scalaz._
 
 If emm were written specifically against scalaz, the second import would be unnecessary.  Users will also need to add a second SBT dependency on the *-scalaz* or *-cats* submodule of your project (e.g. *emm-scalaz*).  Transitive dependencies will take care of the rest!
 
+## SBT Setup
+
+```sbt
+resolvers += "bintray-djspiewak-maven" at "https://dl.bintray.com/djspiewak/maven"
+
+libraryDependencies += "com.codecommit" %% "shims-core" % ShimsVersion
+```
+
+In your *-scalaz* and *-cats* subprojects, add the following dependencies:
+
+```sbt
+libraryDependencies += "com.codecommit" %% "shims-scalaz" % ShimsVersion        // for scalaz
+
+// or!
+
+libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        // for cats
+```
+
+At present, the upstream dependencies of *shims-cats* and *shims-scalaz* are cats-0.1 and scalaz-7.2.0, respectively.
+
+It *is* our plan to publish shims to sonatype in the near future, to avoid even more resolver issues for everyone.  This hasn't been done yet because I'm in a hurry.
+
+The current version of shims is **0.1**:
+
+```sbt
+val ShimsVersion = "0.1"
+```
+
 ## Features
 
 This is a lazily-evaluated library.  Currently, it contains only just enough to make [emm](https://github.com/djspiewak/emm) operational.  If you need more than that, PRs are very much welcome.  Please note that this is a compatibility layer *specifically* for typeclasses!  It is not a replacement for scalaz *or* cats.  For example, we will not implement an `Xor` (or `\/`) delegate.  `State`, `Kleisli` and anything ending in `T` are similarly out of scope.  The whole point is just to write code which works with either cats or scalaz typeclasses, where they are equivalent.  I reserve the right to be pointlessly opinionated about what is and isn't out of scope.
