@@ -15,6 +15,12 @@ lazy val commonSettings = Seq(
 
   scalacOptions in Test += "-Yrangepos")
 
+lazy val root = project
+  .in(file("."))
+  .aggregate(core, scalaz, cats)
+  .settings(name := "shims")
+  .settings(commonSettings: _*)
+
 lazy val core = project.in(file("core")).settings(commonSettings: _*)
 lazy val scalaz = project.in(file("scalaz")).settings(commonSettings: _*).dependsOn(core)
 lazy val cats = project.in(file("cats")).settings(commonSettings: _*).dependsOn(core)
