@@ -1,3 +1,1 @@
-name := "shims-scalaz"
-
-libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.0"
+// stuff that's general to scalaz, but not specific to 7.1 or 7.2

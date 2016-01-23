@@ -41,7 +41,7 @@ lazy val commonSettings = Seq(
 
 lazy val root = project
   .in(file("."))
-  .aggregate(core, scalaz, cats)
+  .aggregate(core, scalaz72, scalaz71, cats)
   .settings(commonSettings: _*)
   .settings(
     name := "shims",
@@ -52,7 +52,22 @@ lazy val root = project
 
 lazy val core = project.in(file("core")).settings(commonSettings: _*)
 
-lazy val scalaz = project.in(file("scalaz")).settings(commonSettings: _*).dependsOn(core)
+lazy val scalaz72 = project
+  .in(file("scalaz")).settings(commonSettings: _*)
+  .dependsOn(core)
+  .settings(
+    name := s"shims-scalaz-72",
+    target := target.value / "7.2",
+    libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.0")
+
+lazy val scalaz71 = project
+  .in(file("scalaz")).settings(commonSettings: _*)
+  .dependsOn(core)
+  .settings(
+    name := s"shims-scalaz-71",
+    target := target.value / "7.1",
+    libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.6")
+
 lazy val cats = project.in(file("cats")).settings(commonSettings: _*).dependsOn(core)
 
 enablePlugins(GitVersioning)
