@@ -72,3 +72,5 @@ git.formattedShaVersion := {
     git.baseVersion.value + "-" + sha + suffix
   }
 }
+
+git.gitUncommittedChanges := "git status -s".!!.trim.length > 0
