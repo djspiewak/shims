@@ -42,13 +42,15 @@ lazy val commonSettings = Seq(
 lazy val root = project
   .in(file("."))
   .aggregate(core, scalaz, cats)
-  .settings(name := "shims")
   .settings(commonSettings: _*)
+  .settings(
+    name := "shims",
 
-lazy val core = project.in(file("core")).settings(commonSettings: _*).settings(
-  publish := (),
-  publishLocal := (),
-  publishArtifact := false)
+    publish := (),
+    publishLocal := (),
+    publishArtifact := false)
+
+lazy val core = project.in(file("core")).settings(commonSettings: _*)
 
 lazy val scalaz = project.in(file("scalaz")).settings(commonSettings: _*).dependsOn(core)
 lazy val cats = project.in(file("cats")).settings(commonSettings: _*).dependsOn(core)
