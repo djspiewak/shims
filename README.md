@@ -20,8 +20,6 @@ If emm were written specifically against scalaz, the second import would be unne
 ## SBT Setup
 
 ```sbt
-resolvers += "bintray-djspiewak-maven" at "https://dl.bintray.com/djspiewak/maven"
-
 libraryDependencies += "com.codecommit" %% "shims-core" % ShimsVersion
 ```
 
@@ -36,8 +34,6 @@ libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        //
 ```
 
 At present, the upstream dependencies of *shims-cats* and *shims-scalaz* are cats-0.1 and scalaz-7.2.0, respectively.
-
-It *is* our plan to publish shims to sonatype in the near future, to avoid even more resolver issues for everyone.  This hasn't been done yet because I'm in a hurry.
 
 The current version of shims is **0.1**:
 
