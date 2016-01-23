@@ -26,11 +26,15 @@ libraryDependencies += "com.codecommit" %% "shims-core" % ShimsVersion
 In your *-scalaz* and *-cats* subprojects, add the following dependencies:
 
 ```sbt
-libraryDependencies += "com.codecommit" %% "shims-scalaz" % ShimsVersion        // for scalaz
+libraryDependencies += "com.codecommit" %% "shims-scalaz-71" % ShimsVersion        // for scalaz 7.1
 
 // or!
 
-libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        // for cats
+libraryDependencies += "com.codecommit" %% "shims-scalaz-72" % ShimsVersion        // for scalaz 7.2
+
+// or!
+
+libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        // for cats 0.3
 ```
 
 At present, the upstream dependencies of *shims-cats* and *shims-scalaz* are cats-0.1 and scalaz-7.2.0, respectively.
