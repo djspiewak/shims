@@ -12,7 +12,7 @@ From a user standpoint, they must add a single additional import which would not
 
 ```scala
 import emm._
-import emm.scalaz._
+import emm.compat.scalaz._
 ```
 
 If emm were written specifically against scalaz, the second import would be unnecessary.  Users will also need to add a second SBT dependency on the *-scalaz* or *-cats* submodule of your project (e.g. *emm-scalaz*).  Transitive dependencies will take care of the rest!
@@ -37,12 +37,10 @@ libraryDependencies += "com.codecommit" %% "shims-scalaz-72" % ShimsVersion     
 libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        // for cats 0.3
 ```
 
-At present, the upstream dependencies of *shims-cats* and *shims-scalaz* are cats-0.1 and scalaz-7.2.0, respectively.
-
-The current version of shims is **0.1**:
+The current stable version of shims is **0.2**:
 
 ```sbt
-val ShimsVersion = "0.1"
+val ShimsVersion = "0.2"
 ```
 
 ## Features
