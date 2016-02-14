@@ -34,13 +34,13 @@ libraryDependencies += "com.codecommit" %% "shims-scalaz-72" % ShimsVersion     
 
 // or!
 
-libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        // for cats 0.3
+libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        // for cats 0.4.1
 ```
 
-The current stable version of shims is **0.2**:
+The current stable version of shims is **0.3**:
 
 ```sbt
-val ShimsVersion = "0.2"
+val ShimsVersion = "0.3"
 ```
 
 ## Features
