@@ -1,7 +1,7 @@
 name := "shims-cats"
 
-val CatsVersion = "0.3.0"
+val CatsVersion = "0.4.1"
 
 libraryDependencies ++= Seq(
-  "org.spire-math" %% "cats-core" % CatsVersion,
-  "org.spire-math" %% "cats-macros" % CatsVersion)
+  "org.typelevel" %% "cats-core" % CatsVersion,
+  "org.typelevel" %% "cats-macros" % CatsVersion)

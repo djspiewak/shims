@@ -20,7 +20,7 @@ private[shims] trait LowPriorityImplicits2 extends LowPriorityImplicits3 {
   implicit def applicative1[F[_]](implicit F: _root_.cats.Applicative[F]): Applicative[F] = new Applicative[F] {
     def point[A](a: A): F[A] = F.pure(a)
     def map[A, B](fa: F[A])(f: A => B): F[B] = F.map(fa)(f)
-    def ap[A, B](fa: F[A])(f: F[A => B]): F[B] = F.ap(fa)(f)
+    def ap[A, B](fa: F[A])(f: F[A => B]): F[B] = F.ap(f)(fa)
   }
 
   implicit def applicative2[F[_, _], F2[_, _], Z](implicit ev: Permute2[F, F2], F: _root_.cats.Applicative[F2[Z, ?]]): Applicative[F2[Z, ?]] = applicative1[F2[Z, ?]]
@@ -67,7 +67,9 @@ trait Implicits extends LowPriorityImplicits1 {
     def traverse[G[_], A, B](fa: F[A])(f: A => G[B])(implicit G: Applicative[G]): G[F[B]] = {
       val cap: _root_.cats.Applicative[G] = new _root_.cats.Applicative[G] {
         def pure[A](a: A): G[A] = G.point(a)
-        def ap[A, B](ga: G[A])(f: G[A => B]): G[B] = G.ap(ga)(f)
+        def map[A, B](ga: G[A])(f: A => B): G[B] = G.map(ga)(f)
+        def product[A, B](ga: G[A], gb: G[B]): G[(A, B)] = ap(map(gb) { b => { a: A => (a, b) } })(ga)
+        def ap[A, B](f: G[A => B])(ga: G[A]): G[B] = G.ap(ga)(f)
       }
 
       F.traverse(fa)(f)(cap)
