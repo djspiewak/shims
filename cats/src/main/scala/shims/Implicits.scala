@@ -65,6 +65,11 @@ trait Implicits extends LowPriorityImplicits1 {
     def apply[M[_], A, B](run: A => M[B]): _root_.cats.data.Kleisli[M, A, B] = _root_.cats.data.Kleisli(run)
   }
 
+  implicit def monoid[A](implicit A: _root_.cats.Monoid[A]): Monoid[A] = new Monoid[A] {
+    def zero: A = A.empty
+    def append(a1: A, a2: => A): A = A.combine(a1, a2)
+  }
+
   implicit def traverse1[F[_]](implicit F: _root_.cats.Traverse[F]): Traverse[F] = new Traverse[F] {
     def map[A, B](fa: F[A])(f: A => B): F[B] = F.map(fa)(f)
 
