@@ -61,6 +61,10 @@ private[shims] trait LowPriorityImplicits1 extends LowPriorityImplicits2 {
 
 trait Implicits extends LowPriorityImplicits1 {
 
+  implicit def kleisli: KleisliLike[_root_.cats.data.Kleisli] = new KleisliLike[_root_.cats.data.Kleisli] {
+    def apply[M[_], A, B](run: A => M[B]): _root_.cats.data.Kleisli[M, A, B] = _root_.cats.data.Kleisli(run)
+  }
+
   implicit def traverse1[F[_]](implicit F: _root_.cats.Traverse[F]): Traverse[F] = new Traverse[F] {
     def map[A, B](fa: F[A])(f: A => B): F[B] = F.map(fa)(f)
 
