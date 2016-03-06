@@ -5,5 +5,7 @@ trait Traverse[F[_]] extends Functor[F] {
 }
 
 object Traverse {
+  type Aux[F[_], Tag0] = Traverse[F] { type Tag = Tag0 }
+
   def apply[F[_]](implicit F: Traverse[F]): Traverse[F] = F
 }

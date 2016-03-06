@@ -1,7 +1,7 @@
 // scalaz
 package shims
 
-private[shims] trait LowPriorityImplicits3 {
+private[shims] trait LowPriorityImplicits4 {
 
   implicit def functor1[F[_]](implicit F: _root_.scalaz.Functor[F]): Functor[F] = new Functor[F] {
     def map[A, B](fa: F[A])(f: A => B): F[B] = F.map(fa)(f)
@@ -15,7 +15,7 @@ private[shims] trait LowPriorityImplicits3 {
   implicit def functorH3[F[_[_], _, _, _], F2[_[_], _, _, _], G[_], Y, Z](implicit ev: PermuteH3[F, F2], F: _root_.scalaz.Functor[F2[G, Y, Z, ?]]): Functor[F2[G, Y, Z, ?]] = functor1[F2[G, Y, Z, ?]]
 }
 
-private[shims] trait LowPriorityImplicits2 extends LowPriorityImplicits3 {
+private[shims] trait LowPriorityImplicits3 extends LowPriorityImplicits4 {
 
   implicit def applicative1[F[_]](implicit F: _root_.scalaz.Applicative[F]): Applicative[F] = new Applicative[F] {
     def point[A](a: A): F[A] = F.point(a)
@@ -29,6 +29,9 @@ private[shims] trait LowPriorityImplicits2 extends LowPriorityImplicits3 {
   implicit def applicativeH1[F[_[_], _], G[_]](implicit F: _root_.scalaz.Applicative[F[G, ?]]): Applicative[F[G, ?]] = applicative1[F[G, ?]]
   implicit def applicativeH2[F[_[_], _, _], F2[_[_], _, _], G[_], Z](implicit ev: PermuteH2[F, F2], F: _root_.scalaz.Applicative[F2[G, Z, ?]]): Applicative[F2[G, Z, ?]] = applicative1[F2[G, Z, ?]]
   implicit def applicativeH3[F[_[_], _, _, _], F2[_[_],_,  _, _], G[_], Y, Z](implicit ev: PermuteH3[F, F2], F: _root_.scalaz.Applicative[F2[G, Y, Z, ?]]): Applicative[F2[G, Y, Z, ?]] = applicative1[F2[G, Y, Z, ?]]
+}
+
+private[shims] trait LowPriorityImplicits2 extends LowPriorityImplicits3 {
 
   implicit def flatMap1[F[_]](implicit F: _root_.scalaz.Bind[F]): FlatMap[F] = new FlatMap[F] {
     def map[A, B](fa: F[A])(f: A => B): F[B] = F.map(fa)(f)

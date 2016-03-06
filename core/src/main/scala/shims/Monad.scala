@@ -5,5 +5,7 @@ trait Monad[F[_]] extends FlatMap[F] with Applicative[F] {
 }
 
 object Monad {
+  type Aux[F[_], Tag0] = Monad[F] { type Tag = Tag0 }
+
   def apply[F[_]](implicit F: Monad[F]): Monad[F] = F
 }
