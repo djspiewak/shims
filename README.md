@@ -17,6 +17,16 @@ import emm.compat.scalaz._
 
 If emm were written specifically against scalaz, the second import would be unnecessary.  Users will also need to add a second SBT dependency on the *-scalaz* or *-cats* submodule of your project (e.g. *emm-scalaz*).  Transitive dependencies will take care of the rest!
 
+Note that it is highly recommended that you use the following convention in your own projects if at all possible.  Or at least, it is recommended that you shy away from something like this:
+
+```scala
+// do NOT do this!
+import emm._
+import emm.scalaz._             // no no no no!
+```
+
+The problem with this revision (droping the `compat`) is hierarchical imports.  Importing `emm._` brings `scalaz` into scope, which masks the `_root_.scalaz` package, which is where all of the real scalaz stuff lives!  Tucking your compatibility objects off into their own package, which won't be independently imported by users, avoids this problem.
+
 ## SBT Setup
 
 ```sbt
@@ -45,8 +55,24 @@ val ShimsVersion = "0.3"
 
 ## Features
 
-This is a lazily-evaluated library.  Currently, it contains only just enough to make [emm](https://github.com/djspiewak/emm) operational.  If you need more than that, PRs are very much welcome.  Please note that this is a compatibility layer *specifically* for typeclasses!  It is not a replacement for scalaz *or* cats.  For example, we will not implement an `Xor` (or `\/`) delegate.  `State`, `Kleisli` and anything ending in `T` are similarly out of scope.  The whole point is just to write code which works with either cats or scalaz typeclasses, where they are equivalent.  I reserve the right to be pointlessly opinionated about what is and isn't out of scope.
+At present, the only non-typeclass feature which shims provides is a default right-projected syntax for `scala.util.Either`.  It provides this primarily in lieu of providing an `EitherLike`, which may change in the future.  The syntax also provides scalaz-style symbolic aliases for `Either`, so you can use it without tearing your hair out.  The syntax can be brought in by importing `shims.syntax.either._`
+
+### Typeclasses
+
+*TODO*
+
+### Type Shapes
+
+*TODO*
+
+### Providing Instances
+
+*TODO*
 
 ## What Shims is NOT
 
 Shims is *not* a replacement for scalaz or cats!  It is not a competitor.  It does not fill the same needs.  If you think you need shims and you're not an upstream library author, chances are you actually need scalaz or cats.  Shims is a compatibility layer, nothing more.  If you're writing a "downstream" project (i.e. you deploy to a server, instead of to bintray/sonatype), you should absolutely not see "shims" in your SBT files.
+
+## Contributing
+
+This is a lazily-evaluated library.  Currently, it contains only just enough to make [emm](https://github.com/djspiewak/emm) and [http4s](http://http4s.org) operational.  If you need more than that, PRs are very much welcome.  Please note that this is a compatibility layer *specifically* for typeclasses!  It is not a replacement for scalaz *or* cats.  For example, we will not implement an `Xor` (or `\/`) delegate.  `State`, `Kleisli` and anything ending in `T` are similarly out of scope.  The whole point is just to write code which works with either cats or scalaz typeclasses, where they are equivalent.  I reserve the right to be pointlessly opinionated about what is and isn't out of scope.  Also, when we implement something, I reserve the right to be pointlessly opinionated about the names and types thereof.  So basically, welcome to my bikeshed.  :-)
