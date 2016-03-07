@@ -1,5 +1,7 @@
 # Shims
 
+[![Build Status](https://travis-ci.org/djspiewak/shims.svg?branch=master)](https://travis-ci.org/djspiewak/shims)
+
 Once upon a time, [scalaz](https://github.com/scalaz/scalaz) was the standard library for functional and generally higher-order abstractions in the Scala community.  Library and framework authors could confidently write and publish functions in terms of `scalaz.Monad`, `scalaz.State` and so on.
 
 Unfortunately, for various reasons, this is no longer the case.  [Cats](https://github.com/non/cats) is now on the scene, and many users may want to use it rather than scalaz in their downstream projects.  As a library author, we do not want to force a specific choice upon our users.  We would ideally like to supply our users with a single dependency that could work with scalaz *or* cats, without introducing classpath polution or code duplication.
