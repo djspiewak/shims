@@ -87,6 +87,22 @@ private[shims] trait LowPriorityImplicits2 extends LowPriorityImplicits3 {
 
 private[shims] trait LowPriorityImplicits1 extends LowPriorityImplicits2 {
 
+  implicit def equal[A](implicit A: _root_.scalaz.Equal[A]): Equal.Aux[A, Synthetic] = new Equal[A] {
+    type Tag = Synthetic
+
+    def equal(a1: A, a2: A) = A.equal(a1, a2)
+  }
+
+  implicit def rorder[A, Tag](implicit A: Order.Aux[A, Tag], neg: Tag =/= Synthetic): _root_.scalaz.Order[A] = new _root_.scalaz.Order[A] {
+    override def equal(a1: A, a2: A) = A.equal(a1, a2)
+
+    def order(a1: A, a2: A) = A.order(a1, a2) match {
+      case i if i < 0 => _root_.scalaz.Ordering.LT
+      case 0 => _root_.scalaz.Ordering.EQ
+      case i if i > 0 => _root_.scalaz.Ordering.GT
+    }
+  }
+
   implicit def monad1[F[_]](implicit F: _root_.scalaz.Monad[F]): Monad.Aux[F, Synthetic] = new Monad[F] {
     type Tag = Synthetic
 
@@ -136,6 +152,27 @@ trait Implicits extends LowPriorityImplicits1 {
   implicit def rmonoid[A, Tag](implicit A: Monoid.Aux[A, Tag], neg: Tag =/= Synthetic): _root_.scalaz.Monoid[A] = new _root_.scalaz.Monoid[A] {
     def zero = A.zero
     def append(a1: A, a2: => A) = A.append(a1, a2)
+  }
+
+  implicit def show[A](implicit A: _root_.scalaz.Show[A]): Show.Aux[A, Synthetic] = new Show[A] {
+    type Tag = Synthetic
+
+    def show(a: A) = A.shows(a)
+  }
+
+  implicit def rshow[A, Tag](implicit A: Show.Aux[A, Tag], neg: Tag =/= Synthetic): _root_.scalaz.Show[A] = new _root_.scalaz.Show[A] {
+    override def shows(a: A) = A.show(a)
+  }
+
+  implicit def order[A](implicit A: _root_.scalaz.Order[A]): Order.Aux[A, Synthetic] = new Order[A] {
+    type Tag = Synthetic
+
+    def equal(a1: A, a2: A) = A.equal(a1, a2)
+    def order(a1: A, a2: A) = A.order(a1, a2).toInt
+  }
+
+  implicit def requal[A, Tag](implicit A: Equal.Aux[A, Tag], neg: Tag =/= Synthetic): _root_.scalaz.Equal[A] = new _root_.scalaz.Equal[A] {
+    def equal(a1: A, a2: A) = A.equal(a1, a2)
   }
 
   implicit def traverse1[F[_]](implicit F: _root_.scalaz.Traverse[F]): Traverse.Aux[F, Synthetic] = new Traverse[F] {

@@ -87,6 +87,17 @@ private[shims] trait LowPriorityImplicits2 extends LowPriorityImplicits3 {
 
 private[shims] trait LowPriorityImplicits1 extends LowPriorityImplicits2 {
 
+  implicit def equal[A](implicit A: _root_.cats.Eq[A]): Equal.Aux[A, Synthetic] = new Equal[A] {
+    type Tag = Synthetic
+
+    def equal(a1: A, a2: A) = A.eqv(a1, a2)
+  }
+
+  implicit def rorder[A, Tag](implicit A: Order.Aux[A, Tag], neg: Tag =/= Synthetic): _root_.cats.Order[A] = new _root_.cats.Order[A] {
+    override def eqv(a1: A, a2: A) = A.equal(a1, a2)
+    def compare(a1: A, a2: A) = A.order(a1, a2)
+  }
+
   implicit def monad1[F[_]](implicit F: _root_.cats.Monad[F]): Monad.Aux[F, Synthetic] = new Monad[F] {
     type Tag = Synthetic
 
@@ -136,6 +147,27 @@ trait Implicits extends LowPriorityImplicits1 {
   implicit def rmonoid[A, Tag](implicit A: Monoid.Aux[A, Tag], neg: Tag =/= Synthetic): _root_.cats.Monoid[A] = new _root_.cats.Monoid[A] {
     def empty = A.zero
     def combine(a1: A, a2: A) = A.append(a1, a2)
+  }
+
+  implicit def show[A](implicit A: _root_.cats.Show[A]): Show.Aux[A, Synthetic] = new Show[A] {
+    type Tag = Synthetic
+
+    def show(a: A) = A.show(a)
+  }
+
+  implicit def rshow[A, Tag](implicit A: Show.Aux[A, Tag], neg: Tag =/= Synthetic): _root_.cats.Show[A] = new _root_.cats.Show[A] {
+    def show(a: A) = A.show(a)
+  }
+
+  implicit def order[A](implicit A: _root_.cats.Order[A]): Order.Aux[A, Synthetic] = new Order[A] {
+    type Tag = Synthetic
+
+    def equal(a1: A, a2: A) = A.eqv(a1, a2)
+    def order(a1: A, a2: A) = A.compare(a1, a2)
+  }
+
+  implicit def requal[A, Tag](implicit A: Equal.Aux[A, Tag], neg: Tag =/= Synthetic): _root_.cats.Eq[A] = new _root_.cats.Eq[A] {
+    def eqv(a1: A, a2: A) = A.equal(a1, a2)
   }
 
   implicit def traverse1[F[_]](implicit F: _root_.cats.Traverse[F]): Traverse.Aux[F, Synthetic] = new Traverse[F] {
