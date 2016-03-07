@@ -60,7 +60,7 @@ lazy val cats = project.in(file("cats")).settings(commonSettings: _*).dependsOn(
 
 enablePlugins(GitVersioning)
 
-git.baseVersion := "0.3"
+git.baseVersion := "0.4"
 
 git.gitTagToVersionNumber := {
   case ReleaseTag(version) => Some(version)
