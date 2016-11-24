@@ -2,8 +2,8 @@ package shims
 
 import shims.cats._
 
-import _root_.cats.{Applicative => CApplicative, FlatMap => CFlatMap, Functor => CFunctor, Monad => CMonad, Traverse => CTraverse}
-import _root_.cats.std.option._
+import _root_.cats.{Functor => CFunctor}
+import _root_.cats.instances.option._
 
 import org.specs2.mutable._
 

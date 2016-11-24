@@ -42,47 +42,50 @@ private[shims] trait LowPriorityImplicits3 extends LowPriorityImplicits4 {
   implicit def applicativeH2[F[_[_], _, _], F2[_[_], _, _], G[_], Z](implicit ev: PermuteH2[F, F2], F: _root_.cats.Applicative[F2[G, Z, ?]]): Applicative.Aux[F2[G, Z, ?], Synthetic] = applicative1[F2[G, Z, ?]]
   implicit def applicativeH3[F[_[_], _, _, _], F2[_[_],_,  _, _], G[_], Y, Z](implicit ev: PermuteH3[F, F2], F: _root_.cats.Applicative[F2[G, Y, Z, ?]]): Applicative.Aux[F2[G, Y, Z, ?], Synthetic] = applicative1[F2[G, Y, Z, ?]]
 
-  implicit def rmonad1[F[_], Tag](implicit F: Monad.Aux[F, Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F] = new _root_.cats.Monad[F] {
+  implicit def rmonad1[F[_], Tag](implicit F: MonadRec.Aux[F, Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F] = new _root_.cats.Monad[F] {
     def pure[A](a: A): F[A] = F.point(a)
     override def map[A, B](fa: F[A])(f: A => B): F[B] = F.map(fa)(f)
     def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] = F.flatMap(fa)(f)
+    override def tailRecM[A, B](a: A)(f: A => F[Either[A, B]]): F[B] = F.tailRecM(a)(f)
   }
 
-  implicit def rmonad2[F[_, _], F2[_, _], Z, Tag](implicit ev: Permute2[F, F2], F: Monad.Aux[F2[Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F2[Z, ?]] = rmonad1[F2[Z, ?], Tag]
-  implicit def rmonad3[F[_, _, _], F2[_, _, _], Y, Z, Tag](implicit ev: Permute3[F, F2], F: Monad.Aux[F2[Y, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F2[Y, Z, ?]] = rmonad1[F2[Y, Z, ?], Tag]
+  implicit def rmonad2[F[_, _], F2[_, _], Z, Tag](implicit ev: Permute2[F, F2], F: MonadRec.Aux[F2[Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F2[Z, ?]] = rmonad1[F2[Z, ?], Tag]
+  implicit def rmonad3[F[_, _, _], F2[_, _, _], Y, Z, Tag](implicit ev: Permute3[F, F2], F: MonadRec.Aux[F2[Y, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F2[Y, Z, ?]] = rmonad1[F2[Y, Z, ?], Tag]
 
-  implicit def rmonadH1[F[_[_], _], G[_], Tag](implicit F: Monad.Aux[F[G, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F[G, ?]] = rmonad1[F[G, ?], Tag]
-  implicit def rmonadH2[F[_[_], _, _], F2[_[_], _, _], G[_], Z, Tag](implicit ev: PermuteH2[F, F2], F: Monad.Aux[F2[G, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F2[G, Z, ?]] = rmonad1[F2[G, Z, ?], Tag]
-  implicit def rmonadH3[F[_[_], _, _, _], F2[_[_], _, _, _], G[_], Y, Z, Tag](implicit ev: PermuteH3[F, F2], F: Monad.Aux[F2[G, Y, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F2[G, Y, Z, ?]] = rmonad1[F2[G, Y, Z, ?], Tag]
+  implicit def rmonadH1[F[_[_], _], G[_], Tag](implicit F: MonadRec.Aux[F[G, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F[G, ?]] = rmonad1[F[G, ?], Tag]
+  implicit def rmonadH2[F[_[_], _, _], F2[_[_], _, _], G[_], Z, Tag](implicit ev: PermuteH2[F, F2], F: MonadRec.Aux[F2[G, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F2[G, Z, ?]] = rmonad1[F2[G, Z, ?], Tag]
+  implicit def rmonadH3[F[_[_], _, _, _], F2[_[_], _, _, _], G[_], Y, Z, Tag](implicit ev: PermuteH3[F, F2], F: MonadRec.Aux[F2[G, Y, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.Monad[F2[G, Y, Z, ?]] = rmonad1[F2[G, Y, Z, ?], Tag]
 }
 
 private[shims] trait LowPriorityImplicits2 extends LowPriorityImplicits3 {
 
-  implicit def flatMap1[F[_]](implicit F: _root_.cats.FlatMap[F]): FlatMap.Aux[F, Synthetic] = new FlatMap[F] {
+  implicit def flatMap1[F[_]](implicit F: _root_.cats.FlatMap[F]): FlatMapRec.Aux[F, Synthetic] = new FlatMapRec[F] {
     type Tag = Synthetic
 
     def map[A, B](fa: F[A])(f: A => B): F[B] = F.map(fa)(f)
     def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] = F.flatMap(fa)(f)
+    def tailRecM[A, B](a: A)(f: (A) => F[Either[A, B]]): F[B] = F.tailRecM(a)(f)
   }
 
-  implicit def flatMap2[F[_, _], F2[_, _], Z](implicit ev: Permute2[F, F2], F: _root_.cats.FlatMap[F2[Z, ?]]): FlatMap.Aux[F2[Z, ?], Synthetic] = flatMap1[F2[Z, ?]]
-  implicit def flatMap3[F[_, _, _], F2[_, _, _], Y, Z](implicit ev: Permute3[F, F2], F: _root_.cats.FlatMap[F2[Y, Z, ?]]): FlatMap.Aux[F2[Y, Z, ?], Synthetic] = flatMap1[F2[Y, Z, ?]]
+  implicit def flatMap2[F[_, _], F2[_, _], Z](implicit ev: Permute2[F, F2], F: _root_.cats.FlatMap[F2[Z, ?]]): FlatMapRec.Aux[F2[Z, ?], Synthetic] = flatMap1[F2[Z, ?]]
+  implicit def flatMap3[F[_, _, _], F2[_, _, _], Y, Z](implicit ev: Permute3[F, F2], F: _root_.cats.FlatMap[F2[Y, Z, ?]]): FlatMapRec.Aux[F2[Y, Z, ?], Synthetic] = flatMap1[F2[Y, Z, ?]]
 
-  implicit def flatMapH1[F[_[_], _], G[_]](implicit F: _root_.cats.FlatMap[F[G, ?]]): FlatMap.Aux[F[G, ?], Synthetic] = flatMap1[F[G, ?]]
-  implicit def flatMapH2[F[_[_], _, _], F2[_[_], _, _], G[_], Z](implicit ev: PermuteH2[F, F2], F: _root_.cats.FlatMap[F2[G, Z, ?]]): FlatMap.Aux[F2[G, Z, ?], Synthetic] = flatMap1[F2[G, Z, ?]]
-  implicit def flatMapH3[F[_[_], _, _, _], F2[_[_], _, _, _], G[_], Y, Z](implicit ev: PermuteH3[F, F2], F: _root_.cats.FlatMap[F2[G, Y, Z, ?]]): FlatMap.Aux[F2[G, Y, Z, ?], Synthetic] = flatMap1[F2[G, Y, Z, ?]]
+  implicit def flatMapH1[F[_[_], _], G[_]](implicit F: _root_.cats.FlatMap[F[G, ?]]): FlatMapRec.Aux[F[G, ?], Synthetic] = flatMap1[F[G, ?]]
+  implicit def flatMapH2[F[_[_], _, _], F2[_[_], _, _], G[_], Z](implicit ev: PermuteH2[F, F2], F: _root_.cats.FlatMap[F2[G, Z, ?]]): FlatMapRec.Aux[F2[G, Z, ?], Synthetic] = flatMap1[F2[G, Z, ?]]
+  implicit def flatMapH3[F[_[_], _, _, _], F2[_[_], _, _, _], G[_], Y, Z](implicit ev: PermuteH3[F, F2], F: _root_.cats.FlatMap[F2[G, Y, Z, ?]]): FlatMapRec.Aux[F2[G, Y, Z, ?], Synthetic] = flatMap1[F2[G, Y, Z, ?]]
 
-  implicit def rflatMap1[F[_], Tag](implicit F: FlatMap.Aux[F, Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F] = new _root_.cats.FlatMap[F] {
+  implicit def rflatMap1[F[_], Tag](implicit F: FlatMapRec.Aux[F, Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F] = new _root_.cats.FlatMap[F] {
     def map[A, B](fa: F[A])(f: A => B): F[B] = F.map(fa)(f)
     def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] = F.flatMap(fa)(f)
+    def tailRecM[A, B](a: A)(f: A => F[Either[A, B]]): F[B] = F.tailRecM(a)(f)
   }
 
-  implicit def rflatMap2[F[_, _], F2[_, _], Z, Tag](implicit ev: Permute2[F, F2], F: FlatMap.Aux[F2[Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F2[Z, ?]] = rflatMap1[F2[Z, ?], Tag]
-  implicit def rflatMap3[F[_, _, _], F2[_, _, _], Y, Z, Tag](implicit ev: Permute3[F, F2], F: FlatMap.Aux[F2[Y, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F2[Y, Z, ?]] = rflatMap1[F2[Y, Z, ?], Tag]
+  implicit def rflatMap2[F[_, _], F2[_, _], Z, Tag](implicit ev: Permute2[F, F2], F: FlatMapRec.Aux[F2[Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F2[Z, ?]] = rflatMap1[F2[Z, ?], Tag]
+  implicit def rflatMap3[F[_, _, _], F2[_, _, _], Y, Z, Tag](implicit ev: Permute3[F, F2], F: FlatMapRec.Aux[F2[Y, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F2[Y, Z, ?]] = rflatMap1[F2[Y, Z, ?], Tag]
 
-  implicit def rflatMapH1[F[_[_], _], G[_], Tag](implicit F: FlatMap.Aux[F[G, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F[G, ?]] = rflatMap1[F[G, ?], Tag]
-  implicit def rflatMapH2[F[_[_], _, _], F2[_[_], _, _], G[_], Z, Tag](implicit ev: PermuteH2[F, F2], F: FlatMap.Aux[F2[G, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F2[G, Z, ?]] = rflatMap1[F2[G, Z, ?], Tag]
-  implicit def rflatMapH3[F[_[_], _, _, _], F2[_[_], _, _, _], G[_], Y, Z, Tag](implicit ev: PermuteH3[F, F2], F: FlatMap.Aux[F2[G, Y, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F2[G, Y, Z, ?]] = rflatMap1[F2[G, Y, Z, ?], Tag]
+  implicit def rflatMapH1[F[_[_], _], G[_], Tag](implicit F: FlatMapRec.Aux[F[G, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F[G, ?]] = rflatMap1[F[G, ?], Tag]
+  implicit def rflatMapH2[F[_[_], _, _], F2[_[_], _, _], G[_], Z, Tag](implicit ev: PermuteH2[F, F2], F: FlatMapRec.Aux[F2[G, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F2[G, Z, ?]] = rflatMap1[F2[G, Z, ?], Tag]
+  implicit def rflatMapH3[F[_[_], _, _, _], F2[_[_], _, _, _], G[_], Y, Z, Tag](implicit ev: PermuteH3[F, F2], F: FlatMapRec.Aux[F2[G, Y, Z, ?], Tag], neg: Tag =/= Synthetic): _root_.cats.FlatMap[F2[G, Y, Z, ?]] = rflatMap1[F2[G, Y, Z, ?], Tag]
 }
 
 private[shims] trait LowPriorityImplicits1 extends LowPriorityImplicits2 {
@@ -116,7 +119,7 @@ private[shims] trait LowPriorityImplicits1 extends LowPriorityImplicits2 {
   implicit def rapplicative1[F[_], Tag](implicit F: Applicative.Aux[F, Tag], neg: Tag =/= Synthetic): _root_.cats.Applicative[F] = new _root_.cats.Applicative[F] {
     def pure[A](a: A): F[A] = F.point(a)
     override def map[A, B](fa: F[A])(f: A => B): F[B] = F.map(fa)(f)
-    def product[A, B](fa: F[A], fb: F[B]): F[(A, B)] = F.ap(fb)(F.map(fa) { a => { b: B => (a, b) } })
+    override def product[A, B](fa: F[A], fb: F[B]): F[(A, B)] = F.ap(fb)(F.map(fa) { a => { b: B => (a, b) } })
     def ap[A, B](f: F[A => B])(fa: F[A]): F[B] = F.ap(fa)(f)
   }
 
@@ -180,7 +183,7 @@ trait Implicits extends LowPriorityImplicits1 {
       val cap: _root_.cats.Applicative[G] = new _root_.cats.Applicative[G] {
         def pure[A](a: A): G[A] = G.point(a)
         override def map[A, B](ga: G[A])(f: A => B): G[B] = G.map(ga)(f)
-        def product[A, B](ga: G[A], gb: G[B]): G[(A, B)] = ap(map(gb) { b => { a: A => (a, b) } })(ga)
+        override def product[A, B](ga: G[A], gb: G[B]): G[(A, B)] = ap(map(gb) { b => { a: A => (a, b) } })(ga)
         def ap[A, B](f: G[A => B])(ga: G[A]): G[B] = G.ap(ga)(f)
       }
 
