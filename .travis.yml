@@ -1,7 +1,22 @@
 language: scala
+
 scala:
-  - 2.11.7
-  - 2.10.6
+  - 2.11.8
+  - 2.12.1
+
 jdk:
-  - oraclejdk7
   - oraclejdk8
+
+env:
+  global:
+    - COURSIER_PROGRESS=0
+
+cache:
+  directories:
+    - $HOME/.coursier
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+
+before_cache:
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete

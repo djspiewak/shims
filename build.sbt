@@ -7,13 +7,9 @@ lazy val commonSettings = Seq(
 
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/")),
 
-  scalaVersion := "2.11.8",
+  libraryDependencies += "org.specs2" %% "specs2-core" % "3.8.6" % "test",
 
-  crossScalaVersions := Seq(scalaVersion.value, "2.10.6"),
-
-  libraryDependencies += "org.specs2" %% "specs2-core" % "3.7" % "test",
-
-  addCompilerPlugin("org.spire-math" % "kind-projector" % "0.7.1" cross CrossVersion.binary),
+  addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary),
 
   scalacOptions += "-language:_",      // I really can't be bothered with SIP-18
   scalacOptions in Test += "-Yrangepos",
