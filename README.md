@@ -29,6 +29,10 @@ import emm.scalaz._             // no no no no!
 
 The problem with this revision (droping the `compat`) is hierarchical imports.  Importing `emm._` brings `scalaz` into scope, which masks the `_root_.scalaz` package, which is where all of the real scalaz stuff lives!  Tucking your compatibility objects off into their own package, which won't be independently imported by users, avoids this problem.
 
+### SI-2712 Caveats
+
+If you run Scala 2.12.1 (or Typelevel Scala) with the `-Ypartial-unification` flag, or if you use Miles Sabin's SI-2712 fix plugin with 2.11.8 or 2.10.6, you may see ambiguous implicits in *downstream* projects.  I haven't actually tried this yet, but it seems plausible.  If this happens, it's being (ironically!) caused by the series of redundant implicits required to work around SI-2712 if you *don't* have the fix enabled.  This is a known issue (well, known-ish), and should be resolved in a future minor release.
+
 ## SBT Setup
 
 ```sbt
@@ -38,21 +42,19 @@ libraryDependencies += "com.codecommit" %% "shims-core" % ShimsVersion
 In your *-scalaz* and *-cats* subprojects, add the following dependencies:
 
 ```sbt
-libraryDependencies += "com.codecommit" %% "shims-scalaz-71" % ShimsVersion        // for scalaz 7.1
-
-// or!
-
 libraryDependencies += "com.codecommit" %% "shims-scalaz-72" % ShimsVersion        // for scalaz 7.2
 
 // or!
 
-libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        // for cats 0.4.1
+libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        // for cats 0.9.0
 ```
 
-The current stable version of shims is **0.3**:
+Scalaz 7.3 support is planned.  Scalaz 7.1 was *previously* supported, but as they lack a Scala.js build, it becomes a bit trickier.  It may be resupported if I find that I really, really need it.  Only the latest Cats will be tracked until they make a major stable release.
+
+The current stable version of shims is **0.4**:
 
 ```sbt
-val ShimsVersion = "0.3"
+val ShimsVersion = "0.4"
 ```
 
 ## Features
