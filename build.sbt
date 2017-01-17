@@ -1,6 +1,6 @@
 val ReleaseTag = """^v([\d\.]+)$""".r
 
-val CatsVersion = "0.8.1"
+val CatsVersion = "0.9.0"
 
 lazy val commonSettings = Seq(
   organization := "com.codecommit",
