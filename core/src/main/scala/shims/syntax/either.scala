@@ -2,7 +2,7 @@ package shims.syntax
 
 import scala.util.{Either, Left, Right}
 
-object either {
+trait either {
   type \/[+A, +B] = Either[A, B]
 
   object \/- {
@@ -15,7 +15,7 @@ object either {
     def unapply[A, B](either: Either[A, B]): Option[A] = either.left.toOption
   }
 
-  implicit class EitherSyntax[A, B](val either: Either[A, B]) extends AnyVal {
+  final implicit class EitherSyntax[A, B](either: Either[A, B]) {
 
     def flatMap[C](f: B => Either[A, C]): Either[A, C] = either.right flatMap f
 
@@ -24,3 +24,5 @@ object either {
     def map[C](f: B => C): Either[A, C] = either.right map f
   }
 }
+
+object either extends either
