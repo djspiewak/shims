@@ -106,7 +106,7 @@ lazy val catsJS = cats.js
 
 enablePlugins(GitVersioning)
 
-git.baseVersion := "0.4"
+git.baseVersion := "0.4.1"
 
 git.gitTagToVersionNumber := {
   case ReleaseTag(version) => Some(version)
