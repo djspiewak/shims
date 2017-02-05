@@ -29,12 +29,6 @@ import emm.scalaz._             // no no no no!
 
 The problem with this revision (droping the `compat`) is hierarchical imports.  Importing `emm._` brings `scalaz` into scope, which masks the `_root_.scalaz` package, which is where all of the real scalaz stuff lives!  Tucking your compatibility objects off into their own package, which won't be independently imported by users, avoids this problem.
 
-### SI-2712 Caveats
-
-If you run Scala 2.12.1 (or Typelevel Scala) with the `-Ypartial-unification` flag, or if you use Miles Sabin's SI-2712 fix plugin with 2.11.8 or 2.10.6, you may see ambiguous implicits in *downstream* projects.  I haven't actually tried this yet, but it seems plausible.  If this happens, it's being (ironically!) caused by the series of redundant implicits required to work around SI-2712 if you *don't* have the fix enabled.  This is a known issue (well, known-ish), and should be resolved in a future minor release.
-
-(**update**: it is resolved as of `0.4.1-cf0a86b`)
-
 ## SBT Setup
 
 ```sbt
@@ -57,10 +51,10 @@ libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        //
 
 Scala.js support (via `%%%`) is provided for every submodule except `scalaz-71`.
 
-The current stable version of shims is **0.4**:
+The current stable version of shims is **0.4.1**:
 
 ```sbt
-val ShimsVersion = "0.4"
+val ShimsVersion = "0.4.1"
 ```
 
 ## Features
