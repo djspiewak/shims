@@ -51,10 +51,10 @@ libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        //
 
 Scala.js support (via `%%%`) is provided for every submodule except `scalaz-71`.
 
-The current stable version of shims is **0.4.1**:
+The current stable version of shims is **0.4.2**:
 
 ```sbt
-val ShimsVersion = "0.4.1"
+val ShimsVersion = "0.4.2"
 ```
 
 ## Features
