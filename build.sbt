@@ -86,7 +86,8 @@ lazy val scalaz71 = project
   .in(file("scalaz71"))
   .settings(
     (commonSettings :+ (name := "shims-scalaz-71")) :+
-      (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.11"): _*
+      (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.11") :+
+      (unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "main" / "compat"): _*
   ).dependsOn(coreJVM)
 
 lazy val scalaz72 = crossProject
@@ -94,7 +95,8 @@ lazy val scalaz72 = crossProject
   .in(file("scalaz72"))
   .settings(
     (commonSettings :+ (name := "shims-scalaz-72")) :+
-      (libraryDependencies += "org.scalaz" %%% "scalaz-core" % "7.2.8"): _*
+      (libraryDependencies += "org.scalaz" %%% "scalaz-core" % "7.2.8") :+
+      (unmanagedSourceDirectories in Compile += baseDirectory.value / ".." / "src" / "main" / "compat"): _*   // avoiding the .jvm/ directory
   ).dependsOn(core)
 lazy val scalaz72JVM = scalaz72.jvm
 lazy val scalaz72JS = scalaz72.js
