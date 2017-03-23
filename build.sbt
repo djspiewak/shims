@@ -41,7 +41,7 @@ lazy val commonSettings = Seq(
 
 lazy val root = project
   .in(file("."))
-  .aggregate(coreJVM, coreJS, scalaz71, scalaz72JVM, scalaz72JS, catsJVM, catsJS)
+  .aggregate(coreJVM, coreJS)
   .settings(commonSettings: _*)
   .settings(
     name := "shims",
@@ -50,72 +50,18 @@ lazy val root = project
     publishLocal := (),
     publishArtifact := false)
 
-val extraCoreSettings = Seq(
-  name := "shims-core",
-
-  // shamelessly copied from shapeless
-  libraryDependencies ++= Seq(
-    "org.typelevel" %% "macro-compat" % "1.1.1",
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
-    "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-    compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)),
-
-  libraryDependencies ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      // if scala 2.11+ is used, quasiquotes are merged into scala-reflect
-      case Some((2, scalaMajor)) if scalaMajor >= 11 => Seq()
-      // in Scala 2.10, quasiquotes are provided by macro paradise
-      case Some((2, 10)) =>
-        Seq("org.scalamacros" %% "quasiquotes" % "2.1.0" cross CrossVersion.binary)
-    }
-  },
-
-  libraryDependencies += "org.specs2" %% "specs2-core" % "3.7" % "test",
-
-  scalacOptions in Test ++= Seq("-Yrangepos")
-)
-
 lazy val core = crossProject
   .crossType(CrossType.Pure)
   .in(file("core"))
-  .settings(commonSettings ++ extraCoreSettings: _*)
+  .settings(commonSettings: _*)
+  .settings(name := "shims-core")
+
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
 
-lazy val scalaz71 = project
-  .in(file("scalaz71"))
-  .settings(
-    (commonSettings :+ (name := "shims-scalaz-71")) :+
-      (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.11") :+
-      (unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "main" / "compat"): _*
-  ).dependsOn(coreJVM)
-
-lazy val scalaz72 = crossProject
-  .crossType(CrossType.Pure)
-  .in(file("scalaz72"))
-  .settings(
-    (commonSettings :+ (name := "shims-scalaz-72")) :+
-      (libraryDependencies += "org.scalaz" %%% "scalaz-core" % "7.2.8") :+
-      (unmanagedSourceDirectories in Compile += baseDirectory.value / ".." / "src" / "main" / "compat"): _*   // avoiding the .jvm/ directory
-  ).dependsOn(core)
-lazy val scalaz72JVM = scalaz72.jvm
-lazy val scalaz72JS = scalaz72.js
-
-lazy val cats = crossProject
-  .crossType(CrossType.Pure)
-  .in(file("cats"))
-  .settings(
-    (commonSettings :+ (name := "shims-cats")) :+
-      (libraryDependencies ++= Seq(
-        "org.typelevel" %%% "cats-core" % CatsVersion,
-        "org.typelevel" %%% "cats-macros" % CatsVersion)): _*
-  ).dependsOn(core)
-lazy val catsJVM = cats.jvm
-lazy val catsJS = cats.js
-
 enablePlugins(GitVersioning)
 
-git.baseVersion := "0.4.1"
+git.baseVersion := "1.0.0"
 
 git.gitTagToVersionNumber := {
   case ReleaseTag(version) => Some(version)
