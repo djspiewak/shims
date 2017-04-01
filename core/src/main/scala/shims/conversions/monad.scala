@@ -175,7 +175,7 @@ trait CoflatMapConversions extends ApplicativeConversions {
     override def coflatMap[A, B](fa: F[A])(f: F[A] => B): F[B] = F.cobind(fa)(f)
   }
 
-  implicit def traverseToCats[F[_], T](implicit FC: Capture[scalaz.Cobind[F], T], ev: T </< Synthetic): cats.CoflatMap[F] with Synthetic =
+  implicit def cobindToCats[F[_], T](implicit FC: Capture[scalaz.Cobind[F], T], ev: T </< Synthetic): cats.CoflatMap[F] with Synthetic =
     new CoflatMapShimS2C[F] { val F = FC.value }
 
   private[conversions] trait CoflatMapShimC2S[F[_]] extends scalaz.Cobind[F] with FunctorShimC2S[F] {
@@ -184,7 +184,7 @@ trait CoflatMapConversions extends ApplicativeConversions {
     override def cobind[A, B](fa: F[A])(f: F[A] => B): F[B] = F.coflatMap(fa)(f)
   }
 
-  implicit def traverseToScalaz[F[_], T](implicit FC: Capture[cats.CoflatMap[F], T], ev: T </< Synthetic): scalaz.Cobind[F] with Synthetic =
+  implicit def coflatMapToScalaz[F[_], T](implicit FC: Capture[cats.CoflatMap[F], T], ev: T </< Synthetic): scalaz.Cobind[F] with Synthetic =
     new CoflatMapShimC2S[F] { val F = FC.value }
 }
 
@@ -196,7 +196,7 @@ trait ComonadConversions extends CoflatMapConversions {
     override def extract[A](x: F[A]): A = F.copoint(x)
   }
 
-  implicit def traverseToCats[F[_], T](implicit FC: Capture[scalaz.Comonad[F], T], ev: T </< Synthetic): cats.Comonad[F] with Synthetic =
+  implicit def comonadToCats[F[_], T](implicit FC: Capture[scalaz.Comonad[F], T], ev: T </< Synthetic): cats.Comonad[F] with Synthetic =
     new ComonadShimS2C[F] { val F = FC.value }
 
   private[conversions] trait ComonadShimC2S[F[_]] extends scalaz.Comonad[F] with CoflatMapShimC2S[F] {
@@ -205,7 +205,7 @@ trait ComonadConversions extends CoflatMapConversions {
     override def copoint[A](x: F[A]): A = F.extract(x)
   }
 
-  implicit def traverseToScalaz[F[_], T](implicit FC: Capture[cats.Comonad[F], T], ev: T </< Synthetic): scalaz.Comonad[F] with Synthetic =
+  implicit def comonadToScalaz[F[_], T](implicit FC: Capture[cats.Comonad[F], T], ev: T </< Synthetic): scalaz.Comonad[F] with Synthetic =
     new ComonadShimC2S[F] { val F = FC.value }
 }
 

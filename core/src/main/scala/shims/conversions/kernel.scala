@@ -34,7 +34,7 @@ trait OrderConversions extends EqConversions {
     override def compare(x: A, y: A): Int = A.order(x, y).toInt
   }
 
-  implicit def equalToCats[A, T](implicit AC: Capture[scalaz.Order[A], T], ev: T </< Synthetic): cats.kernel.Order[A] with Synthetic =
+  implicit def orderToCats[A, T](implicit AC: Capture[scalaz.Order[A], T], ev: T </< Synthetic): cats.kernel.Order[A] with Synthetic =
     new OrderShimS2C[A] { val A = AC.value }
 
   private[conversions] trait OrderShimC2S[A] extends scalaz.Order[A] with EqShimC2S[A] {
@@ -43,7 +43,7 @@ trait OrderConversions extends EqConversions {
     override def order(x: A, y: A): scalaz.Ordering = scalaz.Ordering.fromInt(A.compare(x, y))
   }
 
-  implicit def eqToScalaz[A, T](implicit AC: Capture[cats.kernel.Order[A], T], ev: T </< Synthetic): scalaz.Order[A] with Synthetic =
+  implicit def orderToScalaz[A, T](implicit AC: Capture[cats.kernel.Order[A], T], ev: T </< Synthetic): scalaz.Order[A] with Synthetic =
     new OrderShimC2S[A] { val A = AC.value }
 }
 
