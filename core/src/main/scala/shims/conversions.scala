@@ -116,29 +116,6 @@ trait FunctorConversions extends IFunctorConversions {
     new FunctorShimC2S[F] { val F = FC.value }
 }
 
-/*trait CartesianConversions {
-
-  private[shims] trait CartesianShimS2C[F[_]] extends cats.Cartesian[F] {
-    val F: scalaz.Cartesian[F]
-
-    override def product[A, B](fa: F[A], fb: F[B]): F[(A, B)] =
-      F.product(fa, fb)
-  }
-
-  implicit def cartesianToCats[F[_], T](implicit FC: Capture[scalaz.Cartesian[F], T], ev: T </< Synthetic): cats.Cartesian[F] with Synthetic =
-    new CartesianShimS2C[F] { val F = FC.value }
-
-  private[shims] trait CartesianShimC2S[F[_]] extends scalaz.Cartesian[F] {
-    val F: cats.Cartesian[F]
-
-    override def product[A, B](fa: F[A], fb: F[B]): F[(A, B)] =
-      F.product(fa, fb)
-  }
-
-  implicit def cartesianToScalaz[F[_], T](implicit FC: Capture[cats.Cartesian[F], T], ev: T </< Synthetic): scalaz.Cartesian[F] with Synthetic =
-    new CartesianShimC2S[F] { val F = FC.value }
-}*/
-
 trait ApplyConversions extends FunctorConversions {
 
   private[shims] trait ApplyShimS2C[F[_]] extends cats.Apply[F] with FunctorShimS2C[F] {
