@@ -1,4 +1,4 @@
-package shims
+package shims.conversions
 
 import scalaz.\/
 
