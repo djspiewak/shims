@@ -11,15 +11,44 @@ sealed trait Synthetic extends Serializable
 
 trait EqConversions {
 
-  implicit def equalToCats[A, T](implicit A: Capture[scalaz.Equal[A], T], ev: T </< Synthetic): cats.Eq[A] with Synthetic =
-    new cats.Eq[A] with Synthetic {
-      def eqv(a1: A, a2: A) = A.value.equal(a1, a2)
-    }
+  private[shims] trait EqShimS2C[A] extends cats.kernel.Eq[A] with Synthetic {
+    val A: scalaz.Equal[A]
 
-  implicit def eqToScalaz[A, T](implicit A: Capture[cats.Eq[A], T], ev: T </< Synthetic): scalaz.Equal[A] with Synthetic =
-    new scalaz.Equal[A] with Synthetic {
-      def equal(a1: A, a2: A) = A.value.eqv(a1, a2)
-    }
+    override def eqv(x: A, y: A): Boolean = A.equal(x, y)
+  }
+
+  implicit def equalToCats[A, T](implicit AC: Capture[scalaz.Equal[A], T], ev: T </< Synthetic): cats.kernel.Eq[A] with Synthetic =
+    new EqShimS2C[A] { val A = AC.value }
+
+  private[shims] trait EqShimC2S[A] extends scalaz.Equal[A] with Synthetic {
+    val A: cats.kernel.Eq[A]
+
+    override def equal(x: A, y: A): Boolean = A.eqv(x, y)
+  }
+
+  implicit def eqToScalaz[A, T](implicit AC: Capture[cats.kernel.Eq[A], T], ev: T </< Synthetic): scalaz.Equal[A] with Synthetic =
+    new EqShimC2S[A] { val A = AC.value }
+}
+
+trait OrderConversions extends EqConversions {
+
+  private[shims] trait OrderShimS2C[A] extends cats.kernel.Order[A] with EqShimS2C[A] {
+    val A: scalaz.Order[A]
+
+    override def compare(x: A, y: A): Int = A.order(x, y).toInt
+  }
+
+  implicit def equalToCats[A, T](implicit AC: Capture[scalaz.Order[A], T], ev: T </< Synthetic): cats.kernel.Order[A] with Synthetic =
+    new OrderShimS2C[A] { val A = AC.value }
+
+  private[shims] trait OrderShimC2S[A] extends scalaz.Order[A] with EqShimC2S[A] {
+    val A: cats.kernel.Order[A]
+
+    override def order(x: A, y: A): scalaz.Ordering = scalaz.Ordering.fromInt(A.compare(x, y))
+  }
+
+  implicit def eqToScalaz[A, T](implicit AC: Capture[cats.kernel.Order[A], T], ev: T </< Synthetic): scalaz.Order[A] with Synthetic =
+    new OrderShimC2S[A] { val A = AC.value }
 }
 
 trait IFunctorConversions {
