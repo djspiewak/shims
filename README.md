@@ -18,6 +18,8 @@ Add the following to your SBT configuration:
 libraryDependencies += "com.codecommit" %% "shims-core" % "1.0"
 ```
 
+There is currently no *stable* released version of shims 1.0 (the only stable releases represent the prior library state).  If you want to live dangerously, I've published a hash snapshot with version `"1.0-b0e5152"`.
+
 If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  This can be done either by using Typelevel Scala, adding Miles Sabin's hacky compiler plugin, or simply using Scala 2.12 or higher with the `-Ypartial-unification` flag.  A large number of conversions will simply *not work* without partial unification.
 
 Once you have the dependency installed, simply add the following import to any scopes which require cats-scalaz interop:
