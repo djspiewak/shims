@@ -53,7 +53,7 @@ trait ContravariantConversions extends IFunctorConversions {
       F.contramap(fa)(f)
   }
 
-  implicit def functorToCats[F[_], T](implicit FC: Capture[scalaz.Contravariant[F], T], ev: T </< Synthetic): cats.functor.Contravariant[F] with Synthetic =
+  implicit def contravariantToCats[F[_], T](implicit FC: Capture[scalaz.Contravariant[F], T], ev: T </< Synthetic): cats.functor.Contravariant[F] with Synthetic =
     new ContravariantShimS2C[F] { val F = FC.value }
 
   private[conversions] trait ContravariantShimC2S[F[_]] extends scalaz.Contravariant[F] with IFunctorShimC2S[F] {
@@ -63,7 +63,7 @@ trait ContravariantConversions extends IFunctorConversions {
       F.contramap(fa)(f)
   }
 
-  implicit def functorToScalaz[F[_], T](implicit FC: Capture[cats.functor.Contravariant[F], T], ev: T </< Synthetic): scalaz.Contravariant[F] with Synthetic =
+  implicit def contravariantToScalaz[F[_], T](implicit FC: Capture[cats.functor.Contravariant[F], T], ev: T </< Synthetic): scalaz.Contravariant[F] with Synthetic =
     new ContravariantShimC2S[F] { val F = FC.value }
 }
 
