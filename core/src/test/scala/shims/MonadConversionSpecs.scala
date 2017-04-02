@@ -8,7 +8,7 @@ import scalaz.std.anyVal._
 import org.specs2.mutable._
 import org.typelevel.discipline.specs2.mutable.Discipline
 
-object ConversionSpecs extends Specification with Discipline {
+object MonadConversionSpecs extends Specification with Discipline {
 
   "functor conversion" >> {
     cats.Functor[Option]
