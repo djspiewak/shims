@@ -16,6 +16,7 @@
 
 import de.heikoseeberger.sbtheader.license.Apache2_0
 
+val BaseVersion = "1.0"
 val ReleaseTag = """^v([\d\.]+)$""".r
 
 val CatsVersion = "0.9.0"
@@ -143,7 +144,7 @@ lazy val coreJS = core.js
 
 enablePlugins(GitVersioning)
 
-git.baseVersion := "1.0.0"
+git.baseVersion := BaseVersion
 
 git.gitTagToVersionNumber := {
   case ReleaseTag(version) => Some(version)
