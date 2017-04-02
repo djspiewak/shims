@@ -18,7 +18,7 @@ libraryDependencies += "com.codecommit" %% "shims-core" % "1.0"
 
 There is currently no *stable* released version of shims 1.0 (the only stable releases represent the prior library state).  If you want to live dangerously, I've published a hash snapshot with version `"1.0-b0e5152"`.
 
-If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  This can be done either by using Typelevel Scala, adding Miles Sabin's hacky compiler plugin, or simply using Scala 2.12 or higher with the `-Ypartial-unification` flag.  A large number of conversions will simply *not work* without partial unification.
+If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  This can be done either by using [Typelevel Scala](https://github.com/typelevel/scala), adding [Miles Sabin's hacky compiler plugin](https://github.com/milessabin/si2712fix-plugin), or simply using Scala 2.12 or higher with the `-Ypartial-unification` flag.  An example of the shenanigans which can enable the SI-2712 fix across multiple Scala versions can be seen [here](https://github.com/djspiewak/shims/blob/34f8851d1726027b537707f27b6c33f83c15a9fd/build.sbt#L60-L91).  A large number of conversions will simply *not work* without partial unification.
 
 Once you have the dependency installed, simply add the following import to any scopes which require cats-scalaz interop:
 
@@ -61,7 +61,37 @@ So when in doubt, if you get an error summoning a cats/scalaz typeclass converte
 
 Typeclass conversions are *transparent*, meaning that they will materialize fully implicitly without any syntactic interaction.  Effectively, this means that all cats monads are scalaz monads *and vice versa*.
 
-*TODO*
+What follows is an alphabetized list (in terms of cats types) of typeclasses which are bidirectionally converted.  In all cases except where noted, the conversion is exactly as trivial as it seems.
+
+- `Applicative`
+- `Apply`
+- `Arrow`
+- `Bifoldable`
+- `Bifunctor`
+- `Bitraverse`
+- `Category`
+- `Choice`
+- `CoflatMap`
+- `Comonad`
+- `Compose`
+- `Contravariant`
+- `Eq`
+- `FlatMap`
+  + Requires `Bind[F]` and *either* `BindRec[F]` *or* `Applicative[F]`.  This is because the cats equivalent of `scalaz.Bind` is actually `scalaz.BindRec`.  If an instance of `BindRec` is visible, it will be used to implement the `tailRecM` function.  Otherwise, a stack-*unsafe* `tailRecM` will be implemented in terms of `flatMap` and `point`.
+  + The cats → scalaz conversion materializes `scalaz.BindRec`; there is no conversion which *just* materializes `Bind`.
+- `Foldable`
+- `Functor`
+- `Invariant` (functor)
+- `Monad`
+  + Requires `Monad[F]` and *optionally* `BindRec[F]`.  Similar to `FlatMap`, this is because `cats.Monad` constrains `F` to define a `tailRecM` function, which may or may not be available on an arbitrary `scalaz.Monad`.  If `BindRec[F]` is available, it will be used to implement `tailRecM`.  Otherwise, a stack-*unsafe* `tailRecM` will be implemented in terms of `flatMap` and `point`.
+  + The cats → scalaz conversion materializes `scalaz.Monad[F] with scalaz.BindRec[F]`, reflecting the fact that cats provides a `tailRecM`.
+- `Monoid`
+- `Order`
+- `Profunctor`
+- `Semigroup`
+- `Split`
+- `Strong`
+- `Traverse`
 
 ### Datatypes
 
@@ -70,9 +100,16 @@ Datatype conversions are *explicit*, meaning that users must insert syntax which
 ```scala
 val f1: scalaz.Free[F, A] = ???
 val f2: cats.free.Free[F, A] = f1.asCats
+val f3: scalaz.Free[F, A] = f2.asScalaz
 ```
 
-*TODO*
+| Cats                   | Scalaz                 |
+| ---------------------- | ---------------------- |
+| `scala.util.Either`    | `scalaz.\/`            |
+| `cats.arrow.FunctionK` | `scalaz.~>`            |
+| `cats.free.Free`       | `scalaz.Free`          |
+
+Note that the `asScalaz`/`asCats` mechanism is open and extensible.  To enable support for converting some type "cats type" `A` to an equivalent "scalaz type" `B`, define an implicit instance of type `shims.conversions.AsScalaz[A, B]`.  Similarly, for some "scalaz type" `A` to an equivalent "cats type" `B`, define an implicit instance of type `shims.conversions.AsCats[A, B]`.  Thus, a pair of types, `A` and `B`, for which a bijection exists would have a single implicit instance extending `AsScalaz[A, B] with AsCats[B, A]` (though the machinery does not require this is handled with a *single* instance; the ambiguity resolution here is pretty straightforward).
 
 ## Previously, on shims…
 
