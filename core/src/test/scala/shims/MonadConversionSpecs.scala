@@ -67,14 +67,14 @@ object MonadConversionSpecs extends Specification with Discipline {
 
   "foldable" >> {
     "scalaz -> cats" >> {
-      "option" >> {
+      "Option" >> {
         cats.Foldable[Option]
         scalaz.Foldable[Option]
 
         ok
       }
 
-      "list" >> {
+      "List" >> {
         import scalaz.std.list._
 
         cats.Foldable[List]
@@ -85,24 +85,35 @@ object MonadConversionSpecs extends Specification with Discipline {
     }
   }
 
+  "traverse" >> {
+    import scalaz.std.list._
+
+    cats.Traverse[Option]
+    scalaz.Traverse[Option]
+
+    "scalaz -> cats" >>
+      checkAll("Option", TraverseTests[Option].traverse[Int, Int, Int, Int, List, Option])
+  }
+
   "monad" >> {
-    "Option" >> {
-      cats.Monad[Option]
-      scalaz.Monad[Option]
+    "scalaz -> cats" >> {
+      "Option" >> {
+        cats.Monad[Option]
+        scalaz.Monad[Option]
 
-      "scalaz -> cats" >>
         checkAll("Option", MonadTests[Option].monad[Int, Int, Int])
-    }
+      }
 
-    "Free[Function0, ?]" >> {
-      import scalaz.Free
+      "Free[Function0, ?]" >> {
+        import scalaz.Free
 
-      trait Foo[A]
+        trait Foo[A]
 
-      cats.Monad[Free[Foo, ?]]
-      scalaz.Monad[Free[Foo, ?]]
+        cats.Monad[Free[Foo, ?]]
+        scalaz.Monad[Free[Foo, ?]]
 
-      "scalaz -> cats" >> ok   // TODO
+        ok   // TODO
+      }
     }
   }
 }
