@@ -1,3 +1,4 @@
+// topological root(s): EitherConverters, FunctionKConverters, FreeConverters
 package shims.conversions
 
 import scalaz.{~>, \/}
@@ -11,7 +12,7 @@ trait AsCats[-I, +O] {
   def s2c(i: I): O
 }
 
-trait EitherConversions {
+trait EitherConverters {
 
   implicit def eitherAs[A, B] = new AsScalaz[Either[A, B], A \/ B] with AsCats[A \/ B, Either[A, B]] {
     def c2s(e: Either[A, B]) = \/.fromEither(e)
@@ -19,7 +20,7 @@ trait EitherConversions {
   }
 }
 
-trait FunctionKConversions {
+trait FunctionKConverters {
 
   implicit def functionkAs[F[_], G[_]] = new AsScalaz[FunctionK[F, G], F ~> G] with AsCats[F ~> G, FunctionK[F, G]] {
     def c2s(f: FunctionK[F, G]) = λ[F ~> G](f(_))
@@ -27,7 +28,7 @@ trait FunctionKConversions {
   }
 }
 
-trait FreeConversions extends MonadConversions {
+trait FreeConverters extends MonadConversions {
 
   implicit def freeAs[S[_], A] = new AsScalaz[cats.free.Free[S, A], scalaz.Free[S, A]] with AsCats[scalaz.Free[S, A], cats.free.Free[S, A]] {
 
