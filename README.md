@@ -28,6 +28,13 @@ import shims._
 
 *Chuckle*… there is no step three!
 
+### Upstream Dependencies
+
+- cats 0.9.0
+- scalaz 7.2.10
+
+At present, there is no complex build matrix of craziness to provide support for other major versions of each library.  This will probably come in time, when I've become sad and jaded, and possibly when I have received a pull request for it.
+
 ### Common Issues
 
 If you get a "diverging implicit expansion" error, it *probably* means that you simply didn't have the appropriate upstream implicit in scope.  For example, consider the following:
