@@ -14,20 +14,36 @@ object MonadConversionSpecs extends Specification with Discipline {
     cats.Functor[Option]
     scalaz.Functor[Option]
 
-    "scalaz -> cats" >> checkAll("Option", FunctorTests[Option].functor[Int, Int, Int])
+    "scalaz -> cats" >>
+      checkAll("Option", FunctorTests[Option].functor[Int, Int, Int])
   }
 
   "applicative conversion" >> {
     cats.Applicative[Option]
     scalaz.Applicative[Option]
 
-    "scalaz -> cats" >> checkAll("Option", ApplicativeTests[Option].applicative[Int, Int, Int])
+    "scalaz -> cats" >>
+      checkAll("Option", ApplicativeTests[Option].applicative[Int, Int, Int])
   }
 
   "monad conversion" >> {
-    cats.Monad[Option]
-    scalaz.Monad[Option]
+    "Option" >> {
+      cats.Monad[Option]
+      scalaz.Monad[Option]
 
-    "scalaz -> cats" >> checkAll("Option", MonadTests[Option].monad[Int, Int, Int])
+      "scalaz -> cats" >>
+        checkAll("Option", MonadTests[Option].monad[Int, Int, Int])
+    }
+
+    "Free[Function0, ?]" >> {
+      import scalaz.Free
+
+      trait Foo[A]
+
+      cats.Monad[Free[Foo, ?]]
+      scalaz.Monad[Free[Foo, ?]]
+
+      "scalaz -> cats" >> ok   // TODO
+    }
   }
 }

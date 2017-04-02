@@ -7,7 +7,8 @@ package object shims
     with ArrowConversions
     with ChoiceConversions
     with EitherConversions
-    with FunctionKConversions {
+    with FunctionKConversions
+    with FreeConversions {
 
   implicit final class AsSyntax[A](val self: A) extends AnyVal {
     def asScalaz[B](implicit A: AsScalaz[A, B]): B = A.c2s(self)

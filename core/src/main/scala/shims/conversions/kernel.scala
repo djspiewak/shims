@@ -1,9 +1,6 @@
 package shims.conversions
 
-import cats.Eval
-import scalaz.\/
-
-import shims.util.{</<, Capture, EitherCapture, OptionCapture}
+import shims.util.{</<, Capture}
 
 trait EqConversions {
 

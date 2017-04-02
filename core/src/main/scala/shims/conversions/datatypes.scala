@@ -27,7 +27,7 @@ trait FunctionKConversions {
   }
 }
 
-/*trait FreeConversions extends MonadConversions {
+trait FreeConversions extends MonadConversions {
 
   implicit def freeAs[S[_], A] = new AsScalaz[cats.free.Free[S, A], scalaz.Free[S, A]] with AsCats[scalaz.Free[S, A], cats.free.Free[S, A]] {
 
@@ -37,4 +37,4 @@ trait FunctionKConversions {
     def s2c(f: scalaz.Free[S, A]) =
       f.foldMap[cats.free.Free[S, ?]](λ[S ~> cats.free.Free[S, ?]](cats.free.Free.liftF(_)))
   }
-}*/
+}

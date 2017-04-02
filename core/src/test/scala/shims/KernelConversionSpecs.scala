@@ -1,7 +1,6 @@
 package shims
 
 import cats.kernel.laws._
-import cats.laws.discipline._
 import scalaz.std.anyVal._
 
 import org.specs2.mutable._
