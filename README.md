@@ -1,82 +1,79 @@
-# Shims
+# shims
 
 [![Build Status](https://travis-ci.org/djspiewak/shims.svg?branch=master)](https://travis-ci.org/djspiewak/shims)
 
-Once upon a time, [scalaz](https://github.com/scalaz/scalaz) was the standard library for functional and generally higher-order abstractions in the Scala community.  Library and framework authors could confidently write and publish functions in terms of `scalaz.Monad`, `scalaz.State` and so on.
-
-Unfortunately, for various reasons, this is no longer the case.  [Cats](https://github.com/non/cats) is now on the scene, and many users may want to use it rather than scalaz in their downstream projects.  As a library author, we do not want to force a specific choice upon our users.  We would ideally like to supply our users with a single dependency that could work with scalaz *or* cats, without introducing classpath polution or code duplication.
-
-Shims is a tool for achieving this goal.  It is *explicitly* targeted at upstream library authors, not downstream, user-facing projects!  If you have already committed to specifically scalaz or cats, or (more importantly) you have no reason to support both, **you do not need shims!**  However, if you are a library or framework author who does not want to force your downstream users into one universe or another, shims will solve all your problems.
-
-The way this works is you divide your framework into (at minimum) three submodules: for example, *emm-core*, *emm-scalaz* and *emm-cats*.  You put all of your code into the *core* submodule, which has a dependency on *shims-core*.  You do *not* depend on scalaz or cats in your *core!*  When you need typeclasses (e.g. `Monad` or `Functor`), you use the types provided by shims (literally, `shims.Monad`).  Then, your *scalaz* and *cats* submodules are defined to depend on your *core* as well as *shims-scalaz* or *shims-cats*, respectively.  You can optionally define an `object scalaz extends shims.Implicits` (or analogously for cats), which insulates your end users from ever needing to know about shims.  This also gives you the ability to add custom shims in a uniform and user-transparent fashion.
-
-From a user standpoint, they must add a single additional import which would not be required if you wrote specifically against cats *or* scalaz.  For example, for the emm project, the following *pair* of imports are required:
+Shims aims to provide a convenient, bidirectional and transparent set of conversions between scalaz and cats, covering typeclasses (e.g. `Monad`) and data types (e.g. `\/`).  By that I mean, with shims, anything that has a `cats.Functor` instance also has a `scalaz.Functor` instance, *and vice versa*.  Additionally, every convertable scalaz datatype – such as `scalaz.State` – has an implicitly-added `asCats` function, while every convertable cats datatype – such as `cats.free.Free` – has an implicitly-added `asScalaz` function.  Only a single import is required to enable any and all functionality:
 
 ```scala
-import emm._
-import emm.compat.scalaz._
+import shims._
 ```
 
-If emm were written specifically against scalaz, the second import would be unnecessary.  Users will also need to add a second SBT dependency on the *-scalaz* or *-cats* submodule of your project (e.g. *emm-scalaz*).  Transitive dependencies will take care of the rest!
+Toss that at the top of any files which need to work with APIs written in terms of both frameworks, and everything should behave seamlessly.  You can see some examples of this in the test suite, where we run the cats laws-based property tests on *scalaz* instances of various typeclasses.
 
-Note that it is highly recommended that you use the following convention in your own projects if at all possible.  Or at least, it is recommended that you shy away from something like this:
+## Usage
+
+Add the following to your SBT configuration:
+
+```sbt
+libraryDependencies += "com.codecommit" %% "shims-core" % "1.0"
+```
+
+If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  This can be done either by using Typelevel Scala, adding Miles Sabin's hacky compiler plugin, or simply using Scala 2.12 or higher with the `-Ypartial-unification` flag.  A large number of conversions will simply *not work* without partial unification.
+
+Once you have the dependency installed, simply add the following import to any scopes which require cats-scalaz interop:
 
 ```scala
-// do NOT do this!
-import emm._
-import emm.scalaz._             // no no no no!
+import shims._
 ```
 
-The problem with this revision (droping the `compat`) is hierarchical imports.  Importing `emm._` brings `scalaz` into scope, which masks the `_root_.scalaz` package, which is where all of the real scalaz stuff lives!  Tucking your compatibility objects off into their own package, which won't be independently imported by users, avoids this problem.
+*Chuckle*… there is no step three!
 
-## SBT Setup
+### Common Issues
 
-```sbt
-libraryDependencies += "com.codecommit" %% "shims-core" % ShimsVersion
+If you get a "diverging implicit expansion" error, it *probably* means that you simply didn't have the appropriate upstream implicit in scope.  For example, consider the following:
+
+```scala
+import cats.kernel.Eq
+
+import scalaz.std.anyVal._
+import scalaz.std.option._
+
+Eq[(Int, Int)]       // error!
 ```
 
-In your *-scalaz* and *-cats* subprojects, add the following dependencies:
+The above will produce a diverging implicit expansion error.  The reasons for this are… complicated.  But the problem is actually simple: we're missing an implicit declaration for how to apply `scalaz.Equal` to `Tuple2`!  We would get a more informative error if we had tried to summon `scalaz.Equal[(Int, Int)]`, but in either case, the solution is identical: add the appropriate import.
 
-```sbt
-libraryDependencies += "com.codecommit" %% "shims-scalaz-71" % ShimsVersion        // for scalaz 7.1
+```scala
+import cats.kernel.Eq
 
-// or!
+import scalaz.std.anyVal._
+import scalaz.std.option._
+import scalaz.std.tuple._
 
-libraryDependencies += "com.codecommit" %% "shims-scalaz-72" % ShimsVersion        // for scalaz 7.2
-
-// or!
-
-libraryDependencies += "com.codecommit" %% "shims-cats" % ShimsVersion        // for cats 0.9.0
+Eq[(Int, Int)]       // works!
 ```
 
-Scala.js support (via `%%%`) is provided for every submodule except `scalaz-71`.
+So when in doubt, if you get an error summoning a cats/scalaz typeclass converted from the presence of the other, try to summon the other implicitly and see what happens.  We got a weird error trying to summon an implicitly materialized cats instance from a scalaz instance, and we were able to debug the issue by trying to summon the "natural" scalaz instance.
 
-The current stable version of shims is **0.4.2**:
-
-```sbt
-val ShimsVersion = "0.4.2"
-```
-
-## Features
-
-At present, the only non-typeclass feature which shims provides is a default right-projected syntax for `scala.util.Either`.  It provides this primarily in lieu of providing an `EitherLike`, which may change in the future.  The syntax also provides scalaz-style symbolic aliases for `Either`, so you can use it without tearing your hair out.  The syntax can be brought in by importing `shims.syntax.either._`
+## Conversions
 
 ### Typeclasses
 
-*TODO*
-
-### Type Shapes
+Typeclass conversions are *transparent*, meaning that they will materialize fully implicitly without any syntactic interaction.  Effectively, this means that all cats monads are scalaz monads *and vice versa*.
 
 *TODO*
 
-### Providing Instances
+### Datatypes
+
+Datatype conversions are *explicit*, meaning that users must insert syntax which triggers the conversion.  In other words, there is no implicit coercion between data types: a method call is required.  For example, converting between `scalaz.Free` and `cats.free.Free` is done via the following:
+
+```scala
+val f1: scalaz.Free[F, A] = ???
+val f2: cats.free.Free[F, A] = f1.asCats
+```
 
 *TODO*
 
-## What Shims is NOT
+## Previously, on shims…
 
-Shims is *not* a replacement for scalaz or cats!  It is not a competitor.  It does not fill the same needs.  If you think you need shims and you're not an upstream library author, chances are you actually need scalaz or cats.  Shims is a compatibility layer, nothing more.  If you're writing a "downstream" project (i.e. you deploy to a server, instead of to bintray/sonatype), you should absolutely not see "shims" in your SBT files.
-
-## Contributing
-
-This is a lazily-evaluated library.  Currently, it contains only just enough to make [emm](https://github.com/djspiewak/emm) and [http4s](http://http4s.org) operational.  If you need more than that, PRs are very much welcome.  Please note that this is a compatibility layer *specifically* for typeclasses!  It is not a replacement for scalaz *or* cats.  For example, we will not implement an `Xor` (or `\/`) delegate.  `State`, `Kleisli` and anything ending in `T` are similarly out of scope.  The whole point is just to write code which works with either cats or scalaz typeclasses, where they are equivalent.  I reserve the right to be pointlessly opinionated about what is and isn't out of scope.  Also, when we implement something, I reserve the right to be pointlessly opinionated about the names and types thereof.  So basically, welcome to my bikeshed.  :-)
+Shims was previously (prior to version 1.0) a project for allowing middleware frameworks to avoid dependencies on *either* cats or scalaz, deferring that upstream decision to their downstream users.  It… didn't work very well, and nobody liked it.  Hence, its rebirth as a seamless interop framework!
