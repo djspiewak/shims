@@ -3,14 +3,14 @@ package shims.util
 import scala.annotation.implicitNotFound
 import scala.util.{Either, Left, Right}
 
-@implicitNotFound("unable to find an implicit value of type $A")
+@implicitNotFound("unable to find an implicit value of type ${A}")
 private[shims] final case class Capture[A, T](value: A) extends AnyVal
 
 private[shims] object Capture {
   implicit def materialize[A <: AnyRef](implicit A: A): Capture[A, A.type] = Capture(A)
 }
 
-@implicitNotFound("unable to find an implicit value of type $A or $B")
+@implicitNotFound("unable to find an implicit value of type ${A} or ${B}")
 private[shims] final case class EitherCapture[A, B, T](value: Either[A, B]) extends AnyVal
 
 private[shims] trait EitherLowPriorityImplicits {

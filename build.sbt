@@ -66,6 +66,7 @@ lazy val core = crossProject
 
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-core"   % CatsVersion,
+      "org.typelevel" %%% "cats-free"   % CatsVersion,
       "org.scalaz"    %%% "scalaz-core" % ScalazVersion,
 
       "org.typelevel" %%  "discipline"  % "0.7.3"     % "test",
