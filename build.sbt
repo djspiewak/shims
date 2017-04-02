@@ -16,6 +16,7 @@
 
 import de.heikoseeberger.sbtheader.license.Apache2_0
 
+// version scheme described here: https://github.com/djspiewak/parseback/blob/30ee45e411a66297167a6e45e0e874fa23d8cc6d/project.sbt#L23-L53
 val BaseVersion = "1.0"
 val ReleaseTag = """^v([\d\.]+)$""".r
 
@@ -23,6 +24,8 @@ val CatsVersion = "0.9.0"
 val ScalazVersion = "7.2.10"
 
 val Specs2Version = "3.8.6"
+
+addCommandAlias("ci", ";test ;mimaReportBinaryIssues")
 
 lazy val commonSettings = Seq(
   organization := "com.codecommit",
@@ -112,6 +115,20 @@ lazy val commonSettings = Seq(
   scmInfo := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
     "git@github.com:djspiewak/shims.git")))
 
+val mimaSettings = Seq(
+  mimaPreviousArtifacts := {
+    val TagBase = """^(\d+)\.(\d+).*"""r
+    val TagBase(major, minor) = BaseVersion
+
+    val tags = "git tag --list".!! split "\n" map { _.trim }
+
+    val versions =
+      tags filter { _ startsWith s"v$major.$minor" } map { _ substring 1 }
+
+    versions map { v => organization.value %% name.value % v } toSet
+  }
+)
+
 lazy val root = project
   .in(file("."))
   .aggregate(coreJVM, coreJS)
@@ -139,7 +156,7 @@ lazy val core = crossProject
       "org.typelevel" %%% "cats-laws"   % CatsVersion % "test"))
   .enablePlugins(AutomateHeaderPlugin)
 
-lazy val coreJVM = core.jvm
+lazy val coreJVM = core.jvm.settings(mimaSettings)
 lazy val coreJS = core.js
 
 enablePlugins(GitVersioning)
