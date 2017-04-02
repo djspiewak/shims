@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// topological root(s): ArrowConversions, ChoiceConversions
 package shims.conversions
 
 import scalaz.\/
@@ -154,7 +153,7 @@ trait ArrowConversions extends SplitConversions with StrongConversions with Cate
     new ArrowShimC2S[F] { val F = FC.value }
 }
 
-trait ChoiceConversions extends CategoryConversions with EitherConverters {
+trait ChoiceConversions extends CategoryConversions with EitherConverters with ArrowConversions {
 
   private[conversions] trait ChoiceShimS2C[F[_, _]] extends cats.arrow.Choice[F] with CategoryShimS2C[F] {
     val F: scalaz.Choice[F]

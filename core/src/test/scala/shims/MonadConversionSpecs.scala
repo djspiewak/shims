@@ -26,7 +26,22 @@ import org.typelevel.discipline.specs2.mutable.Discipline
 
 object MonadConversionSpecs extends Specification with Discipline {
 
-  "functor conversion" >> {
+  "ifunctor" >> {
+    cats.functor.Invariant[Option]
+    scalaz.InvariantFunctor[Option]
+
+    "scalaz -> cats" >>
+      checkAll("Option", InvariantTests[Option].invariant[Int, Int, Int])
+  }
+
+  /*"contravariant" >> {
+    cats.functor.Contravariant[???]
+    scalaz.Contravariant[???]
+
+    "scalaz -> cats" >> ok
+  }*/
+
+  "functor" >> {
     cats.Functor[Option]
     scalaz.Functor[Option]
 
@@ -34,7 +49,15 @@ object MonadConversionSpecs extends Specification with Discipline {
       checkAll("Option", FunctorTests[Option].functor[Int, Int, Int])
   }
 
-  "applicative conversion" >> {
+  "apply" >> {
+    cats.Apply[Option]
+    scalaz.Apply[Option]
+
+    "scalaz -> cats" >>
+      checkAll("Option", ApplyTests[Option].apply[Int, Int, Int])
+  }
+
+  "applicative" >> {
     cats.Applicative[Option]
     scalaz.Applicative[Option]
 
@@ -42,7 +65,27 @@ object MonadConversionSpecs extends Specification with Discipline {
       checkAll("Option", ApplicativeTests[Option].applicative[Int, Int, Int])
   }
 
-  "monad conversion" >> {
+  "foldable" >> {
+    "scalaz -> cats" >> {
+      "option" >> {
+        cats.Foldable[Option]
+        scalaz.Foldable[Option]
+
+        ok
+      }
+
+      "list" >> {
+        import scalaz.std.list._
+
+        cats.Foldable[List]
+        scalaz.Foldable[List]
+
+        ok
+      }
+    }
+  }
+
+  "monad" >> {
     "Option" >> {
       cats.Monad[Option]
       scalaz.Monad[Option]

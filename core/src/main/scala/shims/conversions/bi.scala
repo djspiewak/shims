@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// topological root(s): BitraverseConversions
 package shims.conversions
 
 import cats.Eval

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// topological root(s): OrderConversions, MonoidConversions
 package shims.conversions
 
 import shims.util.{</<, Capture}
@@ -61,7 +60,7 @@ trait OrderConversions extends EqConversions {
     new OrderShimC2S[A] { val A = AC.value }
 }
 
-trait SemigroupConversions {
+trait SemigroupConversions extends OrderConversions {
 
   private[conversions] trait SemigroupShimS2C[A] extends cats.Semigroup[A] with Synthetic {
     val A: scalaz.Semigroup[A]

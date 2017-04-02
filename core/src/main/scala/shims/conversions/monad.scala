@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// topological root(s): MonadConversions
 package shims.conversions
 
 import cats.Eval
@@ -67,7 +66,7 @@ trait ContravariantConversions extends IFunctorConversions {
     new ContravariantShimC2S[F] { val F = FC.value }
 }
 
-trait FunctorConversions extends IFunctorConversions {
+trait FunctorConversions extends IFunctorConversions with ContravariantConversions {
 
   private[conversions] trait FunctorShimS2C[F[_]] extends cats.Functor[F] with IFunctorShimS2C[F] {
     val F: scalaz.Functor[F]
@@ -132,7 +131,7 @@ trait ApplicativeConversions extends ApplyConversions {
     new ApplicativeShimC2S[F] { val F = FC.value }
 }
 
-trait FoldableConversions extends MonoidConversions {
+trait FoldableConversions extends MonoidConversions with ApplicativeConversions {
 
   private[conversions] trait FoldableShimS2C[F[_]] extends cats.Foldable[F] with Synthetic {
     val F: scalaz.Foldable[F]
@@ -184,7 +183,7 @@ trait TraverseConversions extends ApplicativeConversions with FoldableConversion
     new TraverseShimC2S[F] { val F = FC.value }
 }
 
-trait CoflatMapConversions extends ApplicativeConversions {
+trait CoflatMapConversions extends ApplicativeConversions with TraverseConversions {
 
   private[conversions] trait CoflatMapShimS2C[F[_]] extends cats.CoflatMap[F] with FunctorShimS2C[F] {
     val F: scalaz.Cobind[F]
@@ -226,7 +225,7 @@ trait ComonadConversions extends CoflatMapConversions {
     new ComonadShimC2S[F] { val F = FC.value }
 }
 
-trait FlatMapConversions extends ApplyConversions {
+trait FlatMapConversions extends ApplyConversions with ComonadConversions {
 
   private[conversions] trait FlatMapShimS2C[F[_]] extends cats.FlatMap[F] with ApplyShimS2C[F] {
     val F: scalaz.Bind[F]
