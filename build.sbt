@@ -1,3 +1,21 @@
+/*
+ * Copyright 2017 Daniel Spiewak
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import de.heikoseeberger.sbtheader.license.Apache2_0
+
 val ReleaseTag = """^v([\d\.]+)$""".r
 
 val CatsVersion = "0.9.0"
@@ -9,6 +27,10 @@ lazy val commonSettings = Seq(
   organization := "com.codecommit",
 
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/")),
+
+  headers := Map(
+    "scala" -> Apache2_0("2017", "Daniel Spiewak"),
+    "java" -> Apache2_0("2017", "Daniel Spiewak")),
 
   libraryDependencies ++= Seq(
     "org.specs2"     %% "specs2-core"       % Specs2Version % "test",
@@ -114,6 +136,7 @@ lazy val core = crossProject
 
       "org.typelevel" %%  "discipline"  % "0.7.3"     % "test",
       "org.typelevel" %%% "cats-laws"   % CatsVersion % "test"))
+  .enablePlugins(AutomateHeaderPlugin)
 
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
