@@ -72,7 +72,8 @@ What follows is an alphabetized list (in terms of cats types) of typeclasses whi
 
 - `Applicative`
 - `Apply`
-- `Arrow`
+- `Choice`
+  + Requires a `Bifunctor[F]` in addition to a `Choice[F]`.  This is because scalaz produces a `A \/ B`, while cats produces an `Either[A, B]`.
 - `Bifoldable`
 - `Bifunctor`
 - `Bitraverse`
