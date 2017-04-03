@@ -21,10 +21,12 @@ import scalaz.std.option._
 import scalaz.std.tuple._
 import scalaz.std.anyVal._
 
+import org.scalacheck._
 import org.specs2.mutable._
 import org.typelevel.discipline.specs2.mutable.Discipline
 
 object MonadConversionSpecs extends Specification with Discipline {
+  import Arbitrary.arbitrary
 
   "ifunctor" >> {
     cats.functor.Invariant[Option]
@@ -93,6 +95,71 @@ object MonadConversionSpecs extends Specification with Discipline {
 
     "scalaz -> cats" >>
       checkAll("Option", TraverseTests[Option].traverse[Int, Int, Int, Int, List, Option])
+  }
+
+  "coflatmap" >> {
+    import scalaz.\&/
+
+    implicit def arbThese[A: Arbitrary, B: Arbitrary]: Arbitrary[A \&/ B] = {
+      val g = for {
+        a <- arbitrary[Option[A]]
+
+        b <- if (a.isDefined)
+          arbitrary[Option[B]]
+        else
+          arbitrary[B].map(Some(_))
+
+        // we've defined things such that this is true, but keep the conditional anyway
+        if a.isDefined || b.isDefined
+      } yield {
+        (a, b) match {
+          case (Some(a), Some(b)) => \&/.Both(a, b)
+          case (Some(a), None) => \&/.This(a)
+          case (None, Some(b)) => \&/.That(b)
+          case _ => ???
+        }
+      }
+
+      Arbitrary(g)
+    }
+
+    implicit def cogenThese[A: Cogen, B: Cogen]: Cogen[A \&/ B] = Cogen { (s, t) =>
+      t match {
+        case \&/.Both(a, b) => Cogen.perturb(Cogen.perturb(s, a), b)
+        case \&/.This(a) => Cogen.perturb(s, a)
+        case \&/.That(b) => Cogen.perturb(s, b)
+      }
+    }
+
+    cats.CoflatMap[Boolean \&/ ?]
+    scalaz.Cobind[Boolean \&/ ?]
+
+    "scalaz -> cats" >>
+      checkAll("Boolean \\&/ ?", CoflatMapTests[Boolean \&/ ?].coflatMap[Int, Int, Int])
+  }
+
+  "comonad" >> {
+    import scalaz.{NonEmptyList => NEL}
+
+    implicit def arbNEL[A: Arbitrary]: Arbitrary[NEL[A]] = {
+      val g = for {
+        h <- arbitrary[A]
+        t <- arbitrary[List[A]]
+      } yield NEL(h, t: _*)
+
+      Arbitrary(g)
+    }
+
+    implicit def cogenNEL[A: Cogen]: Cogen[NEL[A]] = Cogen { (s, nel) =>
+      val s2 = Cogen.perturb(s, nel.head)
+      Cogen.perturb(s2, nel.tail.toList)
+    }
+
+    cats.Comonad[NEL]
+    scalaz.Cobind[NEL]
+
+    "scalaz -> cats" >>
+      checkAll("NonEmptyList", ComonadTests[NEL].comonad[Int, Int, Int])
   }
 
   "monad" >> {
