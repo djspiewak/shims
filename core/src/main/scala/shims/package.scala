@@ -20,7 +20,6 @@ package object shims
     extends MonadConversions
     with OrderConversions
     with BitraverseConversions
-    with ArrowConversions
     with ChoiceConversions
     with EitherConverters
     with FunctionKConverters
