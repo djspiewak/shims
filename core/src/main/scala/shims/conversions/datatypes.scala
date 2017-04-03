@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// topological root(s): EitherConverters, FunctionKConverters, EvalConverters
+// topological root(s): EitherConverters, FunctionKConverters, EvalConverters, StateTConverters
 package shims.conversions
 
 import scalaz.{~>, \/}
@@ -66,7 +66,19 @@ trait EvalConverters extends FreeConverters {
     // the inner workings of eval aren't exposed, so we can't do any better here
     def c2s(e: Eval[A]) = Trampoline.delay(e.value)
 
-    def s2c(t: FT[A]) =
-      t.foldMap(λ[Function0 ~> Eval](a => Eval.always(a())))
+    def s2c(t: FT[A]) = t.foldMap(λ[Function0 ~> Eval](a => Eval.always(a())))
   }
+}
+
+trait StateTConverters extends MonadConversions {
+
+  implicit def stateTAs[F[_]: cats.Monad, S, A] =
+    new AsScalaz[cats.data.StateT[F, S, A], scalaz.StateT[F, S, A]] with AsCats[scalaz.StateT[F, S, A], cats.data.StateT[F, S, A]] {
+
+      def c2s(st: cats.data.StateT[F, S, A]) =
+        scalaz.StateT[F, S, A](s => cats.Monad[F].flatMap(st.runF)(_(s)))
+
+      def s2c(st: scalaz.StateT[F, S, A]) =
+        cats.data.StateT[F, S, A](st.run(_))
+    }
 }
