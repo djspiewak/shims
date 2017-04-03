@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// topological root(s): EitherConverters, FunctionKConverters, FreeConverters
+// topological root(s): EitherConverters, FunctionKConverters, EvalConverters
 package shims.conversions
 
 import scalaz.{~>, \/}
@@ -53,5 +53,20 @@ trait FreeConverters extends MonadConversions {
 
     def s2c(f: scalaz.Free[S, A]) =
       f.foldMap[cats.free.Free[S, ?]](λ[S ~> cats.free.Free[S, ?]](cats.free.Free.liftF(_)))
+  }
+}
+
+trait EvalConverters extends FreeConverters {
+  import cats.Eval
+  import scalaz.Trampoline
+  import scalaz.Free.{Trampoline => FT}
+
+  implicit def evalAs[A] = new AsScalaz[Eval[A], FT[A]] with AsCats[FT[A], Eval[A]] {
+
+    // the inner workings of eval aren't exposed, so we can't do any better here
+    def c2s(e: Eval[A]) = Trampoline.delay(e.value)
+
+    def s2c(t: FT[A]) =
+      t.foldMap(λ[Function0 ~> Eval](a => Eval.always(a())))
   }
 }
