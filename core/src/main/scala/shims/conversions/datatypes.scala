@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// topological root(s): EitherConverters, FunctionKConverters, EvalConverters, StateTConverters
+// topological root(s): EitherConverters, FunctionKConverters, EvalConverters, StateTConverters, NELConverters
 package shims.conversions
 
 import scalaz.{~>, \/}
@@ -81,4 +81,13 @@ trait StateTConverters extends MonadConversions {
       def s2c(st: scalaz.StateT[F, S, A]) =
         cats.data.StateT[F, S, A](st.run(_))
     }
+}
+
+trait NELConverters {
+
+  implicit def nelAs[A] = new AsScalaz[cats.data.NonEmptyList[A], scalaz.NonEmptyList[A]] with AsCats[scalaz.NonEmptyList[A], cats.data.NonEmptyList[A]] {
+
+    def c2s(nel: cats.data.NonEmptyList[A]) = scalaz.NonEmptyList(nel.head, nel.tail: _*)
+    def s2c(nel: scalaz.NonEmptyList[A]) = cats.data.NonEmptyList(nel.head, nel.tail.toList)
+  }
 }
