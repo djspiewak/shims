@@ -172,14 +172,53 @@ object MonadConversionSpecs extends Specification with Discipline {
       }
 
       "Free[Function0, ?]" >> {
-        import scalaz.Free
+        import cats.kernel.Eq
+        import cats.instances.list._
 
-        trait Foo[A]
+        import scalaz.{~>, Free}
+
+        case class Foo[A](a: A)
+
+        implicit def arbFreeFoo[A: Arbitrary: Cogen]: Arbitrary[Free[Foo, A]] = {
+          val genPure: Gen[Free[Foo, A]] = arbitrary[A].map(Free.point(_))
+
+          val genLiftF: Gen[Free[Foo, A]] =
+            arbitrary[A].map(a => Free.liftF(Foo[A](a)))
+
+          val genBind: Gen[Free[Foo, A]] = for {
+            s <- arbitrary[Free[Foo, A]]
+            f <- arbitrary[A => Free[Foo, A]]
+          } yield s.flatMap(f)
+
+          val g = Gen.frequency(
+            1 -> genPure,
+            1 -> genLiftF,
+            3 -> genBind)
+
+          Arbitrary(g)
+        }
+
+        {
+          implicit val eqStr: Eq[String] = null
+
+          Eq[List[String]]
+        }
+
+        implicit def eqFree[A: Eq]: Eq[Free[Foo, A]] = {
+          Eq instance { (f1, f2) =>
+            val nt = λ[Foo ~> List](fa => List(fa.a))
+
+            val as1 = f1.foldMap(nt)
+            val as2 = f2.foldMap(nt)
+
+            Eq[List[A]].eqv(as1, as2)
+          }
+        }
 
         cats.Monad[Free[Foo, ?]]
         scalaz.Monad[Free[Foo, ?]]
 
-        ok   // TODO
+        checkAll("Free[Foo, ?]", MonadTests[Free[Foo, ?]].monad[Int, Int, Int])
       }
     }
   }

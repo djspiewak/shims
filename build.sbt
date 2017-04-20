@@ -42,6 +42,12 @@ lazy val commonSettings = Seq(
 
     "org.scalacheck" %% "scalacheck"        % "1.13.5"      % "test"),
 
+  libraryDependencies ++= Seq(
+      "org.typelevel" %% "macro-compat" % "1.1.1",
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)),
+
   addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary),
 
   // Adapted from Rob Norris' post at https://tpolecat.github.io/2014/04/11/scalac-flags.html
@@ -151,6 +157,8 @@ lazy val core = crossProject
       "org.typelevel" %%% "cats-core"   % CatsVersion,
       "org.typelevel" %%% "cats-free"   % CatsVersion,
       "org.scalaz"    %%% "scalaz-core" % ScalazVersion,
+
+      "com.chuusai"   %%% "shapeless"   % "2.3.2",
 
       "org.typelevel" %%  "discipline"  % "0.7.3"     % "test",
       "org.typelevel" %%% "cats-laws"   % CatsVersion % "test"))

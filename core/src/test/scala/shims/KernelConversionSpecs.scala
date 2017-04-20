@@ -24,6 +24,15 @@ import org.typelevel.discipline.specs2.mutable.Discipline
 
 object KernelConversionSpecs extends Specification with Discipline {
 
+  "eq conversion" >> {
+    cats.Eq[Int]
+    scalaz.Equal[Int]
+
+    "scalaz -> cats" >> {
+      checkAll("Int", OrderLaws[Int].eqv)
+    }
+  }
+
   "order conversion" >> {
     cats.Order[Int]
     scalaz.Order[Int]

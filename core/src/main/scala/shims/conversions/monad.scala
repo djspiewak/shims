@@ -149,8 +149,8 @@ trait FoldableConversions extends MonoidConversions with ApplicativeConversions 
   private[conversions] trait FoldableShimC2S[F[_]] extends scalaz.Foldable[F] with Synthetic {
     val F: cats.Foldable[F]
 
-    override def foldMap[A, B](fa: F[A])(f: A => B)(implicit B: scalaz.Monoid[B]): B =
-      F.foldMap(fa)(f)
+    override def foldMap[A, B](fa: F[A])(f: A => B)(implicit B: scalaz.Monoid[B]): B = ???
+      // F.foldMap(fa)(f)
 
     override def foldRight[A, B](fa: F[A], z: => B)(f: (A, => B) => B): B =
       F.foldRight(fa, Eval.always(z))((a, b) => b.map(f(a, _))).value
@@ -165,8 +165,8 @@ trait TraverseConversions extends ApplicativeConversions with FoldableConversion
   private[conversions] trait TraverseShimS2C[F[_]] extends cats.Traverse[F] with FunctorShimS2C[F] with FoldableShimS2C[F] {
     val F: scalaz.Traverse[F]
 
-    override def traverse[G[_]: cats.Applicative, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-      F.traverse(fa)(f)
+    override def traverse[G[_]: cats.Applicative, A, B](fa: F[A])(f: A => G[B]): G[F[B]] = ???
+      // F.traverse(fa)(f)
   }
 
   implicit def traverseToCats[F[_], T](implicit FC: Capture[scalaz.Traverse[F], T], ev: T </< Synthetic): cats.Traverse[F] with Synthetic =
@@ -175,8 +175,8 @@ trait TraverseConversions extends ApplicativeConversions with FoldableConversion
   private[conversions] trait TraverseShimC2S[F[_]] extends scalaz.Traverse[F] with FunctorShimC2S[F] with FoldableShimC2S[F] {
     val F: cats.Traverse[F]
 
-    override def traverseImpl[G[_]: scalaz.Applicative, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-      F.traverse(fa)(f)
+    override def traverseImpl[G[_]: scalaz.Applicative, A, B](fa: F[A])(f: A => G[B]): G[F[B]] = ???
+      // F.traverse(fa)(f)
   }
 
   implicit def traverseToScalaz[F[_], T](implicit FC: Capture[cats.Traverse[F], T], ev: T </< Synthetic): scalaz.Traverse[F] with Synthetic =
