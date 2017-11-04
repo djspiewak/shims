@@ -16,19 +16,19 @@
 
 package shims
 
-import cats.laws.discipline._
-import scalaz.std.option._
-import scalaz.std.tuple._
-import scalaz.std.anyVal._
+// import cats.laws.discipline._
+// import scalaz.std.option._
+// import scalaz.std.tuple._
+// import scalaz.std.anyVal._
 
-import org.scalacheck._
+// import org.scalacheck._
 import org.specs2.mutable._
 import org.typelevel.discipline.specs2.mutable.Discipline
 
 object MonadConversionSpecs extends Specification with Discipline {
-  import Arbitrary.arbitrary
+  // import Arbitrary.arbitrary
 
-  "ifunctor" >> {
+  /*"ifunctor" >> {
     cats.functor.Invariant[Option]
     scalaz.InvariantFunctor[Option]
 
@@ -160,22 +160,22 @@ object MonadConversionSpecs extends Specification with Discipline {
 
     "scalaz -> cats" >>
       checkAll("NonEmptyList", ComonadTests[NEL].comonad[Int, Int, Int])
-  }
+  }*/
 
   "monad" >> {
     "scalaz -> cats" >> {
-      "Option" >> {
+      /*"Option" >> {
         cats.Monad[Option]
         scalaz.Monad[Option]
 
         checkAll("Option", MonadTests[Option].monad[Int, Int, Int])
-      }
+      }*/
 
       "Free[Function0, ?]" >> {
         import cats.kernel.Eq
         import cats.instances.list._
 
-        import scalaz.{~>, Free}
+        /*import scalaz.{~>, Free}
 
         case class Foo[A](a: A)
 
@@ -196,15 +196,16 @@ object MonadConversionSpecs extends Specification with Discipline {
             3 -> genBind)
 
           Arbitrary(g)
-        }
+        }*/
 
         {
           implicit val eqStr: Eq[String] = null
 
+          Eq[String]
           Eq[List[String]]
         }
 
-        implicit def eqFree[A: Eq]: Eq[Free[Foo, A]] = {
+        /*implicit def eqFree[A: Eq]: Eq[Free[Foo, A]] = {
           Eq instance { (f1, f2) =>
             val nt = λ[Foo ~> List](fa => List(fa.a))
 
@@ -218,7 +219,9 @@ object MonadConversionSpecs extends Specification with Discipline {
         cats.Monad[Free[Foo, ?]]
         scalaz.Monad[Free[Foo, ?]]
 
-        checkAll("Free[Foo, ?]", MonadTests[Free[Foo, ?]].monad[Int, Int, Int])
+        checkAll("Free[Foo, ?]", MonadTests[Free[Foo, ?]].monad[Int, Int, Int])*/
+
+        ok
       }
     }
   }

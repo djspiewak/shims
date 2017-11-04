@@ -167,6 +167,9 @@ lazy val core = crossProject
 lazy val coreJVM = core.jvm.settings(mimaSettings)
 lazy val coreJS = core.js
 
+lazy val dottyThing = project
+  .dependsOn(coreJVM)
+
 enablePlugins(GitVersioning)
 
 git.baseVersion := BaseVersion
