@@ -159,8 +159,6 @@ lazy val core = crossProject
       "org.typelevel" %%% "cats-free"   % CatsVersion,
       "org.scalaz"    %%% "scalaz-core" % ScalazVersion,
 
-      "com.chuusai"   %%% "shapeless"   % "2.3.2",
-
       "org.typelevel" %%  "discipline"  % "0.7.3"     % "test",
       "org.typelevel" %%% "cats-laws"   % CatsVersion % "test"),
 
