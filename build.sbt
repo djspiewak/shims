@@ -26,6 +26,7 @@ val ScalazVersion = "7.2.10"
 val Specs2Version = "3.8.6"
 
 addCommandAlias("ci", ";test ;mimaReportBinaryIssues")
+addCommandAlias("release", "; +publish; sonatypeReleaseAll")
 
 lazy val commonSettings = Seq(
   organization := "com.codecommit",
