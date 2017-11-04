@@ -47,7 +47,7 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
       case e: Exception => Left(e)
     }
 
-    val result = treeAM.right.map(Right(_)).getOrElse(treeBM).fold(
+    val result = treeAM.right.map(Right(_)).right.getOrElse(treeBM).fold(
       throw _,    // it's so great how scalac uses exceptions...
       identity)
 
