@@ -19,7 +19,7 @@ package shims.conversions
 import scalaz.\/
 
 import shims.AsSyntax
-import shims.util.{</<, Capture}
+import shims.util.Capture
 
 trait ComposeConversions {
 
@@ -29,7 +29,7 @@ trait ComposeConversions {
     override def compose[A, B, C](f: F[B, C], g: F[A, B]): F[A, C] = F.compose(f, g)
   }
 
-  implicit def composeToCats[F[_, _], T](implicit FC: Capture[scalaz.Compose[F], T], ev: T </< Synthetic): cats.arrow.Compose[F] with Synthetic =
+  implicit def composeToCats[F[_, _]](implicit FC: Capture[scalaz.Compose[F]]): cats.arrow.Compose[F] with Synthetic =
     new ComposeShimS2C[F] { val F = FC.value }
 
   private[conversions] trait ComposeShimC2S[F[_, _]] extends scalaz.Compose[F] with Synthetic {
@@ -38,7 +38,7 @@ trait ComposeConversions {
     override def compose[A, B, C](f: F[B, C], g: F[A, B]): F[A, C] = F.compose(f, g)
   }
 
-  implicit def composeToScalaz[F[_, _], T](implicit FC: Capture[cats.arrow.Compose[F], T], ev: T </< Synthetic): scalaz.Compose[F] with Synthetic =
+  implicit def composeToScalaz[F[_, _]](implicit FC: Capture[cats.arrow.Compose[F]]): scalaz.Compose[F] with Synthetic =
     new ComposeShimC2S[F] { val F = FC.value }
 }
 
@@ -50,7 +50,7 @@ trait SplitConversions extends ComposeConversions {
     override def split[A, B, C, D](f: F[A, B], g: F[C, D]): F[(A, C), (B, D)] = F.split(f, g)
   }
 
-  implicit def splitToCats[F[_, _], T](implicit FC: Capture[scalaz.Split[F], T], ev: T </< Synthetic): cats.arrow.Split[F] with Synthetic =
+  implicit def splitToCats[F[_, _]](implicit FC: Capture[scalaz.Split[F]]): cats.arrow.Split[F] with Synthetic =
     new SplitShimS2C[F] { val F = FC.value }
 
   private[conversions] trait SplitShimC2S[F[_, _]] extends scalaz.Split[F] with ComposeShimC2S[F] {
@@ -59,7 +59,7 @@ trait SplitConversions extends ComposeConversions {
     override def split[A, B, C, D](f: F[A, B], g: F[C, D]): F[(A, C), (B, D)] = F.split(f, g)
   }
 
-  implicit def splitToScalaz[F[_, _], T](implicit FC: Capture[cats.arrow.Split[F], T], ev: T </< Synthetic): scalaz.Split[F] with Synthetic =
+  implicit def splitToScalaz[F[_, _]](implicit FC: Capture[cats.arrow.Split[F]]): scalaz.Split[F] with Synthetic =
     new SplitShimC2S[F] { val F = FC.value }
 }
 
@@ -71,7 +71,7 @@ trait ProfunctorConversions {
     override def dimap[A, B, C, D](fab: F[A, B])(f: C => A)(g: B => D): F[C, D] = F.dimap(fab)(f)(g)
   }
 
-  implicit def profunctorToCats[F[_, _], T](implicit FC: Capture[scalaz.Profunctor[F], T], ev: T </< Synthetic): cats.functor.Profunctor[F] with Synthetic =
+  implicit def profunctorToCats[F[_, _]](implicit FC: Capture[scalaz.Profunctor[F]]): cats.functor.Profunctor[F] with Synthetic =
     new ProfunctorShimS2C[F] { val F = FC.value }
 
   private[conversions] trait ProfunctorShimC2S[F[_, _]] extends scalaz.Profunctor[F] with Synthetic {
@@ -82,7 +82,7 @@ trait ProfunctorConversions {
     override def mapsnd[A, B, C](fab: F[A, B])(f: B => C): F[A, C] = F.rmap(fab)(f)
   }
 
-  implicit def profunctorToScalaz[F[_, _], T](implicit FC: Capture[cats.functor.Profunctor[F], T], ev: T </< Synthetic): scalaz.Profunctor[F] with Synthetic =
+  implicit def profunctorToScalaz[F[_, _]](implicit FC: Capture[cats.functor.Profunctor[F]]): scalaz.Profunctor[F] with Synthetic =
     new ProfunctorShimC2S[F] { val F = FC.value }
 }
 
@@ -96,7 +96,7 @@ trait StrongConversions extends ProfunctorConversions {
     override def second[A, B, C](fa: F[A, B]): F[(C, A), (C, B)] = F.second(fa)
   }
 
-  implicit def strongToCats[F[_, _], T](implicit FC: Capture[scalaz.Strong[F], T], ev: T </< Synthetic): cats.functor.Strong[F] with Synthetic =
+  implicit def strongToCats[F[_, _]](implicit FC: Capture[scalaz.Strong[F]]): cats.functor.Strong[F] with Synthetic =
     new StrongShimS2C[F] { val F = FC.value }
 
   private[conversions] trait StrongShimC2S[F[_, _]] extends scalaz.Strong[F] with ProfunctorShimC2S[F] {
@@ -107,7 +107,7 @@ trait StrongConversions extends ProfunctorConversions {
     override def second[A, B, C](fa: F[A, B]): F[(C, A), (C, B)] = F.second(fa)
   }
 
-  implicit def strongToScalaz[F[_, _], T](implicit FC: Capture[cats.functor.Strong[F], T], ev: T </< Synthetic): scalaz.Strong[F] with Synthetic =
+  implicit def strongToScalaz[F[_, _]](implicit FC: Capture[cats.functor.Strong[F]]): scalaz.Strong[F] with Synthetic =
     new StrongShimC2S[F] { val F = FC.value }
 }
 
@@ -119,7 +119,7 @@ trait CategoryConversions extends ComposeConversions {
     override def id[A]: F[A, A] = F.id
   }
 
-  implicit def categoryToCats[F[_, _], T](implicit FC: Capture[scalaz.Category[F], T], ev: T </< Synthetic): cats.arrow.Category[F] with Synthetic =
+  implicit def categoryToCats[F[_, _]](implicit FC: Capture[scalaz.Category[F]]): cats.arrow.Category[F] with Synthetic =
     new CategoryShimS2C[F] { val F = FC.value }
 
   private[conversions] trait CategoryShimC2S[F[_, _]] extends scalaz.Category[F] with ComposeShimC2S[F] {
@@ -128,7 +128,7 @@ trait CategoryConversions extends ComposeConversions {
     override def id[A]: F[A, A] = F.id
   }
 
-  implicit def categoryToScalaz[F[_, _], T](implicit FC: Capture[cats.arrow.Category[F], T], ev: T </< Synthetic): scalaz.Category[F] with Synthetic =
+  implicit def categoryToScalaz[F[_, _]](implicit FC: Capture[cats.arrow.Category[F]]): scalaz.Category[F] with Synthetic =
     new CategoryShimC2S[F] { val F = FC.value }
 }
 
@@ -140,7 +140,7 @@ trait ArrowConversions extends SplitConversions with StrongConversions with Cate
     override def lift[A, B](f: A => B): F[A, B] = F.arr(f)
   }
 
-  implicit def arrowToCats[F[_, _], T](implicit FC: Capture[scalaz.Arrow[F], T], ev: T </< Synthetic): cats.arrow.Arrow[F] with Synthetic =
+  implicit def arrowToCats[F[_, _]](implicit FC: Capture[scalaz.Arrow[F]]): cats.arrow.Arrow[F] with Synthetic =
     new ArrowShimS2C[F] { val F = FC.value }
 
   private[conversions] trait ArrowShimC2S[F[_, _]] extends scalaz.Arrow[F] with ComposeShimC2S[F] with StrongShimC2S[F] with CategoryShimC2S[F] {
@@ -149,7 +149,7 @@ trait ArrowConversions extends SplitConversions with StrongConversions with Cate
     override def arr[A, B](f: A => B): F[A, B] = F.lift(f)
   }
 
-  implicit def arrowToScalaz[F[_, _], T](implicit FC: Capture[cats.arrow.Arrow[F], T], ev: T </< Synthetic): scalaz.Arrow[F] with Synthetic =
+  implicit def arrowToScalaz[F[_, _]](implicit FC: Capture[cats.arrow.Arrow[F]]): scalaz.Arrow[F] with Synthetic =
     new ArrowShimC2S[F] { val F = FC.value }
 }
 
@@ -164,7 +164,7 @@ trait ChoiceConversions extends CategoryConversions with EitherConverters with A
   }
 
   // the bifunctor is required because cats/scalaz use different Either types :-/
-  implicit def choiceToCats[F[_, _], T](implicit FC: Capture[scalaz.Choice[F], T], BF: scalaz.Bifunctor[F], ev: T </< Synthetic): cats.arrow.Choice[F] with Synthetic =
+  implicit def choiceToCats[F[_, _]](implicit FC: Capture[scalaz.Choice[F]], BF: scalaz.Bifunctor[F]): cats.arrow.Choice[F] with Synthetic =
     new ChoiceShimS2C[F] { val F = FC.value; val Bifunctor = BF }
 
   private[conversions] trait ChoiceShimC2S[F[_, _]] extends scalaz.Choice[F] with CategoryShimC2S[F] {
@@ -176,6 +176,6 @@ trait ChoiceConversions extends CategoryConversions with EitherConverters with A
   }
 
   // the bifunctor is required because cats/scalaz use different Either types :-/
-  implicit def choiceToScalaz[F[_, _], T](implicit FC: Capture[cats.arrow.Choice[F], T], BF: cats.functor.Bifunctor[F], ev: T </< Synthetic): scalaz.Choice[F] with Synthetic =
+  implicit def choiceToScalaz[F[_, _]](implicit FC: Capture[cats.arrow.Choice[F]], BF: cats.functor.Bifunctor[F]): scalaz.Choice[F] with Synthetic =
     new ChoiceShimC2S[F] { val F = FC.value; val Bifunctor = BF }
 }

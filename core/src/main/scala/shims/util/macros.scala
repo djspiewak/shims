@@ -17,6 +17,7 @@
 package shims.util
 
 import scala.reflect.macros.whitebox
+import scala.util.{Left, Right}
 
 @macrocompat.bundle
 class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
@@ -25,8 +26,47 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
   val Synthetic = weakTypeOf[shims.conversions.Synthetic]
 
   def materializeCapture[A: WeakTypeTag]: Tree = {
-    val A = /*openImplicitTpeParam.getOrElse(*/weakTypeOf[A]/*)*/
+    val A = openImplicitTpeParam.getOrElse(weakTypeOf[A])
 
+    q"""_root_.shims.util.Capture[$A](${reconstructImplicit(A)})"""
+  }
+
+  def materializeEitherCapture[A: WeakTypeTag, B: WeakTypeTag]: Tree = {
+    val A = openImplicitTpeParam.getOrElse(weakTypeOf[A])
+    val B = openImplicitTpeParam.getOrElse(weakTypeOf[B])
+
+    val treeAM = try {
+      Right(q"_root_.scala.util.Left(${reconstructImplicit(A)})")
+    } catch {
+      case e: Exception => Left(e)
+    }
+
+    val treeBM = try {
+      Right(q"_root_.scala.util.Right(${reconstructImplicit(B)})")
+    } catch {
+      case e: Exception => Left(e)
+    }
+
+    val result = treeAM.map(Right(_)).getOrElse(treeBM).fold(
+      throw _,    // it's so great how scalac uses exceptions...
+      identity)
+
+    q"""_root_.shims.util.EitherCapture[$A, $B]($result)"""
+  }
+
+  def materializeOptionCapture[A: WeakTypeTag]: Tree = {
+    val A = openImplicitTpeParam.getOrElse(weakTypeOf[A])
+
+    val result = try {
+      q"_root_.scala.Some(${reconstructImplicit(A)})"
+    } catch {
+      case e: Exception => q"_root_.scala.None"
+    }
+
+    q"""_root_.shims.util.OptionCapture[$A]($result)"""
+  }
+
+  private def reconstructImplicit(A: Type): Tree = {
     // we catch the invalid diverging implicit expansion error and produce a correct one
     // this works around a bug in NSC; we can remove this on Dotty
     val tree0 = try {
@@ -43,7 +83,7 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
       c.abort(c.enclosingPosition, s"Cannot capture subtype of of Synthetic")
     }
 
-    q"""_root_.shims.util.Capture[$A, $A]($tree0)"""
+    tree0
   }
 }
 

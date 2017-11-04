@@ -18,7 +18,7 @@ package shims.conversions
 
 import cats.Eval
 
-import shims.util.{</<, Capture}
+import shims.util.Capture
 
 trait BifunctorConversions {
 
@@ -29,7 +29,7 @@ trait BifunctorConversions {
       F.bimap(fab)(f, g)
   }
 
-  implicit def bifunctorToCats[F[_, _], T](implicit FC: Capture[scalaz.Bifunctor[F], T], ev: T </< Synthetic): cats.functor.Bifunctor[F] with Synthetic =
+  implicit def bifunctorToCats[F[_, _]](implicit FC: Capture[scalaz.Bifunctor[F]]): cats.functor.Bifunctor[F] with Synthetic =
     new BifunctorShimS2C[F] { val F = FC.value }
 
   private[conversions] trait BifunctorShimC2S[F[_, _]] extends scalaz.Bifunctor[F] with Synthetic {
@@ -39,7 +39,7 @@ trait BifunctorConversions {
       F.bimap(fab)(f, g)
   }
 
-  implicit def bifunctorToScalaz[F[_, _], T](implicit FC: Capture[cats.functor.Bifunctor[F], T], ev: T </< Synthetic): scalaz.Bifunctor[F] with Synthetic =
+  implicit def bifunctorToScalaz[F[_, _]](implicit FC: Capture[cats.functor.Bifunctor[F]]): scalaz.Bifunctor[F] with Synthetic =
     new BifunctorShimC2S[F] { val F = FC.value }
 }
 
@@ -55,7 +55,7 @@ trait BifoldableConversions extends MonoidConversions {
       F.bifoldRight(fab, c)((a, c) => f(a, c))((b, c) => g(b, c))
   }
 
-  implicit def bifoldableToCats[F[_, _], T](implicit FC: Capture[scalaz.Bifoldable[F], T], ev: T </< Synthetic): cats.Bifoldable[F] with Synthetic =
+  implicit def bifoldableToCats[F[_, _]](implicit FC: Capture[scalaz.Bifoldable[F]]): cats.Bifoldable[F] with Synthetic =
     new BifoldableShimS2C[F] { val F = FC.value }
 
   private[conversions] trait BifoldableShimC2S[F[_, _]] extends scalaz.Bifoldable[F] with Synthetic {
@@ -68,7 +68,7 @@ trait BifoldableConversions extends MonoidConversions {
       // F.bifoldRight(fa, Eval.always(z))((a, c) => c.map(f(a, _)), (b, c) => c.map(g(b, _))).value
   }
 
-  implicit def bifoldableToScalaz[F[_, _], T](implicit FC: Capture[cats.Bifoldable[F], T], ev: T </< Synthetic): scalaz.Bifoldable[F] with Synthetic =
+  implicit def bifoldableToScalaz[F[_, _]](implicit FC: Capture[cats.Bifoldable[F]]): scalaz.Bifoldable[F] with Synthetic =
     new BifoldableShimC2S[F] { val F = FC.value }
 }
 
@@ -81,7 +81,7 @@ trait BitraverseConversions extends BifunctorConversions with BifoldableConversi
       // F.bitraverse(fab)(f)(g)
   }
 
-  implicit def bitraverseToCats[F[_, _], T](implicit FC: Capture[scalaz.Bitraverse[F], T], ev: T </< Synthetic): cats.Bitraverse[F] with Synthetic =
+  implicit def bitraverseToCats[F[_, _]](implicit FC: Capture[scalaz.Bitraverse[F]]): cats.Bitraverse[F] with Synthetic =
     new BitraverseShimS2C[F] { val F = FC.value }
 
   private[conversions] trait BitraverseShimC2S[F[_, _]] extends scalaz.Bitraverse[F] with BifunctorShimC2S[F] with BifoldableShimC2S[F] {
@@ -91,6 +91,6 @@ trait BitraverseConversions extends BifunctorConversions with BifoldableConversi
       // F.bitraverse(fab)(f, g)
   }
 
-  implicit def bitraverseToScalaz[F[_, _], T](implicit FC: Capture[cats.Bitraverse[F], T], ev: T </< Synthetic): scalaz.Bitraverse[F] with Synthetic =
+  implicit def bitraverseToScalaz[F[_, _]](implicit FC: Capture[cats.Bitraverse[F]]): scalaz.Bitraverse[F] with Synthetic =
     new BitraverseShimC2S[F] { val F = FC.value }
 }
