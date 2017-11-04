@@ -29,7 +29,7 @@ object MonadConversionSpecs extends Specification with Discipline {
   import Arbitrary.arbitrary
 
   "ifunctor" >> {
-    cats.functor.Invariant[Option]
+    cats.Invariant[Option]
     scalaz.InvariantFunctor[Option]
 
     "scalaz -> cats" >>
@@ -37,7 +37,7 @@ object MonadConversionSpecs extends Specification with Discipline {
   }
 
   /*"contravariant" >> {
-    cats.functor.Contravariant[???]
+    cats.Contravariant[???]
     scalaz.Contravariant[???]
 
     "scalaz -> cats" >> ok

@@ -16,8 +16,9 @@
 
 package shims
 
-import cats.kernel.laws._
+import cats.kernel.laws.discipline._
 import scalaz.std.anyVal._
+import cats.instances.option._
 
 import org.specs2.mutable._
 import org.typelevel.discipline.specs2.mutable.Discipline
@@ -29,7 +30,7 @@ object KernelConversionSpecs extends Specification with Discipline {
     scalaz.Equal[Int]
 
     "scalaz -> cats" >> {
-      checkAll("Int", OrderLaws[Int].eqv)
+      checkAll("Int", EqTests[Int].eqv)
     }
   }
 
@@ -38,8 +39,7 @@ object KernelConversionSpecs extends Specification with Discipline {
     scalaz.Order[Int]
 
     "scalaz -> cats" >> {
-      checkAll("Int", OrderLaws[Int].eqv)
-      checkAll("Int", OrderLaws[Int].order)
+      checkAll("Int", OrderTests[Int].order)
     }
   }
 
@@ -47,13 +47,13 @@ object KernelConversionSpecs extends Specification with Discipline {
     cats.Semigroup[Int]
     scalaz.Semigroup[Int]
 
-    "scalaz -> cats" >> checkAll("Int", GroupLaws[Int].semigroup)
+    "scalaz -> cats" >> checkAll("Int", SemigroupTests[Int].semigroup)
   }
 
   "monoid conversion" >> {
     cats.Monoid[Int]
     scalaz.Monoid[Int]
 
-    "scalaz -> cats" >> checkAll("Int", GroupLaws[Int].monoid)
+    "scalaz -> cats" >> checkAll("Int", MonoidTests[Int].monoid)
   }
 }

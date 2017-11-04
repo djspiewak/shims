@@ -14,28 +14,30 @@
  * limitations under the License.
  */
 
-import de.heikoseeberger.sbtheader.license.Apache2_0
-
 // version scheme described here: https://github.com/djspiewak/parseback/blob/30ee45e411a66297167a6e45e0e874fa23d8cc6d/project.sbt#L23-L53
 val BaseVersion = "1.0"
 val ReleaseTag = """^v([\d\.]+)$""".r
 
-val CatsVersion = "0.9.0"
-val ScalazVersion = "7.2.10"
+val CatsVersion = "1.0.0-RC1"
+val ScalazVersion = "7.2.16"
 
-val Specs2Version = "3.8.6"
+val Specs2Version = "4.0.0"
 
 addCommandAlias("ci", ";test ;mimaReportBinaryIssues")
 addCommandAlias("release", "; +publish; sonatypeReleaseAll")
 
+organizationName in ThisBuild := "Daniel Spiewak"
+startYear in ThisBuild := Some(2017)
+licenses in ThisBuild += ("Apache-2.0", url("http://www.apache.org/licenses/"))
+
 lazy val commonSettings = Seq(
   organization := "com.codecommit",
 
-  licenses += ("Apache-2.0", url("http://www.apache.org/licenses/")),
-
-  headers := Map(
-    "scala" -> Apache2_0("2017", "Daniel Spiewak"),
-    "java" -> Apache2_0("2017", "Daniel Spiewak")),
+  publishTo := Some(
+    if (isSnapshot.value)
+      Opts.resolver.sonatypeSnapshots
+    else
+      Opts.resolver.sonatypeStaging),
 
   libraryDependencies ++= Seq(
     "org.specs2"     %% "specs2-core"       % Specs2Version % "test",
@@ -76,7 +78,7 @@ lazy val commonSettings = Seq(
 
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, major)) if major >= 12 || scalaVersion.value == "2.11.9" =>
+      case Some((2, major)) if major >= 12 || scalaVersion.value == "2.11.11" =>
         Seq("-Ypartial-unification")
 
       case _ => Seq.empty
@@ -141,7 +143,7 @@ lazy val root = project
   .aggregate(coreJVM, coreJS)
   .settings(commonSettings: _*)
   .settings(
-    name := "shims-root",
+    name := "root",
 
     publish := (),
     publishLocal := (),

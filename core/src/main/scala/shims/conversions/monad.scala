@@ -24,45 +24,45 @@ import shims.util.{Capture, EitherCapture, OptionCapture}
 
 trait IFunctorConversions {
 
-  private[conversions] trait IFunctorShimS2C[F[_]] extends cats.functor.Invariant[F] with Synthetic {
+  private[conversions] trait IFunctorShimS2C[F[_]] extends cats.Invariant[F] with Synthetic {
     val F: scalaz.InvariantFunctor[F]
 
     override def imap[A, B](fa: F[A])(f: A => B)(f2: B => A): F[B] = F.xmap(fa, f, f2)
   }
 
-  implicit def ifunctorToCats[F[_]](implicit FC: Capture[scalaz.InvariantFunctor[F]]): cats.functor.Invariant[F] with Synthetic =
+  implicit def ifunctorToCats[F[_]](implicit FC: Capture[scalaz.InvariantFunctor[F]]): cats.Invariant[F] with Synthetic =
     new IFunctorShimS2C[F] { val F = FC.value }
 
   private[conversions] trait IFunctorShimC2S[F[_]] extends scalaz.InvariantFunctor[F] with Synthetic {
-    val F: cats.functor.Invariant[F]
+    val F: cats.Invariant[F]
 
     override def xmap[A, B](fa: F[A], f: A => B, f2: B => A): F[B] = F.imap(fa)(f)(f2)
   }
 
-  implicit def ifunctorToScalaz[F[_]](implicit FC: Capture[cats.functor.Invariant[F]]): scalaz.InvariantFunctor[F] with Synthetic =
+  implicit def ifunctorToScalaz[F[_]](implicit FC: Capture[cats.Invariant[F]]): scalaz.InvariantFunctor[F] with Synthetic =
     new IFunctorShimC2S[F] { val F = FC.value }
 }
 
 trait ContravariantConversions extends IFunctorConversions {
 
-  private[conversions] trait ContravariantShimS2C[F[_]] extends cats.functor.Contravariant[F] with IFunctorShimS2C[F] {
+  private[conversions] trait ContravariantShimS2C[F[_]] extends cats.Contravariant[F] with IFunctorShimS2C[F] {
     val F: scalaz.Contravariant[F]
 
     override def contramap[A, B](fa: F[A])(f: B => A): F[B] =
       F.contramap(fa)(f)
   }
 
-  implicit def contravariantToCats[F[_]](implicit FC: Capture[scalaz.Contravariant[F]]): cats.functor.Contravariant[F] with Synthetic =
+  implicit def contravariantToCats[F[_]](implicit FC: Capture[scalaz.Contravariant[F]]): cats.Contravariant[F] with Synthetic =
     new ContravariantShimS2C[F] { val F = FC.value }
 
   private[conversions] trait ContravariantShimC2S[F[_]] extends scalaz.Contravariant[F] with IFunctorShimC2S[F] {
-    val F: cats.functor.Contravariant[F]
+    val F: cats.Contravariant[F]
 
     override def contramap[A, B](fa: F[A])(f: B => A): F[B] =
       F.contramap(fa)(f)
   }
 
-  implicit def contravariantToScalaz[F[_]](implicit FC: Capture[cats.functor.Contravariant[F]]): scalaz.Contravariant[F] with Synthetic =
+  implicit def contravariantToScalaz[F[_]](implicit FC: Capture[cats.Contravariant[F]]): scalaz.Contravariant[F] with Synthetic =
     new ContravariantShimC2S[F] { val F = FC.value }
 }
 

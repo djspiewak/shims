@@ -22,24 +22,24 @@ import shims.util.Capture
 
 trait BifunctorConversions {
 
-  private[conversions] trait BifunctorShimS2C[F[_, _]] extends cats.functor.Bifunctor[F] with Synthetic {
+  private[conversions] trait BifunctorShimS2C[F[_, _]] extends cats.Bifunctor[F] with Synthetic {
     val F: scalaz.Bifunctor[F]
 
     override def bimap[A, B, C, D](fab: F[A, B])(f: A => C, g: B => D): F[C, D] =
       F.bimap(fab)(f, g)
   }
 
-  implicit def bifunctorToCats[F[_, _]](implicit FC: Capture[scalaz.Bifunctor[F]]): cats.functor.Bifunctor[F] with Synthetic =
+  implicit def bifunctorToCats[F[_, _]](implicit FC: Capture[scalaz.Bifunctor[F]]): cats.Bifunctor[F] with Synthetic =
     new BifunctorShimS2C[F] { val F = FC.value }
 
   private[conversions] trait BifunctorShimC2S[F[_, _]] extends scalaz.Bifunctor[F] with Synthetic {
-    val F: cats.functor.Bifunctor[F]
+    val F: cats.Bifunctor[F]
 
     override def bimap[A, B, C, D](fab: F[A, B])(f: A => C, g: B => D): F[C, D] =
       F.bimap(fab)(f, g)
   }
 
-  implicit def bifunctorToScalaz[F[_, _]](implicit FC: Capture[cats.functor.Bifunctor[F]]): scalaz.Bifunctor[F] with Synthetic =
+  implicit def bifunctorToScalaz[F[_, _]](implicit FC: Capture[cats.Bifunctor[F]]): scalaz.Bifunctor[F] with Synthetic =
     new BifunctorShimC2S[F] { val F = FC.value }
 }
 
