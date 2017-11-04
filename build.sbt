@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import scala.sys.process._
+
 // version scheme described here: https://github.com/djspiewak/parseback/blob/30ee45e411a66297167a6e45e0e874fa23d8cc6d/project.sbt#L23-L53
 val BaseVersion = "1.0"
 val ReleaseTag = """^v([\d\.]+)$""".r
@@ -147,8 +149,8 @@ lazy val root = project
   .settings(
     name := "root",
 
-    publish := (),
-    publishLocal := (),
+    publish := (()),
+    publishLocal := (()),
     publishArtifact := false)
 
 lazy val core = crossProject
