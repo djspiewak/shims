@@ -61,11 +61,11 @@ trait BifoldableConversions extends MonoidConversions {
   private[conversions] trait BifoldableShimC2S[F[_, _]] extends scalaz.Bifoldable[F] with Synthetic {
     val F: cats.Bifoldable[F]
 
-    override def bifoldMap[A, B, M: scalaz.Monoid](fa: F[A, B])(f: A => M)(g: B => M): M = ???
-      // F.bifoldMap(fa)(f, g)
+    override def bifoldMap[A, B, M: scalaz.Monoid](fa: F[A, B])(f: A => M)(g: B => M): M =
+      F.bifoldMap(fa)(f, g)(monoidToCats(Capture(scalaz.Monoid[M])))
 
-    override def bifoldRight[A, B, C](fa: F[A, B], z: => C)(f: (A, => C) => C)(g: (B, => C) => C): C = ???
-      // F.bifoldRight(fa, Eval.always(z))((a, c) => c.map(f(a, _)), (b, c) => c.map(g(b, _))).value
+    override def bifoldRight[A, B, C](fa: F[A, B], z: => C)(f: (A, => C) => C)(g: (B, => C) => C): C =
+      F.bifoldRight(fa, Eval.always(z))((a, c) => c.map(f(a, _)), (b, c) => c.map(g(b, _))).value
   }
 
   implicit def bifoldableToScalaz[F[_, _]](implicit FC: Capture[cats.Bifoldable[F]]): scalaz.Bifoldable[F] with Synthetic =
@@ -77,8 +77,8 @@ trait BitraverseConversions extends BifunctorConversions with BifoldableConversi
   private[conversions] trait BitraverseShimS2C[F[_, _]] extends cats.Bitraverse[F] with BifunctorShimS2C[F] with BifoldableShimS2C[F] {
     val F: scalaz.Bitraverse[F]
 
-    override def bitraverse[G[_]: cats.Applicative, A, B, C, D](fab: F[A, B])(f: A => G[C], g: B => G[D]): G[F[C, D]] = ???
-      // F.bitraverse(fab)(f)(g)
+    override def bitraverse[G[_]: cats.Applicative, A, B, C, D](fab: F[A, B])(f: A => G[C], g: B => G[D]): G[F[C, D]] =
+      F.bitraverse(fab)(f)(g)(applicativeToScalaz(Capture(cats.Applicative[G])))
   }
 
   implicit def bitraverseToCats[F[_, _]](implicit FC: Capture[scalaz.Bitraverse[F]]): cats.Bitraverse[F] with Synthetic =
@@ -87,8 +87,8 @@ trait BitraverseConversions extends BifunctorConversions with BifoldableConversi
   private[conversions] trait BitraverseShimC2S[F[_, _]] extends scalaz.Bitraverse[F] with BifunctorShimC2S[F] with BifoldableShimC2S[F] {
     val F: cats.Bitraverse[F]
 
-    override def bitraverseImpl[G[_]: scalaz.Applicative, A, B, C, D](fab: F[A, B])(f: A => G[C], g: B => G[D]): G[F[C, D]] = ???
-      // F.bitraverse(fab)(f, g)
+    override def bitraverseImpl[G[_]: scalaz.Applicative, A, B, C, D](fab: F[A, B])(f: A => G[C], g: B => G[D]): G[F[C, D]] =
+      F.bitraverse(fab)(f, g)(applicativeToCats(Capture(scalaz.Applicative[G])))
   }
 
   implicit def bitraverseToScalaz[F[_, _]](implicit FC: Capture[cats.Bitraverse[F]]): scalaz.Bitraverse[F] with Synthetic =

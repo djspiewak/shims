@@ -17,6 +17,8 @@
 // topological root(s): EitherConverters, FunctionKConverters, EvalConverters, StateTConverters, NELConverters
 package shims.conversions
 
+import shims.util.{Capture, OptionCapture}
+
 import scalaz.{~>, \/}
 import cats.arrow.FunctionK
 
@@ -48,11 +50,15 @@ trait FreeConverters extends MonadConversions {
 
   implicit def freeAs[S[_], A] = new AsScalaz[cats.free.Free[S, A], scalaz.Free[S, A]] with AsCats[scalaz.Free[S, A], cats.free.Free[S, A]] {
 
-    def c2s(f: cats.free.Free[S, A]) = ???
-      // f.foldMap[scalaz.Free[S, ?]](λ[FunctionK[S, scalaz.Free[S, ?]]](scalaz.Free.liftF(_)))
+    def c2s(f: cats.free.Free[S, A]) =
+      f.foldMap(λ[FunctionK[S, scalaz.Free[S, ?]]](scalaz.Free.liftF(_)))(
+        monadToCats(
+          Capture(scalaz.Monad[scalaz.Free[S, ?]]),
+          OptionCapture(None)))
 
-    def s2c(f: scalaz.Free[S, A]) = ???
-      // f.foldMap[cats.free.Free[S, ?]](λ[S ~> cats.free.Free[S, ?]](cats.free.Free.liftF(_)))
+    def s2c(f: scalaz.Free[S, A]) =
+      f.foldMap[cats.free.Free[S, ?]](λ[S ~> cats.free.Free[S, ?]](cats.free.Free.liftF(_)))(
+        monadToScalaz(Capture(cats.Monad[cats.free.Free[S, ?]])))
   }
 }
 
@@ -66,7 +72,9 @@ trait EvalConverters extends FreeConverters {
     // the inner workings of eval aren't exposed, so we can't do any better here
     def c2s(e: Eval[A]) = Trampoline.delay(e.value)
 
-    def s2c(t: FT[A]) = ??? // t.foldMap(λ[Function0 ~> Eval](a => Eval.always(a())))
+    def s2c(t: FT[A]) =
+      t.foldMap(λ[Function0 ~> Eval](a => Eval.always(a())))(
+        monadToScalaz(Capture(cats.Monad[Eval])))
   }
 }
 
@@ -75,11 +83,12 @@ trait StateTConverters extends MonadConversions {
   implicit def stateTAs[F[_]: cats.Monad, S, A] =
     new AsScalaz[cats.data.StateT[F, S, A], scalaz.StateT[F, S, A]] with AsCats[scalaz.StateT[F, S, A], cats.data.StateT[F, S, A]] {
 
-      def c2s(st: cats.data.StateT[F, S, A]) = ???
-        // scalaz.StateT[F, S, A](s => cats.Monad[F].flatMap(st.runF)(_(s)))
+      def c2s(st: cats.data.StateT[F, S, A]) =
+        scalaz.StateT[F, S, A](s => cats.Monad[F].flatMap(st.runF)(_(s)))(
+          monadToScalaz(Capture(cats.Monad[F])))
 
-      def s2c(st: scalaz.StateT[F, S, A]) = ???
-        // cats.data.StateT[F, S, A](st.run(_))
+      def s2c(st: scalaz.StateT[F, S, A]) =
+        cats.data.StateT[F, S, A](st.run(_)(monadToScalaz(Capture(cats.Monad[F]))))
     }
 }
 

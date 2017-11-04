@@ -149,8 +149,18 @@ trait FoldableConversions extends MonoidConversions with ApplicativeConversions 
   private[conversions] trait FoldableShimC2S[F[_]] extends scalaz.Foldable[F] with Synthetic {
     val F: cats.Foldable[F]
 
-    override def foldMap[A, B](fa: F[A])(f: A => B)(implicit B: scalaz.Monoid[B]): B = ???
-      // F.foldMap(fa)(f)
+    /*
+     * There are a couple of these "explicitly use the conversion that should
+     * be implicit" bits.  I don't have a good explanation for it, but I can say
+     * that commenting it out, compiling the whole project, and then uncommenting
+     * it WORKS, while clean compiling does not.  That leads me to suspect that
+     * it's some sort of scope linearization issue inside of nsc.  I can't really
+     * fix that, and it's not likely to be something that would affect client
+     * code (since shims is already compiled by that point), so I'm just going to
+     * be explicit.
+     */
+    override def foldMap[A, B](fa: F[A])(f: A => B)(implicit B: scalaz.Monoid[B]): B =
+      F.foldMap(fa)(f)(monoidToCats(Capture(B)))
 
     override def foldRight[A, B](fa: F[A], z: => B)(f: (A, => B) => B): B =
       F.foldRight(fa, Eval.always(z))((a, b) => b.map(f(a, _))).value
@@ -166,7 +176,7 @@ trait TraverseConversions extends ApplicativeConversions with FoldableConversion
     val F: scalaz.Traverse[F]
 
     override def traverse[G[_]: cats.Applicative, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-      F.traverse(fa)(f)
+      F.traverse(fa)(f)(applicativeToScalaz(Capture(cats.Applicative[G])))
   }
 
   implicit def traverseToCats[F[_]](implicit FC: Capture[scalaz.Traverse[F]]): cats.Traverse[F] with Synthetic =
@@ -176,7 +186,7 @@ trait TraverseConversions extends ApplicativeConversions with FoldableConversion
     val F: cats.Traverse[F]
 
     override def traverseImpl[G[_]: scalaz.Applicative, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-      F.traverse(fa)(f)
+      F.traverse(fa)(f)(applicativeToCats(Capture(scalaz.Applicative[G])))
   }
 
   implicit def traverseToScalaz[F[_]](implicit FC: Capture[cats.Traverse[F]]): scalaz.Traverse[F] with Synthetic =
