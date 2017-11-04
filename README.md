@@ -18,7 +18,7 @@ libraryDependencies += "com.codecommit" %% "shims-core" % "1.0"
 
 There is currently no *stable* released version of shims 1.0 (the only stable releases represent the prior library state).  If you want to live dangerously, I've published a hash snapshot with version `"1.0-b0e5152"`.
 
-If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  This can be done either by using [Typelevel Scala](https://github.com/typelevel/scala), adding [Miles Sabin's hacky compiler plugin](https://github.com/milessabin/si2712fix-plugin), or simply using Scala 2.12 or higher with the `-Ypartial-unification` flag.  An example of the shenanigans which can enable the SI-2712 fix across multiple Scala versions can be seen [here](https://github.com/djspiewak/shims/blob/34f8851d1726027b537707f27b6c33f83c15a9fd/build.sbt#L60-L91).  A large number of conversions will simply *not work* without partial unification.
+If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  This can be done either by using [Typelevel Scala](https://github.com/typelevel/scala), adding [Miles Sabin's hacky compiler plugin](https://github.com/milessabin/si2712fix-plugin), or simply using Scala 2.12 (or 2.11.11) or higher with the `-Ypartial-unification` flag.  An example of the shenanigans which can enable the SI-2712 fix across multiple Scala versions can be seen [here](https://github.com/djspiewak/shims/blob/34f8851d1726027b537707f27b6c33f83c15a9fd/build.sbt#L60-L91).  A large number of conversions will simply *not work* without partial unification.
 
 Once you have the dependency installed, simply add the following import to any scopes which require cats-scalaz interop:
 
@@ -28,10 +28,14 @@ import shims._
 
 *Chuckle*… there is no step three!
 
+### Scala 2.12.3/4
+
+There appears to be a regression in 2.12.3 (which still exists in 2.12.4) which causes the compilation of the test suite to trigger an infinite macro expansion.  Or at the very least, the stack trace looks infinite, and I ran out of patience waiting for infinity.  I haven't yet ascertained whether or not this issue will occur in normal client code (i.e. code that uses the shims conversions), but I would guess the answer is "yes".  So if you're using shims on Scala 2.12, you should probably stick to 2.12.2 for now.
+
 ### Upstream Dependencies
 
-- cats 0.9.0
-- scalaz 7.2.10
+- cats 1.0.0-RC1
+- scalaz 7.2.16
 
 At present, there is no complex build matrix of craziness to provide support for other major versions of each library.  This will probably come in time, when I've become sad and jaded, and possibly when I have received a pull request for it.
 
