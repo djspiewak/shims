@@ -33,6 +33,8 @@ licenses in ThisBuild += ("Apache-2.0", url("http://www.apache.org/licenses/"))
 lazy val commonSettings = Seq(
   organization := "com.codecommit",
 
+  useGpg := true,
+
   publishTo := Some(
     if (isSnapshot.value)
       Opts.resolver.sonatypeSnapshots
