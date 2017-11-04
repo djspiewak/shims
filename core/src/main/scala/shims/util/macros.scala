@@ -80,7 +80,7 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
     }
 
     if (tree0.tpe <:< Synthetic) {
-      c.abort(c.enclosingPosition, s"Cannot capture subtype of of Synthetic")
+      c.abort(c.enclosingPosition, s"Cannot capture subtype of Synthetic")
     }
 
     tree0
