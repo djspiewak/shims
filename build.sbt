@@ -140,7 +140,7 @@ lazy val root = project
   .aggregate(coreJVM, coreJS)
   .settings(commonSettings: _*)
   .settings(
-    name := "shims",
+    name := "shims-root",
 
     publish := (),
     publishLocal := (),
@@ -151,7 +151,7 @@ lazy val core = crossProject
   .in(file("core"))
   .settings(commonSettings: _*)
   .settings(
-    name := "shims-core",
+    name := "shims",
 
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-core"   % CatsVersion,
@@ -185,6 +185,7 @@ lazy val core = crossProject
 lazy val coreJVM = core.jvm.settings(mimaSettings)
 lazy val coreJS = core.js
 
+// intentionally not in the aggregation
 lazy val scratch = project.dependsOn(coreJVM)
 
 enablePlugins(GitVersioning)
