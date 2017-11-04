@@ -76,6 +76,7 @@ What follows is an alphabetized list (in terms of cats types) of typeclasses whi
 
 - `Applicative`
 - `Apply`
+- `Arrow`
 - `Choice`
   + Requires a `Bifunctor[F]` in addition to a `Choice[F]`.  This is because scalaz produces a `A \/ B`, while cats produces an `Either[A, B]`.
 - `Bifoldable`
@@ -101,9 +102,14 @@ What follows is an alphabetized list (in terms of cats types) of typeclasses whi
 - `Order`
 - `Profunctor`
 - `Semigroup`
-- `Split`
 - `Strong`
 - `Traverse`
+
+Note that some typeclasses exist in one framework but not in the other (e.g. `Group` in cats, or `Split` in scalaz).  In these cases, no conversion is attempted, though practical conversion may be achieved through more specific instances (e.g. `Arrow` is a subtype of `Split`, and `Arrow` will convert).
+
+And don't get me started on the whole `Bind` vs `BindRec` mess.  I make no excuses for that conversion.  Just trying to make things work as reasonably as possible, given the constraints of the upstream frameworks.
+
+Let me know if I missed anything!  Comprehensive lists of typeclasses in either framework are hard to come by.
 
 ### Datatypes
 
