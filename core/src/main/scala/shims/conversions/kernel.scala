@@ -26,7 +26,7 @@ trait EqConversions {
     override def eqv(x: A, y: A): Boolean = A.equal(x, y)
   }
 
-  implicit def equalToCats[A, T](implicit AC: Capture[scalaz.Equal[A], T], ev: T </< Synthetic): cats.kernel.Eq[A] with Synthetic =
+  implicit def equalToCats[A, T](implicit AC: Capture[scalaz.Equal[A], T]): cats.kernel.Eq[A] with Synthetic =
     new EqShimS2C[A] { val A = AC.value }
 
   private[conversions] trait EqShimC2S[A] extends scalaz.Equal[A] with Synthetic {
@@ -35,7 +35,7 @@ trait EqConversions {
     override def equal(x: A, y: A): Boolean = A.eqv(x, y)
   }
 
-  implicit def eqToScalaz[A, T](implicit AC: Capture[cats.kernel.Eq[A], T], ev: T </< Synthetic): scalaz.Equal[A] with Synthetic =
+  implicit def eqToScalaz[A, T](implicit AC: Capture[cats.kernel.Eq[A], T]): scalaz.Equal[A] with Synthetic =
     new EqShimC2S[A] { val A = AC.value }
 }
 

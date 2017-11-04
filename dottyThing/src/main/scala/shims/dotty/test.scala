@@ -8,4 +8,6 @@ object Test {
 
   Eq[String]
   Eq[List[String]]
+
+  scalaz.Equal[String]
 }

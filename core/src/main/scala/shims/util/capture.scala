@@ -16,6 +16,8 @@
 
 package shims.util
 
+import scala.language.experimental.macros
+
 import scala.annotation.implicitNotFound
 import scala.util.{Either, Left, Right}
 
@@ -23,7 +25,11 @@ import scala.util.{Either, Left, Right}
 final case class Capture[A, T](value: A) extends AnyVal
 
 object Capture {
-  implicit def materialize[A <: AnyRef](implicit A: A): Capture[A, A.type] = Capture(A)
+
+  def makeDependent[A <: AnyRef](a: A): Capture[A, a.type] = Capture[A, a.type](a)
+
+  implicit def materialize[A <: AnyRef]: Capture[A, A] =
+    macro CaptureMacros.materializeCapture[A]
 }
 
 @implicitNotFound("unable to find an implicit value of type ${A} or ${B}")

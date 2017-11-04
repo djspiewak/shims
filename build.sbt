@@ -161,7 +161,25 @@ lazy val core = crossProject
       "com.chuusai"   %%% "shapeless"   % "2.3.2",
 
       "org.typelevel" %%  "discipline"  % "0.7.3"     % "test",
-      "org.typelevel" %%% "cats-laws"   % CatsVersion % "test"))
+      "org.typelevel" %%% "cats-laws"   % CatsVersion % "test"),
+
+    // cribbed from shapeless
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "macro-compat" % "1.1.1",
+      scalaOrganization.value % "scala-reflect" % scalaVersion.value % "provided",
+      scalaOrganization.value % "scala-compiler" % scalaVersion.value % "provided",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch)),
+
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        // if scala 2.11+ is used, quasiquotes are merged into scala-reflect
+        case Some((2, scalaMajor)) if scalaMajor >= 11 => Seq()
+        // in Scala 2.10, quasiquotes are provided by macro paradise
+        case Some((2, 10)) =>
+          Seq("org.scalamacros" %% "quasiquotes" % "2.1.0" cross CrossVersion.binary)
+      }
+    }
+  )
   .enablePlugins(AutomateHeaderPlugin)
 
 lazy val coreJVM = core.jvm.settings(mimaSettings)
