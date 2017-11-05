@@ -117,6 +117,32 @@ val f3: scalaz.Free[F, A] = f2.asScalaz
 
 Note that the `asScalaz`/`asCats` mechanism is open and extensible.  To enable support for converting some type "cats type" `A` to an equivalent "scalaz type" `B`, define an implicit instance of type `shims.conversions.AsScalaz[A, B]`.  Similarly, for some "scalaz type" `A` to an equivalent "cats type" `B`, define an implicit instance of type `shims.conversions.AsCats[A, B]`.  Thus, a pair of types, `A` and `B`, for which a bijection exists would have a single implicit instance extending `AsScalaz[A, B] with AsCats[B, A]` (though the machinery does not require this is handled with a *single* instance; the ambiguity resolution here is pretty straightforward).
 
+### Nesting
+
+At present, the `asScalaz`/`asCats` mechanism does not recursively convert nested structures.  This situation most commonly occurs with monad transformer stacks.  For example:
+
+```scala
+val stuff: EitherT[OptionT[Foo, ?], Errs, Int] = ???
+
+stuff.asCats
+```
+
+The type of the final line is `cats.data.EitherT[scalaz.OptionT[Foo, ?], Errs, Int]`, whereas you might *expect* that it would be `cats.data.EitherT[cats.data.OptionT[Foo, ?], Errs, Int]`.  It is technically possible to apply conversions in depth, though it require some extra functor constraints in places.  The primary reason why this isn't done (now) is compile time performance, which would be adversely affected by the non-trivial inductive solution space.
+
+It shouldn't be too much of a hindrance in any case, since the typeclass instances for the nested type will be materialized for both scalaz and cats, and so it doesn't matter as much *exactly* which nominal structure is in use.  It would really only matter if you had a function which explicitly expected one thing or another.
+
+The only exception to this rule is `ValidationNel` in scalaz and `ValidatedNel` in cats.  Converting this composite type is a very common use case, and thus an specialized converter is defined:
+
+```scala
+val v: ValidationNel[Errs, Int] = ???
+
+v.asCats   // => v2: ValidatedNel[Errs, Int]
+```
+
+Note that the `scalaz.NonEmptyList` within the `Validation` was converted to a `cats.data.NonEmptyList` within the resulting `Validated`.
+
+In other words, under normal circumstances you will need to manually map nested structures in order to deeply convert them, but `ValidationNel`/`ValidatedNel` will Just Work™ without any explicit induction.
+
 ## Previously, on shims…
 
 Shims was previously (prior to version 1.0) a project for allowing middleware frameworks to avoid dependencies on *either* cats or scalaz, deferring that upstream decision to their downstream users.  It… didn't work very well, and nobody liked it.  Hence, its rebirth as a seamless interop framework!
