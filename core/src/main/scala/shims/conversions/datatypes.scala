@@ -179,3 +179,12 @@ trait MaybeTConverters {
         cats.data.OptionT(F.map(i.run)(_.toOption))
     }
 }
+
+trait WriterTConverters {
+
+  implicit def writerTAs[F[_], W, A] = new AsScalaz[cats.data.WriterT[F, W, A], scalaz.WriterT[F, W, A]] with AsCats[scalaz.WriterT[F, W, A], cats.data.WriterT[F, W, A]] {
+
+    def s2c(i: scalaz.WriterT[F, W, A]): cats.data.WriterT[F, W, A] = cats.data.WriterT(i.run)
+    def c2s(i: cats.data.WriterT[F, W, A]): scalaz.WriterT[F, W, A] = scalaz.WriterT(i.run)
+  }
+}

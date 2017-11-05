@@ -32,7 +32,8 @@ package object shims
     with ValidatedNELConverters
     with OneAndConverters
     with MaybeConverters
-    with MaybeTConverters {
+    with MaybeTConverters
+    with WriterTConverters {
 
   implicit final class AsSyntax[A](val self: A) extends AnyVal {
     def asScalaz[B](implicit A: AsScalaz[A, B]): B = A.c2s(self)
