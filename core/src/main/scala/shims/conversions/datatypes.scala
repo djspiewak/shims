@@ -222,8 +222,13 @@ trait RWSTConverters extends MonadConversions {
   implicit def rwstAs[F[_], E, L, S, A](implicit F: cats.Monad[F]) =
     new AsScalaz[cats.data.RWST[F, E, L, S, A], scalaz.RWST[F, E, L, S, A]] with AsCats[scalaz.RWST[F, E, L, S, A], cats.data.RWST[F, E, L, S, A]] {
 
-      def s2c(i: scalaz.RWST[F, E, L, S, A]): cats.data.RWST[F, E, L, S, A] =
-        cats.data.ReaderWriterStateT((e, s) => F.map(i.run(e, s)) { case (l, a, s) => (l, s, a) })
+      def s2c(i: scalaz.RWST[F, E, L, S, A]): cats.data.RWST[F, E, L, S, A] = {
+        cats.data.ReaderWriterStateT { (e, s) =>
+          F.map(i.run(e, s)(monadToScalaz(Capture(F)))) {
+            case (l, a, s) => (l, s, a)
+          }
+        }
+      }
 
       def c2s(i: cats.data.RWST[F, E, L, S, A]): scalaz.RWST[F, E, L, S, A] =
         scalaz.ReaderWriterStateT((e, s) => F.map(i.run(e, s)) { case (l, s, a) => (l, a, s) })
