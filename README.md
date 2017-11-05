@@ -98,6 +98,8 @@ What follows is an alphabetized list (in terms of cats types) of typeclasses whi
 - `Monad`
   + Requires `Monad[F]` and *optionally* `BindRec[F]`.  Similar to `FlatMap`, this is because `cats.Monad` constrains `F` to define a `tailRecM` function, which may or may not be available on an arbitrary `scalaz.Monad`.  If `BindRec[F]` is available, it will be used to implement `tailRecM`.  Otherwise, a stack-*unsafe* `tailRecM` will be implemented in terms of `flatMap` and `point`.
   + The cats → scalaz conversion materializes `scalaz.Monad[F] with scalaz.BindRec[F]`, reflecting the fact that cats provides a `tailRecM`.
+- `MonadError`
+  + Similar requirements to `Monad`
 - `Monoid`
 - `Order`
 - `Profunctor`
