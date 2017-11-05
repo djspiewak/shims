@@ -198,3 +198,12 @@ trait IorConverters {
     def c2s(i: Ior[A, B]): A \&/ B = i.fold(\&/.This(_), \&/.That(_), \&/(_, _))
   }
 }
+
+trait ConstConverters {
+
+  implicit def constAs[A, B] = new AsScalaz[cats.data.Const[A, B], scalaz.Const[A, B]] with AsCats[scalaz.Const[A, B], cats.data.Const[A, B]] {
+
+    def s2c(i: scalaz.Const[A, B]): cats.data.Const[A, B] = cats.data.Const(i.getConst)
+    def c2s(i: cats.data.Const[A, B]): scalaz.Const[A, B] = scalaz.Const(i.getConst)
+  }
+}

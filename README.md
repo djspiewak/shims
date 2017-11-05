@@ -103,6 +103,7 @@ val f3: scalaz.Free[F, A] = f2.asScalaz
 | `scala.Option`            | `scalaz.Maybe`           | 👈        |
 | `scala.util.Either`       | `scalaz.\/`              | 👈👉      |
 | `cats.arrow.FunctionK`    | `scalaz.~>`              | 👈👉      |
+| `cats.data.Const`         | `scalaz.Const`           | 👈👉      |
 | `cats.data.EitherK`       | `scalaz.Coproduct`       | 👈👉      |
 | `cats.data.Ior`           | `scalaz.\&/`             | 👈👉      |
 | `cats.data.Kleisli`       | `scalaz.Kleisli`         | 👈👉      |
