@@ -100,6 +100,7 @@ val f3: scalaz.Free[F, A] = f2.asScalaz
 
 | Cats                      | Scalaz                   | Direction |
 | ------------------------- | ------------------------ | --------- |
+| `scala.Option`            | `scalaz.Maybe`           | ←         |
 | `scala.util.Either`       | `scalaz.\/`              | ↔         |
 | `cats.arrow.FunctionK`    | `scalaz.~>`              | ↔         |
 | `cats.data.EitherK`       | `scalaz.Coproduct`       | ↔         |
@@ -107,6 +108,7 @@ val f3: scalaz.Free[F, A] = f2.asScalaz
 | `cats.data.NonEmptyList`  | `scalaz.NonEmptyList`    | ↔         |
 | `cats.data.OneAnd`        | `scalaz.OneAnd`          | ↔         |
 | `cats.data.OptionT`       | `scalaz.OptionT`         | ↔         |
+| `cats.data.OptionT`       | `scalaz.MaybeT`          | ←         |
 | `cats.data.IndexedStateT` | `scalaz.IndexedStateT`   | ↔         |
 | `cats.data.Validated`     | `scalaz.Validation`      | ↔         |
 | `cats.data.ValidatedNel`  | `scalaz.ValidationNel`   | ↔         |

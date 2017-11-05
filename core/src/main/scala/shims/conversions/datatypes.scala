@@ -163,3 +163,19 @@ trait OneAndConverters {
     def c2s(i: cats.data.OneAnd[F, A]): scalaz.OneAnd[F, A] = scalaz.OneAnd(i.head, i.tail)
   }
 }
+
+trait MaybeConverters {
+
+  implicit def maybeAs[A] = new AsCats[scalaz.Maybe[A], Option[A]] {
+    def s2c(i: scalaz.Maybe[A]): Option[A] = i.toOption
+  }
+}
+
+trait MaybeTConverters {
+
+  implicit def maybeTAs[F[_], A](implicit F: scalaz.Functor[F]) =
+    new AsCats[scalaz.MaybeT[F, A], cats.data.OptionT[F, A]] {
+      def s2c(i: scalaz.MaybeT[F, A]): cats.data.OptionT[F, A] =
+        cats.data.OptionT(F.map(i.run)(_.toOption))
+    }
+}
