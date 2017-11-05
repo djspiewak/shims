@@ -16,7 +16,11 @@
 
 package shims
 
+import cats.Eq
 import cats.laws.discipline._
+
+import scalaz.\/
+import scalaz.std.either._
 import scalaz.std.option._
 import scalaz.std.tuple._
 import scalaz.std.anyVal._
@@ -169,6 +173,32 @@ object MonadConversionSpecs extends Specification with Discipline {
         scalaz.Monad[Option]
 
         checkAll("Option", MonadTests[Option].monad[Int, Int, Int])
+      }
+    }
+  }
+
+  "monaderror" >> {
+    "scalaz -> cats" >> {
+      "Throwable \\/ ?" >> {
+        implicit def arbEitherT[A: Arbitrary, B: Arbitrary]: Arbitrary[A \/ B] = {
+          val genEitherT: Gen[A \/ B] =
+            Arbitrary.arbitrary[Either[A, B]].map(\/.fromEither(_))
+
+          Arbitrary(genEitherT)
+        }
+
+        implicit val eqThrowable: Eq[Throwable] = Eq.fromUniversalEquals[Throwable]
+
+        cats.Monad[Throwable \/ ?]
+        scalaz.Monad[Throwable \/ ?]
+
+        /*
+         * This is an interesting test btw because of where the Eq instances are coming from.
+         * Namely, some are coming from scalaz, some are coming from cats, and some are coming
+         * inductively from BOTH.  This approximates pretty closely a real-world inductive
+         * coercion scenario.
+         */
+        checkAll("Option", MonadErrorTests[Throwable \/ ?, Throwable].monadError[Int, Int, Int])
       }
     }
   }

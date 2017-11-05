@@ -297,3 +297,30 @@ trait MonadConversions extends ApplicativeConversions with FlatMapConversions {
   implicit def monadToScalaz[F[_]](implicit FC: Capture[cats.Monad[F]]): scalaz.Monad[F] with Synthetic =
     new MonadShimC2S[F] { val F = FC.value }
 }
+
+trait MonadErrorConversions extends MonadConversions {
+
+  private[conversions] trait MonadErrorShimS2C[F[_], E] extends cats.MonadError[F, E] with MonadShimS2C[F] {
+    val F: scalaz.MonadError[F, E]
+
+    override def handleErrorWith[A](fa: F[A])(f: E => F[A]): F[A] = F.handleError(fa)(f)
+
+    override def raiseError[A](e: E): F[A] = F.raiseError(e)
+  }
+
+  implicit def monadErrorToCats[F[_], E](
+    implicit
+      FC: Capture[scalaz.MonadError[F, E]],
+      OFC: OptionCapture[scalaz.BindRec[F]]): cats.MonadError[F, E] with Synthetic =
+    new MonadErrorShimS2C[F, E] { val F = FC.value; val OptBindRec = OFC.value }
+
+  private[conversions] trait MonadErrorShimC2S[F[_], E] extends scalaz.MonadError[F, E] with MonadShimC2S[F] {
+    val F: cats.MonadError[F, E]
+
+    override def handleError[A](fa: F[A])(f: E => F[A]): F[A] = F.handleErrorWith(fa)(f)
+    override def raiseError[A](e: E): F[A] = F.raiseError(e)
+  }
+
+  implicit def monadErrorToScalaz[F[_], E](implicit FC: Capture[cats.MonadError[F, E]]): scalaz.MonadError[F, E] with Synthetic =
+    new MonadErrorShimC2S[F, E] { val F = FC.value }
+}
