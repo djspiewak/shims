@@ -29,7 +29,8 @@ package object shims
     with EitherKConverters
     with KleisliConverters
     with OptionTConverters
-    with ValidatedNELConverters {
+    with ValidatedNELConverters
+    with OneAndConverters {
 
   implicit final class AsSyntax[A](val self: A) extends AnyVal {
     def asScalaz[B](implicit A: AsScalaz[A, B]): B = A.c2s(self)

@@ -154,3 +154,12 @@ trait ValidatedNELConverters extends ValidatedConverters with NELConverters {
       scalaz.Validation.fromEither(i.toEither.left.map(nelAs[E].c2s(_)))
   }
 }
+
+trait OneAndConverters {
+
+  implicit def oneAndAs[F[_], A] = new AsScalaz[cats.data.OneAnd[F, A], scalaz.OneAnd[F, A]] with AsCats[scalaz.OneAnd[F, A], cats.data.OneAnd[F, A]] {
+
+    def s2c(i: scalaz.OneAnd[F, A]): cats.data.OneAnd[F, A] = cats.data.OneAnd(i.head, i.tail)
+    def c2s(i: cats.data.OneAnd[F, A]): scalaz.OneAnd[F, A] = scalaz.OneAnd(i.head, i.tail)
+  }
+}
