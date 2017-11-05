@@ -78,17 +78,17 @@ trait EvalConverters extends FreeConverters {
   }
 }
 
-trait StateTConverters extends MonadConversions {
+trait IndexedStateTConverters extends MonadConversions {
 
-  implicit def stateTAs[F[_]: cats.Monad, S, A] =
-    new AsScalaz[cats.data.StateT[F, S, A], scalaz.StateT[F, S, A]] with AsCats[scalaz.StateT[F, S, A], cats.data.StateT[F, S, A]] {
+  implicit def stateTAs[F[_]: cats.Monad, S1, S2, A] =
+    new AsScalaz[cats.data.IndexedStateT[F, S1, S2, A], scalaz.IndexedStateT[F, S1, S2, A]] with AsCats[scalaz.IndexedStateT[F, S1, S2, A], cats.data.IndexedStateT[F, S1, S2, A]] {
 
-      def c2s(st: cats.data.StateT[F, S, A]) =
-        scalaz.StateT[F, S, A](s => cats.Monad[F].flatMap(st.runF)(_(s)))(
+      def c2s(st: cats.data.IndexedStateT[F, S1, S2, A]) =
+        scalaz.IndexedStateT[F, S1, S2, A](s => cats.Monad[F].flatMap(st.runF)(_(s)))(
           monadToScalaz(Capture(cats.Monad[F])))
 
-      def s2c(st: scalaz.StateT[F, S, A]) =
-        cats.data.StateT[F, S, A](st.run(_)(monadToScalaz(Capture(cats.Monad[F]))))
+      def s2c(st: scalaz.IndexedStateT[F, S1, S2, A]) =
+        cats.data.IndexedStateT[F, S1, S2, A](st.run(_)(monadToScalaz(Capture(cats.Monad[F]))))
     }
 }
 

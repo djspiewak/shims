@@ -25,7 +25,7 @@ package object shims
     with EitherConverters
     with FunctionKConverters
     with EvalConverters
-    with StateTConverters
+    with IndexedStateTConverters
     with NELConverters
     with EitherKConverters
     with KleisliConverters
