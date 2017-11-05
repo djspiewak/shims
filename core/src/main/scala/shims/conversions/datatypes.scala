@@ -207,3 +207,12 @@ trait ConstConverters {
     def c2s(i: cats.data.Const[A, B]): scalaz.Const[A, B] = scalaz.Const(i.getConst)
   }
 }
+
+trait CokleisliConverters {
+
+  implicit def cokleisliAs[F[_], A, B] = new AsScalaz[cats.data.Cokleisli[F, A, B], scalaz.Cokleisli[F, A, B]] with AsCats[scalaz.Cokleisli[F, A, B], cats.data.Cokleisli[F, A, B]] {
+
+    def s2c(i: scalaz.Cokleisli[F, A, B]): cats.data.Cokleisli[F, A, B] = cats.data.Cokleisli(i.run)
+    def c2s(i: cats.data.Cokleisli[F, A, B]): scalaz.Cokleisli[F, A, B] = scalaz.Cokleisli(i.run)
+  }
+}

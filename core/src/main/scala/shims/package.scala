@@ -35,7 +35,8 @@ package object shims
     with MaybeTConverters
     with WriterTConverters
     with IorConverters
-    with ConstConverters {
+    with ConstConverters
+    with CokleisliConverters {
 
   implicit final class AsSyntax[A](val self: A) extends AnyVal {
     def asScalaz[B](implicit A: AsScalaz[A, B]): B = A.c2s(self)
