@@ -121,3 +121,12 @@ trait KleisliConverters {
     def c2s(i: cats.data.Kleisli[F, A, B]): scalaz.Kleisli[F, A, B] = scalaz.Kleisli(i.run)
   }
 }
+
+trait OptionTConverters {
+
+  implicit def optionTAs[F[_], A] = new AsScalaz[cats.data.OptionT[F, A], scalaz.OptionT[F, A]] with AsCats[scalaz.OptionT[F, A], cats.data.OptionT[F, A]] {
+
+    def s2c(i: scalaz.OptionT[F, A]): cats.data.OptionT[F, A] = cats.data.OptionT(i.run)
+    def c2s(i: cats.data.OptionT[F, A]): scalaz.OptionT[F, A] = scalaz.OptionT(i.value)
+  }
+}

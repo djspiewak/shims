@@ -105,6 +105,7 @@ val f3: scalaz.Free[F, A] = f2.asScalaz
 | `cats.data.EitherK`      | `scalaz.Coproduct`       | ↔         |
 | `cats.data.Kleisli`      | `scalaz.Kleisli`         | ↔         |
 | `cats.data.NonEmptyList` | `scalaz.NonEmptyList`    | ↔         |
+| `cats.data.OptionT`      | `scalaz.OptionT`         | ↔         |
 | `cats.data.StateT`       | `scalaz.StateT`          | ↔         |
 | `cats.free.Free`         | `scalaz.Free`            | ↔         |
 | `cats.Eval`              | `scalaz.Free.Trampoline` | ↔         |
