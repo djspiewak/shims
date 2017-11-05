@@ -100,3 +100,15 @@ trait NELConverters {
     def s2c(nel: scalaz.NonEmptyList[A]) = cats.data.NonEmptyList(nel.head, nel.tail.toList)
   }
 }
+
+trait EitherKConverters {
+
+  implicit def eitherKAs[F[_], G[_], A] = new AsScalaz[cats.data.EitherK[F, G, A], scalaz.Coproduct[F, G, A]] with AsCats[scalaz.Coproduct[F, G, A], cats.data.EitherK[F, G, A]] {
+
+    def s2c(i: scalaz.Coproduct[F, G, A]): cats.data.EitherK[F, G, A] =
+      cats.data.EitherK(i.run.toEither)
+
+    def c2s(i: cats.data.EitherK[F, G, A]): scalaz.Coproduct[F, G, A] =
+      scalaz.Coproduct(\/.fromEither(i.run))
+  }
+}
