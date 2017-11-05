@@ -112,3 +112,12 @@ trait EitherKConverters {
       scalaz.Coproduct(\/.fromEither(i.run))
   }
 }
+
+trait KleisliConverters {
+
+  implicit def kleisliAs[F[_], A, B] = new AsScalaz[cats.data.Kleisli[F, A, B], scalaz.Kleisli[F, A, B]] with AsCats[scalaz.Kleisli[F, A, B], cats.data.Kleisli[F, A, B]] {
+
+    def s2c(i: scalaz.Kleisli[F, A, B]): cats.data.Kleisli[F, A, B] = cats.data.Kleisli(i.run)
+    def c2s(i: cats.data.Kleisli[F, A, B]): scalaz.Kleisli[F, A, B] = scalaz.Kleisli(i.run)
+  }
+}
