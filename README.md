@@ -39,33 +39,6 @@ There appears to be a regression in 2.12.3 (which still exists in 2.12.4) which 
 
 At present, there is no complex build matrix of craziness to provide support for other major versions of each library.  This will probably come in time, when I've become sad and jaded, and possibly when I have received a pull request for it.
 
-### Common Issues
-
-If you get a "diverging implicit expansion" error, it *probably* means that you simply didn't have the appropriate upstream implicit in scope.  For example, consider the following:
-
-```scala
-import cats.kernel.Eq
-
-import scalaz.std.anyVal._
-import scalaz.std.option._
-
-Eq[(Int, Int)]       // error!
-```
-
-The above will produce a diverging implicit expansion error.  The reasons for this are… complicated.  But the problem is actually simple: we're missing an implicit declaration for how to apply `scalaz.Equal` to `Tuple2`!  We would get a more informative error if we had tried to summon `scalaz.Equal[(Int, Int)]`, but in either case, the solution is identical: add the appropriate import.
-
-```scala
-import cats.kernel.Eq
-
-import scalaz.std.anyVal._
-import scalaz.std.option._
-import scalaz.std.tuple._
-
-Eq[(Int, Int)]       // works!
-```
-
-So when in doubt, if you get an error summoning a cats/scalaz typeclass converted from the presence of the other, try to summon the other implicitly and see what happens.  We got a weird error trying to summon an implicitly materialized cats instance from a scalaz instance, and we were able to debug the issue by trying to summon the "natural" scalaz instance.
-
 ## Conversions
 
 ### Typeclasses
