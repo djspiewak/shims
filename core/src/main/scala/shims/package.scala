@@ -21,6 +21,7 @@ package object shims
     with MonoidConversions
     with BitraverseConversions
     with ChoiceConversions
+    with InjectConversions
     with EitherConverters
     with FunctionKConverters
     with EvalConverters
