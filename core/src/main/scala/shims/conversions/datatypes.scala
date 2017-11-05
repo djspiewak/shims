@@ -19,7 +19,7 @@ package shims.conversions
 
 import shims.util.{Capture, OptionCapture}
 
-import scalaz.{~>, \/}
+import scalaz.{~>, \/, \&/}
 import cats.arrow.FunctionK
 
 trait AsScalaz[-I, +O] {
@@ -186,5 +186,15 @@ trait WriterTConverters {
 
     def s2c(i: scalaz.WriterT[F, W, A]): cats.data.WriterT[F, W, A] = cats.data.WriterT(i.run)
     def c2s(i: cats.data.WriterT[F, W, A]): scalaz.WriterT[F, W, A] = scalaz.WriterT(i.run)
+  }
+}
+
+trait IorConverters {
+
+  implicit def iorAs[A, B] = new AsScalaz[cats.data.Ior[A, B], A \&/ B] with AsCats[A \&/ B, cats.data.Ior[A, B]] {
+    import cats.data.Ior
+
+    def s2c(i: A \&/ B): Ior[A, B] = i.fold(Ior.left(_), Ior.right(_), Ior.both(_, _))
+    def c2s(i: Ior[A, B]): A \&/ B = i.fold(\&/.This(_), \&/.That(_), \&/(_, _))
   }
 }

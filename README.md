@@ -104,6 +104,7 @@ val f3: scalaz.Free[F, A] = f2.asScalaz
 | `scala.util.Either`       | `scalaz.\/`              | 👈👉      |
 | `cats.arrow.FunctionK`    | `scalaz.~>`              | 👈👉      |
 | `cats.data.EitherK`       | `scalaz.Coproduct`       | 👈👉      |
+| `cats.data.Ior`           | `scalaz.\&/`             | 👈👉      |
 | `cats.data.Kleisli`       | `scalaz.Kleisli`         | 👈👉      |
 | `cats.data.NonEmptyList`  | `scalaz.NonEmptyList`    | 👈👉      |
 | `cats.data.OneAnd`        | `scalaz.OneAnd`          | 👈👉      |
