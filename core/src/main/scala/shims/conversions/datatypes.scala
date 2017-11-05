@@ -130,3 +130,15 @@ trait OptionTConverters {
     def c2s(i: cats.data.OptionT[F, A]): scalaz.OptionT[F, A] = scalaz.OptionT(i.value)
   }
 }
+
+trait ValidatedConverters {
+
+  implicit def validatedAs[E, A] = new AsScalaz[cats.data.Validated[E, A], scalaz.Validation[E, A]] with AsCats[scalaz.Validation[E, A], cats.data.Validated[E, A]] {
+
+    def s2c(i: scalaz.Validation[E, A]): cats.data.Validated[E, A] =
+      cats.data.Validated.fromEither(i.disjunction.toEither)
+
+    def c2s(i: cats.data.Validated[E, A]): scalaz.Validation[E, A] =
+      scalaz.Validation.fromEither(i.toEither)
+  }
+}
