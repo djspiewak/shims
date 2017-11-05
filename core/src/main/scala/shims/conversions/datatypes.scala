@@ -142,3 +142,15 @@ trait ValidatedConverters {
       scalaz.Validation.fromEither(i.toEither)
   }
 }
+
+trait ValidatedNELConverters extends ValidatedConverters with NELConverters {
+
+  implicit def validatedNelAs[E, A] = new AsScalaz[cats.data.ValidatedNel[E, A], scalaz.ValidationNel[E, A]] with AsCats[scalaz.ValidationNel[E, A], cats.data.ValidatedNel[E, A]] {
+
+    def s2c(i: scalaz.ValidationNel[E, A]): cats.data.ValidatedNel[E, A] =
+      cats.data.Validated.fromEither(i.disjunction.toEither.left.map(nelAs[E].s2c(_)))
+
+    def c2s(i: cats.data.ValidatedNel[E, A]): scalaz.ValidationNel[E, A] =
+      scalaz.Validation.fromEither(i.toEither.left.map(nelAs[E].c2s(_)))
+  }
+}
