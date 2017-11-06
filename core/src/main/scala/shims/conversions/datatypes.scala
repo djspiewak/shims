@@ -64,7 +64,7 @@ trait FreeConverters extends MonadConversions {
 
 trait EvalConverters extends FreeConverters {
   import cats.Eval
-  import scalaz.Trampoline
+  import scalaz.{Name, Need, Trampoline, Value}
   import scalaz.Free.{Trampoline => FT}
 
   implicit def evalAs[A] = new AsScalaz[Eval[A], FT[A]] with AsCats[FT[A], Eval[A]] {
@@ -75,6 +75,19 @@ trait EvalConverters extends FreeConverters {
     def s2c(t: FT[A]) =
       t.foldMap(λ[Function0 ~> Eval](a => Eval.always(a())))(
         monadToScalaz(Capture(cats.Monad[Eval])))
+  }
+
+  implicit def nameAs[A] = new AsCats[Name[A], Eval[A]] {
+    def s2c(i: Name[A]): Eval[A] = Eval.always(i.value)
+  }
+
+  implicit def needAs[A] = new AsCats[Need[A], Eval[A]] {
+    // this caches twice, but correctly reflects structure; maybe change?
+    def s2c(i: Need[A]): Eval[A] = Eval.later(i.value)
+  }
+
+  implicit def valueAs[A] = new AsCats[Value[A], Eval[A]] {
+    def s2c(i: Value[A]): Eval[A] = Eval.now(i.value)
   }
 }
 

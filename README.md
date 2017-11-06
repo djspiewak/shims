@@ -100,8 +100,10 @@ val f3: scalaz.Free[F, A] = f2.asScalaz
 
 | Cats                      | Direction | Scalaz                   |
 | ------------------------- | :-------: | ------------------------ |
-| `scala.Option`            | 👈        | `scalaz.Maybe`           |
-| `scala.util.Either`       | 👈👉      | `scalaz.\/`              |
+| `cats.Eval`               | 👈👉      | `scalaz.Free.Trampoline` |
+| `cats.Eval`               | 👈        | `scalaz.Name`            |
+| `cats.Eval`               | 👈        | `scalaz.Need`            |
+| `cats.Eval`               | 👈        | `scalaz.Value`           |
 | `cats.arrow.FunctionK`    | 👈👉      | `scalaz.~>`              |
 | `cats.data.Cokleisli`     | 👈👉      | `scalaz.Cokleisli`       |
 | `cats.data.Const`         | 👈👉      | `scalaz.Const`           |
@@ -118,7 +120,8 @@ val f3: scalaz.Free[F, A] = f2.asScalaz
 | `cats.data.ValidatedNel`  | 👈👉      | `scalaz.ValidationNel`   |
 | `cats.data.WriterT`       | 👈👉      | `scalaz.WriterT`         |
 | `cats.free.Free`          | 👈👉      | `scalaz.Free`            |
-| `cats.Eval`               | 👈👉      | `scalaz.Free.Trampoline` |
+| `scala.Option`            | 👈        | `scalaz.Maybe`           |
+| `scala.util.Either`       | 👈👉      | `scalaz.\/`              |
 
 Note that the `asScalaz`/`asCats` mechanism is open and extensible.  To enable support for converting some type "cats type" `A` to an equivalent "scalaz type" `B`, define an implicit instance of type `shims.conversions.AsScalaz[A, B]`.  Similarly, for some "scalaz type" `A` to an equivalent "cats type" `B`, define an implicit instance of type `shims.conversions.AsCats[A, B]`.  Thus, a pair of types, `A` and `B`, for which a bijection exists would have a single implicit instance extending `AsScalaz[A, B] with AsCats[B, A]` (though the machinery does not require this is handled with a *single* instance; the ambiguity resolution here is pretty straightforward).
 
