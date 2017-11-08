@@ -91,7 +91,7 @@ lazy val commonSettings = Seq(
 
   scalacOptions in Test += "-Yrangepos",
 
-  scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains)),
+  scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains)),
 
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
 
