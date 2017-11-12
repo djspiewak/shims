@@ -28,10 +28,6 @@ import shims._
 
 *Chuckle*… there is no step three!
 
-### Scala 2.12.3/4
-
-There appears to be a regression in 2.12.3 (which still exists in 2.12.4) which causes the compilation of the test suite to trigger an infinite macro expansion.  Or at the very least, the stack trace looks infinite, and I ran out of patience waiting for infinity.  I haven't yet ascertained whether or not this issue will occur in normal client code (i.e. code that uses the shims conversions), but I would guess the answer is "yes".  So if you're using shims on Scala 2.12, you should probably stick to 2.12.2 for now.
-
 ### Upstream Dependencies
 
 - cats 1.0.0-RC1
