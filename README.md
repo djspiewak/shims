@@ -1,4 +1,4 @@
-# shims [![Build Status](https://travis-ci.org/djspiewak/shims.svg?branch=master)](https://travis-ci.org/djspiewak/shims) [![Gitter](https://img.shields.io/gitter/room/djspiewak/shims.svg)](https://gitter.im/djspiewak/shims) [![Maven Central](https://img.shields.io/maven-central/v/com.codecommit/shims-core_2.12.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.codecommit%22%20AND%20a%3A%22shims-core_2.12%22)
+# shims [![Build Status](https://travis-ci.org/djspiewak/shims.svg?branch=master)](https://travis-ci.org/djspiewak/shims) [![Gitter](https://img.shields.io/gitter/room/djspiewak/shims.svg)](https://gitter.im/djspiewak/shims) <!-- [![Latest version](https://index.scala-lang.org/djspiewak/shims/shims/latest.svg?color=orange)](https://index.scala-lang.org/djspiewak/shims/shims) -->
 
 Shims aims to provide a convenient, bidirectional and transparent set of conversions between scalaz and cats, covering typeclasses (e.g. `Monad`) and data types (e.g. `\/`).  By that I mean, with shims, anything that has a `cats.Functor` instance also has a `scalaz.Functor` instance, *and vice versa*.  Additionally, every convertible scalaz datatype – such as `scalaz.State` – has an implicitly-added `asCats` function, while every convertible cats datatype – such as `cats.free.Free` – has an implicitly-added `asScalaz` function.  Only a single import is required to enable any and all functionality:
 
@@ -13,10 +13,10 @@ Toss that at the top of any files which need to work with APIs written in terms 
 Add the following to your SBT configuration:
 
 ```sbt
-libraryDependencies += "com.codecommit" %% "shims" % "1.0-4442ecc"
+libraryDependencies += "com.codecommit" %% "shims" % "1.0-3e9fa7b"
 ```
 
-There is currently no *stable* released version of shims 1.0 (the only stable releases represent the prior library state).  If you want to live dangerously, I've published a hash snapshot with version `"1.0-4442ecc"`.
+There is currently no *stable* released version of shims 1.0 (the only stable releases represent the prior library state).  If you want to live dangerously, I've published a hash snapshot with version `"1.0-3e9fa7b"`.
 
 If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  This can be done either by using [Typelevel Scala](https://github.com/typelevel/scala), adding [Miles Sabin's hacky compiler plugin](https://github.com/milessabin/si2712fix-plugin), or simply using Scala 2.12 (or 2.11.11) or higher with the `-Ypartial-unification` flag.  An example of the shenanigans which can enable the SI-2712 fix across multiple Scala versions can be seen [here](https://github.com/djspiewak/shims/blob/34f8851d1726027b537707f27b6c33f83c15a9fd/build.sbt#L60-L91).  A large number of conversions will simply *not work* without partial unification.
 
