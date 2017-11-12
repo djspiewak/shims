@@ -69,10 +69,12 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
   private def reconstructImplicit(A: Type): Tree = {
     // we catch the invalid diverging implicit expansion error and produce a correct one
     // this works around a bug in NSC; we can remove this on Dotty
-    val tree0 = try {
-      c.inferImplicitValue(A)
-    } catch {
-      case e: Exception => c.abort(c.enclosingPosition, s"Implicit $A not found")
+    val tree0 = CaptureMacros.around(c)(A) {
+      try {
+        c.inferImplicitValue(A)
+      } catch {
+        case e: Exception => c.abort(c.enclosingPosition, s"Implicit $A not found")
+      }
     }
 
     if (tree0 == EmptyTree) {
@@ -84,6 +86,39 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
     }
 
     tree0
+  }
+}
+
+/*
+ * Implicit macros which directly call into inferImplicitValue are
+ * responsible for their own divergence checking (https://github.com/scala/bug/issues/10584#issuecomment-343712505).
+ * Thus, we maintain a thread local as we move up and down the implicit
+ * search tree.  Note that we explicitly do not carry this thread local
+ * between sibling descents, so as to avoid unsoundness with scoping.
+ * At any rate, this does a relatively basic <:< check to figure out whether
+ * or not we're looking at the same type that we saw previously at a higher
+ * level of the subtree.
+ */
+private[util] object CaptureMacros {
+  val outstanding = new ThreadLocal[List[Any]] {
+    override def initialValue = List()
+  }
+
+  def around[A](c: whitebox.Context)(tpe: c.universe.Type)(body: => A): A = {
+    val vs = outstanding.get()
+
+    // simple divergence check
+    if (vs.exists(tpe <:< _.asInstanceOf[c.universe.Type])) {
+      c.abort(c.enclosingPosition, s"Implicit $tpe not found")
+    } else {
+      val vs2 = tpe :: vs
+
+      outstanding.set(vs2)
+      val back = body
+      outstanding.set(vs)
+
+      back
+    }
   }
 }
 
