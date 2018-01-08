@@ -20,8 +20,8 @@ import scala.sys.process._
 val BaseVersion = "1.0"
 val ReleaseTag = """^v([\d\.]+)$""".r
 
-val CatsVersion = "1.0.0-RC1"
-val ScalazVersion = "7.2.16"
+val CatsVersion = "1.0.1"
+val ScalazVersion = "7.2.18"
 
 val Specs2Version = "4.0.0"
 
