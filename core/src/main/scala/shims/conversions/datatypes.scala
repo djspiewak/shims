@@ -126,6 +126,15 @@ trait EitherKConverters {
   }
 }
 
+trait EitherTConverters extends EitherConverters {
+
+  implicit def eitherTAs[F[_], A, B](implicit F: cats.Functor[F]) = new AsScalaz[cats.data.EitherT[F, A, B], scalaz.EitherT[F, A, B]] with AsCats[scalaz.EitherT[F, A, B], cats.data.EitherT[F, A, B]] {
+
+    def s2c(i: scalaz.EitherT[F, A, B]): cats.data.EitherT[F, A, B] = cats.data.EitherT(F.map(i.run)(eitherAs[A, B].s2c(_)))
+    def c2s(i: cats.data.EitherT[F, A, B]): scalaz.EitherT[F, A, B] = scalaz.EitherT(F.map(i.value)(eitherAs[A, B].c2s(_)))
+  }
+}
+
 trait KleisliConverters {
 
   implicit def kleisliAs[F[_], A, B] = new AsScalaz[cats.data.Kleisli[F, A, B], scalaz.Kleisli[F, A, B]] with AsCats[scalaz.Kleisli[F, A, B], cats.data.Kleisli[F, A, B]] {

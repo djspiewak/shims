@@ -121,6 +121,7 @@ val f3: scalaz.Free[F, A] = f2.asScalaz
 | `cats.data.Cokleisli`     | 👈👉      | `scalaz.Cokleisli`       |
 | `cats.data.Const`         | 👈👉      | `scalaz.Const`           |
 | `cats.data.EitherK`       | 👈👉      | `scalaz.Coproduct`       |
+| `cats.data.EitherT`       | 👈👉      | `scalaz.EitherT`         |
 | `cats.data.IndexedStateT` | 👈👉      | `scalaz.IndexedStateT`   |
 | `cats.data.Ior`           | 👈👉      | `scalaz.\&/`             |
 | `cats.data.Kleisli`       | 👈👉      | `scalaz.Kleisli`         |
