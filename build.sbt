@@ -82,7 +82,7 @@ lazy val commonSettings = Seq(
 
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, major)) if major >= 12 || scalaVersion.value == "2.11.11" =>
+      case Some((2, major)) if major >= 12 || scalaVersion.value == "2.11.11" || scalaVersion.value == "2.11.12" =>
         Seq("-Ypartial-unification")
 
       case _ => Seq.empty
