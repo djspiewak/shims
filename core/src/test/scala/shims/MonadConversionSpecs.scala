@@ -94,6 +94,23 @@ object MonadConversionSpecs extends Specification with Discipline {
   "traverse" >> {
     import scalaz.std.list._
 
+    // bonkers-unsafe lifting here, but idc
+    // these functions are needed because cats has a
+    // nominatively abelean hierarchy, while scalaz
+    // does not
+
+    implicit def unsafeLiftApp[F[_]](implicit F: cats.Applicative[F]): cats.CommutativeApplicative[F] =
+      new cats.CommutativeApplicative[F] {
+        def pure[A](a: A) = F.pure(a)
+        def ap[A, B](ff: F[A => B])(fa: F[A]) = F.ap(ff)(fa)
+      }
+
+    implicit def unsafeLiftMonoid[A](implicit A: cats.kernel.Monoid[A]): cats.kernel.CommutativeMonoid[A] =
+      new cats.kernel.CommutativeMonoid[A] {
+        def empty = A.empty
+        def combine(x: A, y: A) = A.combine(x, y)
+      }
+
     cats.Traverse[Option]
     scalaz.Traverse[Option]
 
