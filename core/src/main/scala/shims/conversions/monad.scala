@@ -20,7 +20,7 @@ import cats.Eval
 import scalaz.\/
 
 import shims.AsSyntax
-import shims.util.{Capture, EitherCapture, OptionCapture}
+import shims.util._
 
 trait IFunctorConversions {
 
@@ -30,8 +30,11 @@ trait IFunctorConversions {
     override def imap[A, B](fa: F[A])(f: A => B)(f2: B => A): F[B] = F.xmap(fa, f, f2)
   }
 
-  implicit def ifunctorToCats[F[_]](implicit FC: Capture[scalaz.InvariantFunctor[F]]): cats.Invariant[F] with Synthetic =
-    new IFunctorShimS2C[F] { val F = FC.value }
+  implicit def ifunctorToCats[F[_]](
+    implicit ev: Refute[cats.Invariant[F]], FC: scalaz.InvariantFunctor[F]
+  ): cats.Invariant[F] with Synthetic = new IFunctorShimS2C[F] {
+    val F = FC
+  }
 
   private[conversions] trait IFunctorShimC2S[F[_]] extends scalaz.InvariantFunctor[F] with Synthetic {
     val F: cats.Invariant[F]
@@ -39,8 +42,11 @@ trait IFunctorConversions {
     override def xmap[A, B](fa: F[A], f: A => B, f2: B => A): F[B] = F.imap(fa)(f)(f2)
   }
 
-  implicit def ifunctorToScalaz[F[_]](implicit FC: Capture[cats.Invariant[F]]): scalaz.InvariantFunctor[F] with Synthetic =
-    new IFunctorShimC2S[F] { val F = FC.value }
+  implicit def ifunctorToScalaz[F[_]](
+    implicit ev: Refute[scalaz.InvariantFunctor[F]], FC: cats.Invariant[F]
+  ): scalaz.InvariantFunctor[F] with Synthetic = new IFunctorShimC2S[F] {
+    val F = FC
+  }
 }
 
 trait ContravariantConversions extends IFunctorConversions {
