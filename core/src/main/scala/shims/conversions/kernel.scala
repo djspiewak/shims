@@ -16,7 +16,7 @@
 
 package shims.conversions
 
-import shims.util.Capture
+import shims.util._
 
 trait EqConversions {
 
@@ -26,8 +26,11 @@ trait EqConversions {
     override def eqv(x: A, y: A): Boolean = A.equal(x, y)
   }
 
-  implicit def equalToCats[A](implicit AC: Capture[scalaz.Equal[A]]): cats.kernel.Eq[A] with Synthetic =
-    new EqShimS2C[A] { val A = AC.value }
+  implicit def equalToCats[A](
+    implicit ev: Refute[cats.kernel.Eq[A]], AC: scalaz.Equal[A]
+  ): cats.kernel.Eq[A] with Synthetic = new EqShimS2C[A] {
+    val A = AC
+  }
 
   private[conversions] trait EqShimC2S[A] extends scalaz.Equal[A] with Synthetic {
     val A: cats.kernel.Eq[A]
@@ -35,8 +38,11 @@ trait EqConversions {
     override def equal(x: A, y: A): Boolean = A.eqv(x, y)
   }
 
-  implicit def eqToScalaz[A](implicit AC: Capture[cats.kernel.Eq[A]]): scalaz.Equal[A] with Synthetic =
-    new EqShimC2S[A] { val A = AC.value }
+  implicit def eqToScalaz[A](
+    implicit ev: Refute[scalaz.Equal[A]], AC: cats.kernel.Eq[A]
+  ): scalaz.Equal[A] with Synthetic = new EqShimC2S[A] {
+    val A = AC
+  }
 }
 
 trait OrderConversions extends EqConversions {
