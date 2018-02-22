@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Daniel Spiewak
+ * Copyright 2018 Daniel Spiewak
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ addCommandAlias("ci", ";test ;mimaReportBinaryIssues")
 addCommandAlias("release", "; project root; reload; +publishSigned; sonatypeReleaseAll")
 
 organizationName in ThisBuild := "Daniel Spiewak"
-startYear in ThisBuild := Some(2017)
+startYear in ThisBuild := Some(2018)
 licenses in ThisBuild += ("Apache-2.0", url("http://www.apache.org/licenses/"))
 
 lazy val commonSettings = Seq(
