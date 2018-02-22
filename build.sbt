@@ -21,9 +21,9 @@ val BaseVersion = "1.1"
 val ReleaseTag = """^v([\d\.]+)$""".r
 
 val CatsVersion = "1.0.1"
-val ScalazVersion = "7.2.18"
+val ScalazVersion = "7.2.19"
 
-val Specs2Version = "4.0.0"
+val Specs2Version = "4.0.3"
 
 addCommandAlias("ci", ";test ;mimaReportBinaryIssues")
 addCommandAlias("release", "; project root; reload; +publishSigned; sonatypeReleaseAll")
