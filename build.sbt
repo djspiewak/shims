@@ -191,7 +191,7 @@ lazy val coreJVM = core.jvm.settings(mimaSettings)
 lazy val coreJS = core.js
 
 // intentionally not in the aggregation
-lazy val scratch = project.dependsOn(coreJVM)
+lazy val scratch = project.dependsOn(coreJVM).settings(commonSettings)
 
 enablePlugins(GitVersioning)
 
