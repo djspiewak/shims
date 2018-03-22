@@ -17,11 +17,11 @@
 import scala.sys.process._
 
 // version scheme described here: https://github.com/djspiewak/parseback/blob/30ee45e411a66297167a6e45e0e874fa23d8cc6d/project.sbt#L23-L53
-val BaseVersion = "1.1"
+val BaseVersion = "1.2"
 val ReleaseTag = """^v([\d\.]+)$""".r
 
-val CatsVersion = "1.0.1"
-val ScalazVersion = "7.2.19"
+val CatsVersion = "1.1.0"
+val ScalazVersion = "7.2.20"
 
 val Specs2Version = "4.0.3"
 
