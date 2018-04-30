@@ -101,3 +101,25 @@ trait MonoidConversions extends SemigroupConversions {
   implicit def monoidToScalaz[A](implicit FC: Capture[cats.Monoid[A]]): scalaz.Monoid[A] with Synthetic =
     new MonoidShimC2S[A] { val A = FC.value }
 }
+
+// "kernel" is such an ill-defined thing...
+trait ShowConversions {
+
+  private[conversions] trait ShowShimS2C[A] extends cats.Show[A] with Synthetic {
+    val A: scalaz.Show[A]
+
+    override def show(a: A): String = A.shows(a)
+  }
+
+  implicit def showToCats[A](implicit FC: Capture[scalaz.Show[A]]): cats.Show[A] with Synthetic =
+    new ShowShimS2C[A] { val A = FC.value }
+
+  private[conversions] trait ShowShimC2S[A] extends scalaz.Show[A] with Synthetic {
+    val A: cats.Show.ContravariantShow[A]
+
+    override def shows(a: A): String = A.show(a)
+  }
+
+  implicit def showToScalaz[A](implicit FC: Capture[cats.Show.ContravariantShow[A]]): scalaz.Show[A] with Synthetic =
+    new ShowShimC2S[A] { val A = FC.value }
+}

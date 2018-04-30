@@ -19,6 +19,7 @@ import shims.conversions._
 package object shims
     extends MonadErrorConversions
     with MonoidConversions
+    with ShowConversions
     with BitraverseConversions
     with ChoiceConversions
     with InjectConversions

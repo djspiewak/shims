@@ -56,4 +56,15 @@ object KernelConversionSpecs extends Specification with Discipline {
 
     "scalaz -> cats" >> checkAll("Int", MonoidTests[Int].monoid)
   }
+
+  "show conversion" >> {
+    import cats.syntax.show._
+
+    cats.Show[Int]
+    scalaz.Show[Int]
+
+    "scalaz -> cats" >> {
+      show"testing ${42}" mustEqual "testing 42"
+    }
+  }
 }
