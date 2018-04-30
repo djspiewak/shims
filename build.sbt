@@ -130,15 +130,17 @@ lazy val commonSettings = Seq(
 
 val mimaSettings = Seq(
   mimaPreviousArtifacts := {
+    val current = version.value
+
     val TagBase = """^(\d+)\.(\d+).*"""r
     val TagBase(major, minor) = BaseVersion
 
-    val tags = "git tag --list".!! split "\n" map { _.trim }
+    val tags = "git tag --list".!!.split("\n").map(_.trim)
 
     val versions =
-      tags filter { _ startsWith s"v$major.$minor" } map { _ substring 1 }
+      tags.filter(_.startsWith(s"v$major.$minor")).map(_.substring(1))
 
-    versions map { v => organization.value %% name.value % v } toSet
+    versions.filterNot(current ==).map(v => organization.value %% name.value % v).toSet
   }
 )
 
