@@ -26,7 +26,7 @@ val ScalazVersion = "7.2.20"
 val Specs2Version = "4.0.3"
 
 addCommandAlias("ci", ";test ;mimaReportBinaryIssues")
-addCommandAlias("release", "; project root; reload; +publishSigned; sonatypeReleaseAll")
+addCommandAlias("release", "; project root; reload; ;+mimaReportBinaryIssues +publishSigned; sonatypeReleaseAll")
 
 organizationName in ThisBuild := "Daniel Spiewak"
 startYear in ThisBuild := Some(2018)
