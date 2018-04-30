@@ -15,7 +15,7 @@ Toss that at the top of any files which need to work with APIs written in terms 
 Add the following to your SBT configuration:
 
 ```sbt
-libraryDependencies += "com.codecommit" %% "shims" % "1.2"
+libraryDependencies += "com.codecommit" %% "shims" % "1.2.1"
 ```
 
 If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  This can be done either by using [Typelevel Scala](https://github.com/typelevel/scala), adding [Miles Sabin's hacky compiler plugin](https://github.com/milessabin/si2712fix-plugin), or simply using Scala 2.12 (or 2.11.11) or higher with the `-Ypartial-unification` flag.  An example of the shenanigans which can enable the SI-2712 fix across multiple Scala versions can be seen [here](https://github.com/djspiewak/shims/blob/34f8851d1726027b537707f27b6c33f83c15a9fd/build.sbt#L60-L91).  A large number of conversions will simply *not work* without partial unification.
