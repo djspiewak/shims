@@ -16,5 +16,5 @@
 
 resolvers += Resolver.url("djspiewak-sbt-plugins", url("https://dl.bintray.com/djspiewak/sbt-plugins"))(Resolver.ivyStylePatterns)
 
-addSbtPlugin("com.codecommit" % "sbt-spiewak-sonatype" % "0.3.2")
+addSbtPlugin("com.codecommit" % "sbt-spiewak-sonatype" % "0.3.3")
 addSbtPlugin("org.scala-js"   % "sbt-scalajs"          % "0.6.22")
