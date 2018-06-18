@@ -19,3 +19,4 @@ package effect
 
 trait ShimsEffect extends ShimsCore
     with TaskInstances
+    with IOInstances
