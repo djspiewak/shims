@@ -26,9 +26,9 @@ scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
   "git@github.com:djspiewak/shims.git"))
 
 val CatsVersion = "1.1.0"
-val ScalazVersion = "7.2.20"
+val ScalazVersion = "7.2.24"
 
-val Specs2Version = "4.0.3"
+val Specs2Version = "4.1.0"
 
 lazy val root = project
   .in(file("."))
@@ -47,10 +47,9 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
       "org.typelevel" %%% "cats-free"   % CatsVersion,
       "org.scalaz"    %%% "scalaz-core" % ScalazVersion,
 
-      "org.typelevel" %%  "discipline"  % "0.7.3"     % "test",
-      "org.typelevel" %%% "cats-laws"   % CatsVersion % "test"),
+      "org.typelevel"  %%  "discipline"       % "0.8"         % Test,
+      "org.typelevel"  %%% "cats-laws"        % CatsVersion   % Test,
 
-    libraryDependencies ++= Seq(
       "org.specs2"     %% "specs2-core"       % Specs2Version % Test,
       "org.specs2"     %% "specs2-scalacheck" % Specs2Version % Test,
 
