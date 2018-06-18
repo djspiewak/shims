@@ -18,7 +18,7 @@ package shims
 
 import shims.conversions._
 
-private[shims] trait ShimsCore extends MonadErrorConversions
+trait ShimsCore extends MonadErrorConversions
     with MonoidConversions
     with ShowConversions
     with BitraverseConversions

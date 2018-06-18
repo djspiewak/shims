@@ -16,7 +16,7 @@
 
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-baseVersion in ThisBuild := "1.2"
+baseVersion in ThisBuild := "1.3"
 
 developers in ThisBuild += Developer("alissapajer", "Alissa Pajer", "@alissapajer", url("https://github.com/alissapajer"))
 

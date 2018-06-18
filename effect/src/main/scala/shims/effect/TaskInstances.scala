@@ -26,7 +26,7 @@ import shims.conversions.MonadErrorConversions
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-trait TaskEffect extends MonadErrorConversions {
+trait TaskInstances extends MonadErrorConversions {
 
   // cribbed from quasar, where it was mostly cribbed from scalaz-task-effect
   implicit object taskEffect extends Effect[Task] with StackSafeMonad[Task] {
