@@ -30,15 +30,23 @@ val ScalazVersion = "7.2.24"
 
 val Specs2Version = "4.1.0"
 
+val testFrameworkSettings = Seq(
+  libraryDependencies ++= Seq(
+    "org.specs2"     %% "specs2-core"       % Specs2Version % Test,
+    "org.specs2"     %% "specs2-scalacheck" % Specs2Version % Test,
+
+    "org.scalacheck" %% "scalacheck"        % "1.13.5"      % Test))
+
 lazy val root = project
   .in(file("."))
-  .aggregate(coreJVM, coreJS)
+  .aggregate(coreJVM, coreJS, effect)
   .settings(noPublishSettings)
   .settings(name := "root")
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("core"))
+  .settings(testFrameworkSettings)
   .settings(
     name := "shims",
 
@@ -48,12 +56,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
       "org.scalaz"    %%% "scalaz-core" % ScalazVersion,
 
       "org.typelevel"  %%  "discipline"       % "0.8"         % Test,
-      "org.typelevel"  %%% "cats-laws"        % CatsVersion   % Test,
-
-      "org.specs2"     %% "specs2-core"       % Specs2Version % Test,
-      "org.specs2"     %% "specs2-scalacheck" % Specs2Version % Test,
-
-      "org.scalacheck" %% "scalacheck"        % "1.13.5"      % Test),
+      "org.typelevel"  %%% "cats-laws"        % CatsVersion   % Test),
 
     // cribbed from shapeless
     libraryDependencies ++= Seq(
@@ -75,6 +78,18 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
 
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
+
+// scalaz-concurrent isn't published for scalajs
+lazy val effect = project
+  .in(file("effect"))
+  .dependsOn(coreJVM)
+  .settings(testFrameworkSettings)
+  .settings(
+    name := "shims-effect",
+
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-effect"       % "1.0.0-RC2",
+      "org.scalaz"    %% "scalaz-concurrent" % ScalazVersion))
 
 // intentionally not in the aggregation
 lazy val scratch = project.dependsOn(coreJVM)
