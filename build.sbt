@@ -14,38 +14,31 @@
  * limitations under the License.
  */
 
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+
 baseVersion in ThisBuild := "1.2"
+
+developers in ThisBuild += Developer("alissapajer", "Alissa Pajer", "@alissapajer", url("https://github.com/alissapajer"))
+
+homepage in ThisBuild := Some(url("https://github.com/djspiewak/shims"))
+
+scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
+  "git@github.com:djspiewak/shims.git"))
 
 val CatsVersion = "1.1.0"
 val ScalazVersion = "7.2.20"
 
 val Specs2Version = "4.0.3"
 
-lazy val commonSettings = Seq(
-  libraryDependencies ++= Seq(
-    "org.specs2"     %% "specs2-core"       % Specs2Version % Test,
-    "org.specs2"     %% "specs2-scalacheck" % Specs2Version % Test,
-
-    "org.scalacheck" %% "scalacheck"        % "1.13.5"      % Test),
-
-  developers += Developer("alissapajer", "Alissa Pajer", "@alissapajer", url("https://github.com/alissapajer")),
-
-  homepage := Some(url("https://github.com/djspiewak/shims")),
-
-  scmInfo := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
-    "git@github.com:djspiewak/shims.git")))
-
 lazy val root = project
   .in(file("."))
   .aggregate(coreJVM, coreJS)
-  .settings(commonSettings: _*)
   .settings(noPublishSettings)
   .settings(name := "root")
 
-lazy val core = crossProject
+lazy val core = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("core"))
-  .settings(commonSettings: _*)
   .settings(
     name := "shims",
 
@@ -56,6 +49,12 @@ lazy val core = crossProject
 
       "org.typelevel" %%  "discipline"  % "0.7.3"     % "test",
       "org.typelevel" %%% "cats-laws"   % CatsVersion % "test"),
+
+    libraryDependencies ++= Seq(
+      "org.specs2"     %% "specs2-core"       % Specs2Version % Test,
+      "org.specs2"     %% "specs2-scalacheck" % Specs2Version % Test,
+
+      "org.scalacheck" %% "scalacheck"        % "1.13.5"      % Test),
 
     // cribbed from shapeless
     libraryDependencies ++= Seq(
@@ -79,4 +78,4 @@ lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
 
 // intentionally not in the aggregation
-lazy val scratch = project.dependsOn(coreJVM).settings(commonSettings: _*)
+lazy val scratch = project.dependsOn(coreJVM)
