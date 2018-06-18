@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-package object shims extends ShimsCore
+package shims
+
+package object effect extends ShimsEffect

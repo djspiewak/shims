@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-package object shims extends ShimsCore
+package shims
+package effect
+
+private[effect] trait ShimsEffect extends ShimsCore
+    with TaskEffect
