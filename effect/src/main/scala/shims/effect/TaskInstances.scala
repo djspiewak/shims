@@ -81,10 +81,17 @@ trait TaskInstances extends MonadErrorConversions {
         }
       }
 
-    override def toIO[A](fa: Task[A]): IO[A] =
-      IO.async(cb => fa.unsafePerformAsync(d => cb(d.toEither)))
+    override def toIO[A](fa: Task[A]): IO[A] = {
+      runSyncStep(fa) flatMap { e =>
+        e.fold(
+          t => IO.async(cb => t.unsafePerformAsync(d => cb(d.toEither))),
+          a => IO.pure(a))
+      }
+    }
 
     def flatMap[A, B](fa: Task[A])(f: A => Task[B]): Task[B] = fa.flatMap(f)
+
+    override def delay[A](thunk: => A): Task[A] = Task.delay(thunk)
 
     def suspend[A](thunk: => Task[A]): Task[A] = Task.suspend(thunk)
   }
