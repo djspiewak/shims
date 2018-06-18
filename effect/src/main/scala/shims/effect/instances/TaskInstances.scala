@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package shims.effect
+package shims.effect.instances
 
 import cats.StackSafeMonad
 import cats.effect.{Effect, ExitCase, IO}

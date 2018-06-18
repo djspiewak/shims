@@ -17,6 +17,8 @@
 package shims
 package effect
 
+import shims.effect.instances._
+
 trait ShimsEffect extends ShimsCore
     with TaskInstances
     with IOInstances
