@@ -18,7 +18,12 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 baseVersion in ThisBuild := "1.3"
 
-developers in ThisBuild += Developer("alissapajer", "Alissa Pajer", "@alissapajer", url("https://github.com/alissapajer"))
+developers in ThisBuild ++= Seq(
+  Developer(
+    "christopherdavenport",
+    "ChristopherDavenport",
+    "@christopherdavenport",
+    url("https://github.com/christopherdavenport")))
 
 homepage in ThisBuild := Some(url("https://github.com/djspiewak/shims"))
 
