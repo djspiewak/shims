@@ -170,6 +170,9 @@ Note that the `scalaz.NonEmptyList` within the `Validation` was converted to a `
 
 In other words, under normal circumstances you will need to manually map nested structures in order to deeply convert them, but `ValidationNel`/`ValidatedNel` will Just Work™ without any explicit induction.
 
-## Previously, on shims…
+## Contributors
 
-Shims was previously (prior to version 1.0) a project for allowing middleware frameworks to avoid dependencies on *either* cats or scalaz, deferring that upstream decision to their downstream users.  It… didn't work very well, and nobody liked it.  Hence, its rebirth as a seamless interop framework!
+None of this would have been possible without some really invaluable assistance:
+
+- Guillaume Martres ([@smarter](https://github.com/smarter)), who provided the key insight into the `scalac` bug which was preventing the implementation of `Capture` (and thus, bidirectional conversions)
+- Christopher Davenport ([@ChristopherDavenport](https://github.com/ChristopherDavenport)), who contributed the bulk of **shims-effect** in its original form on **scalaz-task-effect**
