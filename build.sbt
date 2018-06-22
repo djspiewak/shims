@@ -18,7 +18,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 baseVersion in ThisBuild := "1.3"
 
-developers in ThisBuild ++= Seq(
+developers in ThisBuild ++= List(
   Developer(
     "christopherdavenport",
     "ChristopherDavenport",
@@ -33,7 +33,10 @@ scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
 val CatsVersion = "1.1.0"
 val ScalazVersion = "7.2.24"
 
-val Specs2Version = "4.1.0"
+val CatsEffectVersion = "1.0.0-RC2"
+
+val Specs2Version = "4.0.3"
+val DisciplineVersion = "0.8"
 
 val testFrameworkSettings = Seq(
   libraryDependencies ++= Seq(
@@ -60,8 +63,8 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
       "org.typelevel" %%% "cats-free"   % CatsVersion,
       "org.scalaz"    %%% "scalaz-core" % ScalazVersion,
 
-      "org.typelevel"  %%  "discipline"       % "0.8"         % Test,
-      "org.typelevel"  %%% "cats-laws"        % CatsVersion   % Test),
+      "org.typelevel"  %%  "discipline"       % DisciplineVersion % Test,
+      "org.typelevel"  %%% "cats-laws"        % CatsVersion       % Test),
 
     // cribbed from shapeless
     libraryDependencies ++= Seq(
@@ -93,8 +96,11 @@ lazy val effect = project
     name := "shims-effect",
 
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect"       % "1.0.0-RC2",
-      "org.scalaz"    %% "scalaz-concurrent" % ScalazVersion))
+      "org.typelevel" %% "cats-effect"       % CatsEffectVersion,
+      "org.scalaz"    %% "scalaz-concurrent" % ScalazVersion,
+
+      "org.typelevel" %% "discipline"        % DisciplineVersion % Test,
+      "org.typelevel" %% "cats-effect-laws"  % CatsEffectVersion % Test))
 
 // intentionally not in the aggregation
 lazy val scratch = project.dependsOn(coreJVM)
