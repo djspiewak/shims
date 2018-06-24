@@ -33,7 +33,7 @@ object TaskArbitrary {
   def genTask[A: Arbitrary: Cogen]: Gen[Task[A]] = {
     Gen.frequency(
       5 -> genPure[A],
-      5 -> genApply[A],
+      // 5 -> genApply[A],    // NB: it is unsound to use this case together with TestContext
       1 -> genFail[A],
       5 -> genAsync[A],
       5 -> genNestedAsync[A],
@@ -45,9 +45,6 @@ object TaskArbitrary {
 
   def genPure[A: Arbitrary]: Gen[Task[A]] =
     Arbitrary.arbitrary[A].map(Task.now(_))
-
-  def genApply[A: Arbitrary]: Gen[Task[A]] =
-    Arbitrary.arbitrary[A].map(Task.apply(_))
 
   def genFail[A]: Gen[Task[A]] =
     Arbitrary.arbitrary[Throwable].map(Task.fail)
@@ -92,4 +89,9 @@ object TaskArbitrary {
       f2 <- Arbitrary.arbitrary[A => A]
     } yield ioa.map(f1).map(f2)
 
+  private[this] case object StaticException extends Exception
+
+  // override built-in
+  private[this] implicit def arbitraryThrowable: Arbitrary[Throwable] =
+    Arbitrary(Gen.const(StaticException))
 }

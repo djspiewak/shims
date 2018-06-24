@@ -18,19 +18,16 @@ package shims.effect
 
 import cats.Eq
 
-import cats.effect.Effect
 import cats.effect.laws.discipline.EffectTests
 import cats.effect.laws.discipline.arbitrary.catsEffectLawsArbitraryForIO
 import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances.{eqIO, eqThrowable}
+import cats.effect.syntax.effect._
 
 import cats.instances.either._
 import cats.instances.int._
 import cats.instances.tuple._
 import cats.instances.unit._
 
-import cats.syntax.eq._
-
-import scalaz.{\/, -\/, \/-}
 import scalaz.concurrent.Task
 
 import org.specs2.Specification
@@ -44,18 +41,17 @@ object TaskInstancesSpecs extends Specification with Discipline {
   import TaskArbitrary._
 
   def is =
-    checkAllAsync("Effect[Task]", implicit ctx => EffectTests[Task].effect[Int, Int, Int])
+    checkAllAsync("Task", implicit ctx => EffectTests[Task].effect[Int, Int, Int])
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
     val ruleSet = f(context)
 
-    s"""${ruleSet.name} laws must hold for ${name}""" ^ br ^
-      Fragments.foreach(ruleSet.all.properties) { case (id, prop) =>
+    Fragments.foreach(ruleSet.all.properties) {
+      case (id, prop) =>
         id ! check(prop, p, defaultFreqMapPretty) ^ br
-      }
+    }
   }
 
-  implicit def taskEq[A: Eq](implicit ctx: TestContext): Eq[Task[A]] =
-    Eq.by(Effect[Task].toIO(_))
+  implicit def taskEq[A: Eq](implicit ctx: TestContext): Eq[Task[A]] = Eq.by(_.toIO)
 }

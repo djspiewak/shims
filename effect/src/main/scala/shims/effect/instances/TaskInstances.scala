@@ -89,6 +89,9 @@ trait TaskInstances extends MonadErrorConversions {
       }
     }
 
+    override def map[A, B](fa: Task[A])(f: A => B): Task[B] =
+      fa.map(f)
+
     def flatMap[A, B](fa: Task[A])(f: A => Task[B]): Task[B] = fa.flatMap(f)
 
     override def delay[A](thunk: => A): Task[A] = Task.delay(thunk)
