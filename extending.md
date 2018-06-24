@@ -1,4 +1,4 @@
-## Extending shims
+# Extending shims
 
 Under certain circumstances, you may wish to have some additional custom conversions in the style of shims which dovetail into the same implicit prioritization mechanism (e.g. so your custom `Monad` instance doesn't conflict with the one that shims is trying to automatically materialize). An obvious example of this is the **shims-effect** subproject, but it's easy to imagine third-party projects which may have similar needs.
 
