@@ -27,6 +27,12 @@ import shims.conversions.MonadErrorConversions
 
 trait IOInstances extends MonadErrorConversions {
 
+  implicit def liftIOToScalaz[F[_]: cats.effect.LiftIO]: scalaz.effect.LiftIO[F] =
+    new scalaz.effect.LiftIO[F] {
+      def liftIO[A](ioa: SzIO[A]): F[A] =
+        cats.effect.LiftIO[F].liftIO(cats.effect.IO(ioa.unsafePerformIO()))
+    }
+
   implicit object ioSync extends Sync[SzIO] with StackSafeMonad[SzIO] {
 
     def pure[A](a: A): SzIO[A] = SzIO(a)
