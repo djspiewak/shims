@@ -18,7 +18,7 @@ Add the following to your SBT configuration:
 libraryDependencies += "com.codecommit" %% "shims" % "<version>"
 ```
 
-If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  This can be done either by using [Typelevel Scala](https://github.com/typelevel/scala), adding [Miles Sabin's hacky compiler plugin](https://github.com/milessabin/si2712fix-plugin), or simply using Scala 2.12 (or 2.11.11) or higher with the `-Ypartial-unification` flag.  An example of the shenanigans which can enable the SI-2712 fix across multiple Scala versions can be seen [here](https://github.com/djspiewak/shims/blob/34f8851d1726027b537707f27b6c33f83c15a9fd/build.sbt#L60-L91).  A large number of conversions will simply *not work* without partial unification.
+If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  [Details here](https://github.com/typelevel/cats/tree/b23c7fbc117856910fa43de205457d8637eef8c6#getting-started).  A large number of conversions will simply *not work* without partial unification.
 
 Once you have the dependency installed, simply add the following import to any scopes which require cats-scalaz interop:
 
