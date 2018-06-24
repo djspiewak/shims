@@ -30,7 +30,7 @@ import shims._
 
 ### Effect Types
 
-You can also use shims to bridge the gap between the older scalaz `Task` hierarchy and newer frameworks which assume cats-effect typeclasses and similar:
+You can also use shims to bridge the gap between the older scalaz `Task` hierarchy and newer frameworks which assume [cats-effect](https://typelevel.org/cats-effect/) typeclasses and similar:
 
 ```sbt
 libraryDependencies += "com.codecommit" %% "shims-effect" % "<version>"
