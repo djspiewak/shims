@@ -17,11 +17,9 @@
 package shims.effect.instances
 
 import cats.StackSafeMonad
-import cats.effect.{ExitCase, Sync}
+import cats.effect.Sync
 
-import scalaz.{-\/, \/-}
 import scalaz.effect.{IO => SzIO}
-import scalaz.syntax.monad._
 
 import shims.conversions.MonadErrorConversions
 
@@ -41,17 +39,6 @@ trait IOInstances extends MonadErrorConversions {
       ioa.catchSome(Some(_), f)
 
     def raiseError[A](e: Throwable): SzIO[A] = SzIO.throwIO(e)
-
-    def bracketCase[A, B](acq: SzIO[A])(use: A => SzIO[B])(rel: (A, ExitCase[Throwable]) => SzIO[Unit]): SzIO[B] = {
-      acq flatMap { a =>
-        use(a).catchLeft flatMap { err =>
-          err match {
-            case -\/(e) => rel(a, ExitCase.error(e)) *> raiseError(e)
-            case \/-(b) => rel(a, ExitCase.complete).as(b)
-          }
-        }
-      }
-    }
 
     def flatMap[A, B](fa: SzIO[A])(f: A => SzIO[B]): SzIO[B] = fa.flatMap(f)
 

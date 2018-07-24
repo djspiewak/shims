@@ -17,7 +17,7 @@
 package shims.effect.instances
 
 import cats.StackSafeMonad
-import cats.effect.{Effect, ExitCase, IO}
+import cats.effect.{Effect, IO}
 
 import scalaz.{\/, -\/, \/-}
 import scalaz.concurrent.{Future, Task}
@@ -37,13 +37,6 @@ trait TaskInstances extends MonadErrorConversions {
       fa.handleWith(functionToPartial(f))
 
     def raiseError[A](e: Throwable): Task[A] = Task.fail(e)
-
-    def bracketCase[A, B](acq: Task[A])(use: A => Task[B])(rel: (A, ExitCase[Throwable]) => Task[Unit]): Task[B] =
-      acq flatMap { a =>
-        use(a) onFinish { err =>
-          rel(a, err.fold(ExitCase.complete[Throwable])(ExitCase.error))
-        }
-      }
 
     // In order to comply with `repeatedCallbackIgnored` law
     // on async, a custom AtomicBoolean is required to ignore
@@ -80,14 +73,6 @@ trait TaskInstances extends MonadErrorConversions {
           }
         }
       }
-
-    override def toIO[A](fa: Task[A]): IO[A] = {
-      runSyncStep(fa) flatMap { e =>
-        e.fold(
-          t => IO.async(cb => t.unsafePerformAsync(d => cb(d.toEither))),
-          a => IO.pure(a))
-      }
-    }
 
     override def map[A, B](fa: Task[A])(f: A => B): Task[B] =
       fa.map(f)

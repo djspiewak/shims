@@ -16,7 +16,7 @@
 
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-baseVersion in ThisBuild := "1.3"
+baseVersion in ThisBuild := "1.4"
 
 developers in ThisBuild ++= List(
   Developer(
@@ -33,7 +33,7 @@ scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
 val CatsVersion = "1.1.0"
 val ScalazVersion = "7.2.24"
 
-val CatsEffectVersion = "1.0.0-RC2"
+val CatsEffectVersion = "0.10.1"
 
 val Specs2Version = "4.0.3"
 val DisciplineVersion = "0.8"

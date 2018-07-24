@@ -18,10 +18,9 @@ package shims.effect
 
 import cats.Eq
 
+import cats.effect.IO
 import cats.effect.laws.discipline.EffectTests
-import cats.effect.laws.discipline.arbitrary.catsEffectLawsArbitraryForIO
 import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances.{eqIO, eqThrowable}
-import cats.effect.syntax.effect._
 
 import cats.instances.either._
 import cats.instances.int._
@@ -53,5 +52,6 @@ object TaskInstancesSpecs extends Specification with Discipline {
     }
   }
 
-  implicit def taskEq[A: Eq](implicit ctx: TestContext): Eq[Task[A]] = Eq.by(_.toIO)
+  implicit def taskEq[A: Eq](implicit ctx: TestContext): Eq[Task[A]] =
+    Eq.by(ta => IO.async[A](k => ta.unsafePerformAsync(e => k(e.toEither))))
 }
