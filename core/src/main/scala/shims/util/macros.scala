@@ -27,43 +27,42 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
 
   def materializeCapture[A: WeakTypeTag]: Tree = {
     val A = openImplicitTpeParam.getOrElse(weakTypeOf[A])
-
     q"""_root_.shims.util.Capture[$A](${reconstructImplicit(A)})"""
   }
 
   def materializeEitherCapture[A: WeakTypeTag, B: WeakTypeTag]: Tree = {
-    val A = openImplicitTpeParam.getOrElse(weakTypeOf[A])
-    val B = openImplicitTpeParam.getOrElse(weakTypeOf[B])
-
     val treeAM = try {
-      Right(q"_root_.scala.util.Left(${reconstructImplicit(A)})")
+      val A = leftImplicitTpeParam.getOrElse(weakTypeOf[A])
+      val B = weakTypeOf[B]
+      Right(q"""_root_.shims.util.EitherCapture[$A, $B](_root_.scala.util.Left[$A, $B](${reconstructImplicit(A)}))""")
     } catch {
-      case e: Exception => Left(e)
+      // ok it's actually an Error, not an Exception 🤦‍♀️
+      case t: Throwable => Left(t)
     }
 
     val treeBM = try {
-      Right(q"_root_.scala.util.Right(${reconstructImplicit(B)})")
+      val A = weakTypeOf[A]
+      val B = rightImplicitTpeParam.getOrElse(weakTypeOf[B])
+      Right(q"""_root_.shims.util.EitherCapture[$A, $B](_root_.scala.util.Right[$A, $B](${reconstructImplicit(B)}))""")
     } catch {
-      case e: Exception => Left(e)
+      // ok it's actually an Error, not an Exception 🤦‍♀️
+      case t: Throwable => Left(t)
     }
 
-    val result = treeAM.right.map(Right(_)).right.getOrElse(treeBM).fold(
+    treeAM.fold(_ => treeBM, Right(_)).fold(
       throw _,    // it's so great how scalac uses exceptions...
       identity)
-
-    q"""_root_.shims.util.EitherCapture[$A, $B]($result)"""
   }
 
   def materializeOptionCapture[A: WeakTypeTag]: Tree = {
-    val A = openImplicitTpeParam.getOrElse(weakTypeOf[A])
-
-    val result = try {
-      q"_root_.scala.Some(${reconstructImplicit(A)})"
+    try {
+      val A = openImplicitTpeParam.getOrElse(weakTypeOf[A])
+      q"""_root_.shims.util.OptionCapture[$A](_root_.scala.Some(${reconstructImplicit(A)}))"""
     } catch {
-      case e: Exception => q"_root_.scala.None"
+      // ok it's actually an Error, not an Exception 🤦‍♀️
+      case t: Throwable =>
+        q"""_root_.shims.util.OptionCapture[${weakTypeOf[A]}](_root_.scala.None)"""
     }
-
-    q"""_root_.shims.util.OptionCapture[$A]($result)"""
   }
 
   private def reconstructImplicit(A: Type): Tree = {
@@ -73,16 +72,16 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
       try {
         c.inferImplicitValue(A)
       } catch {
-        case e: Exception => c.abort(c.enclosingPosition, s"Implicit $A not found")
+        case t: Throwable => c.abort(c.enclosingPosition, s"implicit $A not found")
       }
     }
 
     if (tree0 == EmptyTree) {
-      c.abort(c.enclosingPosition, s"Implicit $A not found")
+      c.abort(c.enclosingPosition, s"implicit $A not found")
     }
 
     if (tree0.tpe <:< Synthetic) {
-      c.abort(c.enclosingPosition, s"Cannot capture subtype of Synthetic")
+      c.abort(c.enclosingPosition, s"cannot capture subtype of Synthetic")
     }
 
     tree0
@@ -109,7 +108,7 @@ private[util] object CaptureMacros {
 
     // simple divergence check
     if (vs.exists(tpe <:< _.asInstanceOf[c.universe.Type])) {
-      c.abort(c.enclosingPosition, s"Implicit $tpe not found")
+      c.abort(c.enclosingPosition, s"implicit $tpe not found")
     } else {
       val vs2 = tpe :: vs
 
@@ -133,17 +132,29 @@ private[shims] trait OpenImplicitMacros {
     c.openImplicits.headOption.map(_.pt)
 
   def openImplicitTpeParam: Option[Type] =
-    openImplicitTpe.map {
+    openImplicitTpe map {
       case TypeRef(_, _, List(tpe)) =>
         tpe.map(_.dealias)
+
       case other =>
-        c.abort(c.enclosingPosition, s"Bad materialization: $other")
+        c.abort(c.enclosingPosition, s"bad materialization: $other")
     }
 
-  def secondOpenImplicitTpe: Option[Type] =
-    c.openImplicits match {
-      case (List(_, second, _ @ _*)) =>
-        Some(second.pt)
-      case _ => None
+  def leftImplicitTpeParam: Option[Type] =
+    openImplicitTpe map {
+      case TypeRef(_, _, List(tpe, _)) =>
+        tpe.map(_.dealias)
+
+      case other =>
+        c.abort(c.enclosingPosition, s"bad materialization (left): $other")
+    }
+
+  def rightImplicitTpeParam: Option[Type] =
+    openImplicitTpe map {
+      case TypeRef(_, _, List(_, tpe)) =>
+        tpe.map(_.dealias)
+
+      case other =>
+        c.abort(c.enclosingPosition, s"bad materialization (right): $other")
     }
 }

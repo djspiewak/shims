@@ -191,6 +191,15 @@ object MonadConversionSpecs extends Specification with Discipline {
 
         checkAll("Option", MonadTests[Option].monad[Int, Int, Int])
       }
+
+      "F[_]" >> {
+        def foo[F[_]](implicit F: scalaz.Monad[F]) = {
+          cats.Applicative[F]
+          cats.Monad[F]
+        }
+
+        ok
+      }
     }
   }
 

@@ -21,7 +21,7 @@ import scala.language.experimental.macros
 import scala.annotation.implicitNotFound
 import scala.util.Either
 
-@implicitNotFound("unable to find an implicit value of type ${A}")
+@implicitNotFound("could not find an implicit value of type ${A}")
 final case class Capture[A](value: A) extends AnyVal
 
 object Capture {
@@ -30,7 +30,7 @@ object Capture {
     macro CaptureMacros.materializeCapture[A]
 }
 
-@implicitNotFound("unable to find an implicit value of type ${A} or ${B}")
+@implicitNotFound("could not find an implicit value of type ${A} or ${B}")
 final case class EitherCapture[A, B](value: Either[A, B]) extends AnyVal
 
 object EitherCapture {
