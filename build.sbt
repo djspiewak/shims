@@ -81,6 +81,22 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
         case Some((2, 10)) =>
           Seq("org.scalamacros" %% "quasiquotes" % "2.1.0" cross CrossVersion.binary)
       }
+    },
+
+    mimaBinaryIssueFilters ++= {
+      import com.typesafe.tools.mima.core._
+      import com.typesafe.tools.mima.core.ProblemFilters._
+
+      Seq(
+        // we don't care about macro incompatibilities
+        exclude[DirectMissingMethodProblem]("shims.util.CaptureMacros.secondOpenImplicitTpe"),
+        exclude[DirectMissingMethodProblem]("shims.util.OpenImplicitMacros.secondOpenImplicitTpe"),
+        exclude[ReversedMissingMethodProblem]("shims.util.OpenImplicitMacros.rightImplicitTpeParam"),
+        exclude[ReversedMissingMethodProblem]("shims.util.OpenImplicitMacros.leftImplicitTpeParam"),
+        exclude[DirectMissingMethodProblem]("shims.util.CaptureMacros.secondOpenImplicitTpe"),
+        exclude[DirectMissingMethodProblem]("shims.util.OpenImplicitMacros.secondOpenImplicitTpe"),
+        exclude[ReversedMissingMethodProblem]("shims.util.OpenImplicitMacros.rightImplicitTpeParam"),
+        exclude[ReversedMissingMethodProblem]("shims.util.OpenImplicitMacros.leftImplicitTpeParam"))
     }
   )
 
