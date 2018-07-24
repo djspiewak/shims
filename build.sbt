@@ -30,12 +30,12 @@ homepage in ThisBuild := Some(url("https://github.com/djspiewak/shims"))
 scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
   "git@github.com:djspiewak/shims.git"))
 
-val CatsVersion = "1.1.0"
-val ScalazVersion = "7.2.24"
+val CatsVersion = "1.2.0"
+val ScalazVersion = "7.2.25"
 
 val CatsEffectVersion = "0.10.1"
 
-val Specs2Version = "4.0.3"
+val Specs2Version = "4.1.2"
 val DisciplineVersion = "0.8"
 
 val testFrameworkSettings = Seq(
