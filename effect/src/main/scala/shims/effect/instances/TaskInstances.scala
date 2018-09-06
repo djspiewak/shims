@@ -17,7 +17,7 @@
 package shims.effect.instances
 
 import cats.StackSafeMonad
-import cats.effect.{Effect, IO}
+import cats.effect.{Effect, ExitCase, IO, SyncIO}
 
 import scalaz.{\/, -\/, \/-}
 import scalaz.concurrent.{Future, Task}
@@ -47,6 +47,17 @@ trait TaskInstances extends MonadErrorConversions {
     def asyncF[A](k: (Either[Throwable, A] => Unit) => Task[Unit]): Task[A] =
       Task.async(cb => singleUseCallback(k)(cb).unsafePerformSync)
 
+    // emulates using attempt
+    def bracketCase[A, B](acquire: Task[A])(use: A => Task[B])(release: (A, ExitCase[Throwable]) => Task[Unit]): Task[B] = {
+      for {
+        a <- acquire
+        bOr <- use(a).attempt
+        ec = bOr.fold(ExitCase.Error(_), _ => ExitCase.Completed)
+        _ <- release(a, ec)
+        b <- bOr.fold(Task.fail(_), Task.now(_))
+      } yield b
+    }
+
     /*
      * runAsync takes the final callback to something that
      * summarizes the effects in an IO[Unit] as such this
@@ -55,9 +66,9 @@ trait TaskInstances extends MonadErrorConversions {
      * within the outer IO, discarding any error that might
      * occur
      */
-    def runAsync[A](fa: Task[A])(cb: Either[Throwable, A] => IO[Unit]): IO[Unit] =
-      IO {
-        fa.unsafePerformAsync { disjunction =>
+    def runAsync[A](fa: Task[A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] =
+      SyncIO {
+        fa unsafePerformAsync { disjunction =>
           cb(disjunction.toEither).unsafeRunAsync(_ => ())
         }
       }

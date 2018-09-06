@@ -89,7 +89,9 @@ object TaskArbitrary {
       f2 <- Arbitrary.arbitrary[A => A]
     } yield ioa.map(f1).map(f2)
 
-  private[this] case object StaticException extends Exception
+  private[this] case object StaticException extends Exception {
+    override def printStackTrace() = ()   // this is to stop the tests from spewing useless traces
+  }
 
   // override built-in
   private[this] implicit def arbitraryThrowable: Arbitrary[Throwable] =

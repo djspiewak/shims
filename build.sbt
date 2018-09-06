@@ -16,7 +16,7 @@
 
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-baseVersion in ThisBuild := "1.4"
+baseVersion in ThisBuild := "1.5"
 
 developers in ThisBuild ++= List(
   Developer(
@@ -30,20 +30,38 @@ homepage in ThisBuild := Some(url("https://github.com/djspiewak/shims"))
 scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
   "git@github.com:djspiewak/shims.git"))
 
-val CatsVersion = "1.2.0"
-val ScalazVersion = "7.2.25"
+val CatsVersion = "1.3.1"
+val ScalazVersion = "7.2.26"
 
-val CatsEffectVersion = "0.10.1"
+val CatsEffectVersion = "1.0.0"
 
-val Specs2Version = "4.1.2"
-val DisciplineVersion = "0.8"
+val Specs2Version = Def setting {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, v)) if v <= 12 => "4.1.2"
+    case _ => "4.3.4"
+  }
+}
+
+val ScalaCheckVersion = Def setting {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, v)) if v <= 12 => "1.13.5"
+    case _ => "1.14.0"
+  }
+}
+
+val DisciplineVersion = Def setting {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, v)) if v <= 12 => "0.9.0"
+    case _ => "0.10.0"
+  }
+}
 
 val testFrameworkSettings = Seq(
   libraryDependencies ++= Seq(
-    "org.specs2"     %% "specs2-core"       % Specs2Version % Test,
-    "org.specs2"     %% "specs2-scalacheck" % Specs2Version % Test,
+    "org.specs2"     %% "specs2-core"       % Specs2Version.value     % Test,
+    "org.specs2"     %% "specs2-scalacheck" % Specs2Version.value     % Test,
 
-    "org.scalacheck" %% "scalacheck"        % "1.13.5"      % Test))
+    "org.scalacheck" %% "scalacheck"        % ScalaCheckVersion.value % Test))
 
 lazy val root = project
   .in(file("."))
@@ -63,8 +81,8 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
       "org.typelevel" %%% "cats-free"   % CatsVersion,
       "org.scalaz"    %%% "scalaz-core" % ScalazVersion,
 
-      "org.typelevel"  %%  "discipline"       % DisciplineVersion % Test,
-      "org.typelevel"  %%% "cats-laws"        % CatsVersion       % Test),
+      "org.typelevel"  %%  "discipline"       % DisciplineVersion.value % Test,
+      "org.typelevel"  %%% "cats-laws"        % CatsVersion             % Test),
 
     // cribbed from shapeless
     libraryDependencies ++= Seq(
@@ -115,8 +133,8 @@ lazy val effect = project
       "org.typelevel" %% "cats-effect"       % CatsEffectVersion,
       "org.scalaz"    %% "scalaz-concurrent" % ScalazVersion,
 
-      "org.typelevel" %% "discipline"        % DisciplineVersion % Test,
-      "org.typelevel" %% "cats-effect-laws"  % CatsEffectVersion % Test))
+      "org.typelevel" %% "discipline"        % DisciplineVersion.value % Test,
+      "org.typelevel" %% "cats-effect-laws"  % CatsEffectVersion       % Test))
 
 // intentionally not in the aggregation
 lazy val scratch = project.dependsOn(coreJVM)

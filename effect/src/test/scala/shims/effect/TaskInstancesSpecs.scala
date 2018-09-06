@@ -19,8 +19,8 @@ package shims.effect
 import cats.Eq
 
 import cats.effect.IO
-import cats.effect.laws.discipline.EffectTests
-import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances.{eqIO, eqThrowable}
+import cats.effect.laws.discipline.{arbitrary, EffectTests}, arbitrary._
+import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances._
 
 import cats.instances.either._
 import cats.instances.int._
