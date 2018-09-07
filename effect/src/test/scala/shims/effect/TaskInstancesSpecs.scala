@@ -39,14 +39,13 @@ import org.typelevel.discipline.specs2.Discipline
 object TaskInstancesSpecs extends Specification with Discipline {
   import TaskArbitrary._
 
-  def is =
-    checkAllAsync("Task", implicit ctx => EffectTests[Task].effect[Int, Int, Int])
+  def is = checkAllAsync("Task", implicit ctx => EffectTests[Task].effect[Int, Int, Int])
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
     val ruleSet = f(context)
 
-    Fragments.foreach(ruleSet.all.properties) {
+    Fragments.foreach(ruleSet.all.properties.toList) {
       case (id, prop) =>
         id ! check(prop, p, defaultFreqMapPretty) ^ br
     }

@@ -19,7 +19,6 @@ package shims.util
 import scala.reflect.macros.whitebox
 import scala.util.{Left, Right}
 
-@macrocompat.bundle
 class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
   import c.universe._
 
@@ -122,7 +121,6 @@ private[util] object CaptureMacros {
 }
 
 // copied from shapeless
-@macrocompat.bundle
 private[shims] trait OpenImplicitMacros {
   val c: whitebox.Context
 
