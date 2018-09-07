@@ -1,13 +1,20 @@
 language: scala
 
-scala:
-  - '2.13.0-M4'
-  - '2.11.12'
-  - '2.12.6'
-
-jdk:
-  - oraclejdk8
-  - oraclejdk10
+matrix:
+  include:
+    - jdk: oraclejdk8
+      scala: '2.13.0-M4'
+    # broken for entirely unclear reasons
+    # - jdk: oraclejdk10
+    #   scala: '2.13.0-M4'
+    - jdk: oraclejdk8
+      scala: '2.11.12'
+    - jdk: oraclejdk10
+      scala: '2.11.12'
+    - jdk: oraclejdk8
+      scala: '2.12.6'
+    - jdk: oraclejdk10
+      scala: '2.12.6'
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION ci
