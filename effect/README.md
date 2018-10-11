@@ -30,8 +30,8 @@ The reason for this is implicit ambiguity. `Effect` is a subtype of `cats.Monad`
 ### Upstream Dependencies
 
 - Obviously, the core **shims** subproject
-- cats-effect 0.10.1
-- scalaz-concurrent 7.2.25
+- cats-effect 1.0.0
+- scalaz-concurrent 7.2.26
 
 ## Conversions
 

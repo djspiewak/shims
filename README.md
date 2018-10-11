@@ -44,9 +44,8 @@ For more information, see the [**shims-effect** subproject readme](effect/README
 
 ### Upstream Dependencies
 
-- cats 1.2.0
-  + Note: cats 1.0.x and 1.1.x are binary-compatible with 1.2.0, so the eviction should be safe
-- scalaz 7.2.25
+- cats 1.4.0
+- scalaz 7.2.26
 
 At present, there is no complex build matrix of craziness to provide support for other major versions of each library.  This will probably come in time, when I've become sad and jaded, and possibly when I have received a pull request for it.
 
