@@ -20,13 +20,14 @@ import cats.effect.{ContextShift, IO}
 import cats.effect.laws.discipline.{arbitrary, ConcurrentTests}, arbitrary._
 import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances._
 
+import cats.Eq
 import cats.instances.either._
 import cats.instances.int._
 import cats.instances.option._
 import cats.instances.tuple._
 import cats.instances.unit._
 
-import scalaz.OptionT
+import scalaz.{Kleisli, OptionT}
 
 import org.scalacheck.{Arbitrary, Prop}
 
@@ -45,7 +46,8 @@ import java.io.{ByteArrayOutputStream, PrintStream}
 object MTLSpecs extends Specification with Discipline {
 
   def is =
-    br ^ checkAllAsync("OptionT[IO, ?]", implicit ctx => ConcurrentTests[OptionT[IO, ?]].concurrent[Int, Int, Int])
+    br ^ checkAllAsync("OptionT[IO, ?]", implicit ctx => ConcurrentTests[OptionT[IO, ?]].concurrent[Int, Int, Int]) ^
+    br ^ checkAllAsync("Kleisli[IO, Int, ?]", implicit ctx => ConcurrentTests[Kleisli[IO, Int, ?]].concurrent[Int, Int, Int])
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
@@ -62,6 +64,12 @@ object MTLSpecs extends Specification with Discipline {
 
   implicit def optionTArbitrary[F[_], A](implicit arbFA: Arbitrary[F[Option[A]]]): Arbitrary[OptionT[F, A]] =
     Arbitrary(arbFA.arbitrary.map(OptionT.optionT(_)))
+
+  implicit def kleisliArbitrary[F[_], R, A](implicit arbRFA: Arbitrary[R => F[A]]): Arbitrary[Kleisli[F, R, A]] =
+    Arbitrary(arbRFA.arbitrary.map(Kleisli(_)))
+
+  implicit def kleisliEq[F[_], A](implicit eqv: Eq[F[A]]): Eq[Kleisli[F, Int, A]] =
+    Eq.by(k => k(42))   // totally random and comprehensive seed
 
   // copied from cats-effect
   private def silenceSystemErr[A](thunk: => A): A = synchronized {

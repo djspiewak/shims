@@ -39,7 +39,8 @@ import org.typelevel.discipline.specs2.Discipline
 object TaskInstancesSpecs extends Specification with Discipline {
   import TaskArbitrary._
 
-  def is = checkAllAsync("Task", implicit ctx => EffectTests[Task].effect[Int, Int, Int])
+  def is =
+    br ^ checkAllAsync("Task", implicit ctx => EffectTests[Task].effect[Int, Int, Int])
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
