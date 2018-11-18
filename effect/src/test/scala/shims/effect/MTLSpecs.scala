@@ -16,18 +16,19 @@
 
 package shims.effect
 
-import cats.Eq
-
-import cats.effect.IO
-import cats.effect.laws.discipline.{arbitrary, AsyncTests}, arbitrary._
+import cats.effect.{ContextShift, IO}
+import cats.effect.laws.discipline.{arbitrary, ConcurrentTests}, arbitrary._
 import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances._
 
 import cats.instances.either._
 import cats.instances.int._
+import cats.instances.option._
 import cats.instances.tuple._
 import cats.instances.unit._
 
-import scalaz.concurrent.Task
+import scalaz.OptionT
+
+import org.scalacheck.{Arbitrary, Prop}
 
 import org.specs2.Specification
 import org.specs2.scalacheck.Parameters
@@ -36,10 +37,15 @@ import org.specs2.specification.core.Fragments
 import org.typelevel.discipline.Laws
 import org.typelevel.discipline.specs2.Discipline
 
-object MTLSpecs extends Specification with Discipline {
-  import TaskArbitrary._
+import scala.concurrent.ExecutionContext
+import scala.util.control.NonFatal
 
-  def is = checkAllAsync("OptionT[Task, ?]", implicit ctx => AsyncTests[Task].async[Int, Int, Int])
+import java.io.{ByteArrayOutputStream, PrintStream}
+
+object MTLSpecs extends Specification with Discipline {
+
+  def is =
+    br ^ checkAllAsync("OptionT[IO, ?]", implicit ctx => ConcurrentTests[OptionT[IO, ?]].concurrent[Int, Int, Int])
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
@@ -47,10 +53,35 @@ object MTLSpecs extends Specification with Discipline {
 
     Fragments.foreach(ruleSet.all.properties.toList) {
       case (id, prop) =>
-        id ! check(prop, p, defaultFreqMapPretty) ^ br
+        s"$name.$id" ! check(Prop(p => silenceSystemErr(prop(p))), p, defaultFreqMapPretty) ^ br
     }
   }
 
-  implicit def taskEq[A: Eq](implicit ctx: TestContext): Eq[Task[A]] =
-    Eq.by(ta => IO.async[A](k => ta.unsafePerformAsync(e => k(e.toEither))))
+  implicit def iocsForEC(implicit ec: ExecutionContext): ContextShift[IO] =
+    IO.contextShift(ec)
+
+  implicit def optionTArbitrary[F[_], A](implicit arbFA: Arbitrary[F[Option[A]]]): Arbitrary[OptionT[F, A]] =
+    Arbitrary(arbFA.arbitrary.map(OptionT.optionT(_)))
+
+  // copied from cats-effect
+  private def silenceSystemErr[A](thunk: => A): A = synchronized {
+    // Silencing System.err
+    val oldErr = System.err
+    val outStream = new ByteArrayOutputStream()
+    val fakeErr = new PrintStream(outStream)
+    System.setErr(fakeErr)
+    try {
+      val result = thunk
+      System.setErr(oldErr)
+      result
+    } catch {
+      case NonFatal(e) =>
+        System.setErr(oldErr)
+        // In case of errors, print whatever was caught
+        fakeErr.close()
+        val out = outStream.toString("utf-8")
+        if (out.nonEmpty) oldErr.println(out)
+        throw e
+    }
+  }
 }

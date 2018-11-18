@@ -22,6 +22,7 @@ import scalaz.concurrent.Task
 import org.scalacheck._
 
 object TaskArbitrary {
+  import ThrowableArbitrary._
 
   implicit def arbitraryTask[A: Arbitrary: Cogen]: Arbitrary[Task[A]] =
     Arbitrary(Gen.delay(genTask[A]))
@@ -88,12 +89,4 @@ object TaskArbitrary {
       f1 <- Arbitrary.arbitrary[A => A]
       f2 <- Arbitrary.arbitrary[A => A]
     } yield ioa.map(f1).map(f2)
-
-  private[this] case object StaticException extends Exception {
-    override def printStackTrace() = ()   // this is to stop the tests from spewing useless traces
-  }
-
-  // override built-in
-  private[this] implicit def arbitraryThrowable: Arbitrary[Throwable] =
-    Arbitrary(Gen.const(StaticException))
 }
