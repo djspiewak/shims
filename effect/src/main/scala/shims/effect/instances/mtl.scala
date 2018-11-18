@@ -16,20 +16,24 @@
 
 package shims.effect.instances
 
-import cats.Monad
+import cats.{Functor, Monad}
 import cats.effect.{
   Async,
   Bracket,
   CancelToken,
   Concurrent,
+  ConcurrentEffect,
   ContextShift,
+  Effect,
   ExitCase,
   Fiber,
-  Sync
+  IO,
+  Sync,
+  SyncIO
 }
 import cats.syntax.all._
 
-import scalaz.{Kleisli, OptionT}
+import scalaz.{\/, -\/, \/-, EitherT, Kleisli, OptionT}
 
 import shims.AsSyntaxModule
 import shims.conversions.{EitherConverters, MonadConversions, MonadErrorConversions}
@@ -84,6 +88,9 @@ trait MTLSync extends MTLBracket {
 
   implicit def scalazKleisliSync[F[_]: Sync, R]: Sync[Kleisli[F, R, ?]] =
     new KleisliSync[F, R] { def F = Sync[F] }
+
+  implicit def scalazEitherTSync[F[_]: Sync, L]: Sync[EitherT[F, L, ?]] =
+    new EitherTSync[F, L] { def F = Sync[F] }
 
   protected[this] trait OptionTSync[F[_]] extends Sync[OptionT[F, ?]] {
     protected implicit def F: Sync[F]
@@ -140,6 +147,47 @@ trait MTLSync extends MTLBracket {
     override def uncancelable[A](fa: Kleisli[F, R, A]): Kleisli[F, R, A] =
       Kleisli(r => F.suspend(F.uncancelable(fa.run(r))))
   }
+
+  protected[this] trait EitherTSync[F[_], L] extends Sync[EitherT[F, L, ?]] {
+    protected implicit def F: Sync[F]
+
+    def pure[A](x: A): EitherT[F, L, A] = EitherT.pure[F, L, A](x)
+
+    def handleErrorWith[A](fa: EitherT[F, L, A])(f: Throwable => EitherT[F, L, A]): EitherT[F, L, A] =
+      EitherT.eitherT(F.handleErrorWith(fa.run)(f.andThen(_.run)))
+
+    def raiseError[A](e: Throwable): EitherT[F, L, A] =
+      EitherT.rightT(F.raiseError(e))
+
+    def bracketCase[A, B](
+        acquire: EitherT[F, L, A])(
+        use: A => EitherT[F, L, B])(
+        release: (A, ExitCase[Throwable]) => EitherT[F, L, Unit])
+        : EitherT[F, L, B] = {
+
+      EitherT(F.bracketCase(acquire.run) {
+        case \/-(a) => use(a).run
+        case e @ -\/(_) => F.pure(e: \/[L, B])
+      } { (ea, br) =>
+        ea match {
+          case \/-(a) => release(a, br).run.void
+          case -\/(_) => F.unit // nothing to release
+        }
+      })
+    }
+
+    def flatMap[A, B](fa: EitherT[F, L, A])(f: A => EitherT[F, L, B]): EitherT[F, L, B] =
+      fa.flatMap(f)
+
+    def tailRecM[A, B](a: A)(f: A => EitherT[F, L, Either[A, B]]): EitherT[F, L, B] =
+      EitherT.eitherTBindRec[F, L].tailrecM(f.andThen(_.map(_.asScalaz)))(a)
+
+    def suspend[A](thunk: => EitherT[F, L, A]): EitherT[F, L, A] =
+      EitherT.eitherT(F.suspend(thunk.run))
+
+    override def uncancelable[A](fa: EitherT[F, L, A]): EitherT[F, L, A] =
+      EitherT.eitherT(F.uncancelable(fa.run))
+  }
 }
 
 trait MTLAsync extends MTLSync {
@@ -149,6 +197,9 @@ trait MTLAsync extends MTLSync {
 
   implicit def scalazKleisliAsync[F[_]: Async, R]: Async[Kleisli[F, R, ?]] =
     new KleisliAsync[F, R] { def F = Async[F] }
+
+  implicit def scalazEitherTAsync[F[_]: Async, L]: Async[EitherT[F, L, ?]] =
+    new EitherTAsync[F, L] { def F = Async[F] }
 
   protected[this] trait OptionTAsync[F[_]] extends OptionTSync[F] with Async[OptionT[F, ?]] {
     protected implicit def F: Async[F]
@@ -169,9 +220,33 @@ trait MTLAsync extends MTLSync {
     override def async[A](k: (Either[Throwable, A] => Unit) => Unit): Kleisli[F, R, A] =
       Kleisli(_ => F.async(k))
   }
+
+  protected[this] trait EitherTAsync[F[_], L] extends EitherTSync[F, L] with Async[EitherT[F, L, ?]] {
+    protected implicit def F: Async[F]
+
+    def async[A](k: (Either[Throwable, A] => Unit) => Unit): EitherT[F, L, A] =
+      EitherT.rightT(F.async(k))
+
+    def asyncF[A](k: (Either[Throwable, A] => Unit) => EitherT[F, L, Unit]): EitherT[F, L, A] =
+      EitherT.rightT(F.asyncF(cb => F.as(k(cb).run, ())))
+  }
 }
 
-trait MTLEffect extends MTLAsync
+trait MTLEffect extends MTLAsync {
+
+  implicit def scalazEitherTEffect[F[_]: Effect]: Effect[EitherT[F, Throwable, ?]] =
+    new EitherTEffect[F] { def F = Effect[F] }
+
+  protected[this] trait EitherTEffect[F[_]] extends EitherTAsync[F, Throwable] with Effect[EitherT[F, Throwable, ?]] {
+    protected implicit def F: Effect[F]
+
+    def runAsync[A](fa: EitherT[F, Throwable, A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] =
+      F.runAsync(fa.run)(cb.compose(_.right.flatMap(x => x.asCats)))
+
+    override def toIO[A](fa: EitherT[F, Throwable, A]): IO[A] =
+      F.toIO(F.rethrow(fa.run.map(_.asCats)))
+  }
+}
 
 trait MTLConcurrent extends MTLAsync {
 
@@ -235,9 +310,60 @@ trait MTLConcurrent extends MTLAsync {
     protected def fiberT[A](fiber: Fiber[F, A]): Fiber[Kleisli[F, R, ?], A] =
       Fiber(Kleisli(_ => fiber.join), Kleisli(_ => fiber.cancel))
   }
+
+  protected[this] trait EitherTConcurrent[F[_], L] extends EitherTAsync[F, L] with Concurrent[EitherT[F, L, ?]] {
+    protected implicit def F: Concurrent[F]
+
+    override def cancelable[A](k: (Either[Throwable, A] => Unit) => CancelToken[EitherT[F, L, ?]]): EitherT[F, L, A] =
+      EitherT.rightT(F.cancelable(k.andThen(_.run.void)))
+
+    override def start[A](fa: EitherT[F, L, A]) =
+      EitherT.rightT(F.start(fa.run).map(fiberT))
+
+    override def racePair[A, B](
+        fa: EitherT[F, L, A],
+        fb: EitherT[F, L, B])
+        : EitherT[F, L, Either[(A, Fiber[EitherT[F, L, ?], B]), (Fiber[EitherT[F, L, ?], A], B)]] = {
+
+      EitherT.eitherT(F.racePair(fa.run, fb.run) flatMap {
+        case Left((\/-(r), fiberB)) =>
+          F.pure(\/-(Left((r, fiberT[B](fiberB)))))
+
+          case Left((-\/(l), fiberB)) =>
+            fiberB.cancel.as(-\/(l))
+
+        case Right((fiberA, \/-(r))) =>
+          F.pure(\/-(Right((fiberT[A](fiberA), r))))
+
+        case Right((fiberA, -\/(l))) =>
+          fiberA.cancel.as(-\/(l))
+      })
+    }
+
+    protected def fiberT[A](fiber: Fiber[F, L \/ A]): Fiber[EitherT[F, L, ?], A] =
+      Fiber(EitherT.eitherT(fiber.join), EitherT.rightT(fiber.cancel))
+  }
 }
 
-trait MTLConcurrentEffect extends MTLEffect with MTLConcurrent
+trait MTLConcurrentEffect extends MTLEffect with MTLConcurrent {
+
+  implicit def scalazEitherTConcurrentEffect[F[_]: ConcurrentEffect]: ConcurrentEffect[EitherT[F, Throwable, ?]] =
+    new EitherTConcurrentEffect[F] { def F = ConcurrentEffect[F] }
+
+  protected[this] trait EitherTConcurrentEffect[F[_]]
+      extends EitherTEffect[F]
+      with EitherTConcurrent[F, Throwable]
+      with ConcurrentEffect[EitherT[F, Throwable, ?]] {
+
+    protected implicit def F: ConcurrentEffect[F]
+
+    override def runCancelable[A](
+        fa: EitherT[F, Throwable, A])(
+        cb: Either[Throwable, A] => IO[Unit])
+        : SyncIO[CancelToken[EitherT[F, Throwable, ?]]] =
+      F.runCancelable(fa.run)(cb.compose(_.right.flatMap(x => x.asCats))).map(EitherT.rightT(_))
+  }
+}
 
 trait MTLContextShift extends MonadConversions {
 
@@ -262,6 +388,18 @@ trait MTLContextShift extends MonadConversions {
 
       def evalOn[A](ec: ExecutionContext)(fa: Kleisli[F, R, A]): Kleisli[F, R, A] =
         Kleisli(a => cs.evalOn(ec)(fa.run(a)))
+    }
+  }
+
+  implicit def scalazEitherTContextShift[F[_]: Functor, L](
+      implicit cs: ContextShift[F])
+      : ContextShift[EitherT[F, L, ?]] = {
+    new ContextShift[EitherT[F, L, ?]] {
+      def shift: EitherT[F, L, Unit] =
+        EitherT.rightT(cs.shift)
+
+      def evalOn[A](ec: ExecutionContext)(fa: EitherT[F, L, A]): EitherT[F, L, A] =
+        EitherT.eitherT(cs.evalOn(ec)(fa.run))
     }
   }
 }

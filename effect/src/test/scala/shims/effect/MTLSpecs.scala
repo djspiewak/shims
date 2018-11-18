@@ -17,17 +17,18 @@
 package shims.effect
 
 import cats.effect.{ContextShift, IO}
-import cats.effect.laws.discipline.{arbitrary, ConcurrentTests}, arbitrary._
+import cats.effect.laws.discipline.{arbitrary, ConcurrentEffectTests, ConcurrentTests}, arbitrary._
 import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances._
 
-import cats.Eq
+import cats.{Eq, Functor}
 import cats.instances.either._
 import cats.instances.int._
 import cats.instances.option._
 import cats.instances.tuple._
 import cats.instances.unit._
+import cats.syntax.functor._
 
-import scalaz.{Kleisli, OptionT}
+import scalaz.{EitherT, Kleisli, OptionT}
 
 import org.scalacheck.{Arbitrary, Prop}
 
@@ -47,7 +48,8 @@ object MTLSpecs extends Specification with Discipline {
 
   def is =
     br ^ checkAllAsync("OptionT[IO, ?]", implicit ctx => ConcurrentTests[OptionT[IO, ?]].concurrent[Int, Int, Int]) ^
-    br ^ checkAllAsync("Kleisli[IO, Int, ?]", implicit ctx => ConcurrentTests[Kleisli[IO, Int, ?]].concurrent[Int, Int, Int])
+    br ^ checkAllAsync("Kleisli[IO, Int, ?]", implicit ctx => ConcurrentTests[Kleisli[IO, Int, ?]].concurrent[Int, Int, Int]) ^
+    br ^ checkAllAsync("EitherT[IO, Throwable, ?]", implicit ctx => ConcurrentEffectTests[EitherT[IO, Throwable, ?]].concurrentEffect[Int, Int, Int])
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
@@ -67,6 +69,9 @@ object MTLSpecs extends Specification with Discipline {
 
   implicit def kleisliArbitrary[F[_], R, A](implicit arbRFA: Arbitrary[R => F[A]]): Arbitrary[Kleisli[F, R, A]] =
     Arbitrary(arbRFA.arbitrary.map(Kleisli(_)))
+
+  implicit def eitherTArbitrary[F[_]: Functor, L, A](implicit arbEA: Arbitrary[F[Either[L, A]]]): Arbitrary[EitherT[F, L, A]] =
+    Arbitrary(arbEA.arbitrary.map(fe => EitherT.eitherT(fe.map(_.asScalaz))))
 
   implicit def kleisliEq[F[_], A](implicit eqv: Eq[F[A]]): Eq[Kleisli[F, Int, A]] =
     Eq.by(k => k(42))   // totally random and comprehensive seed
