@@ -16,7 +16,7 @@
 
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-baseVersion in ThisBuild := "1.5"
+baseVersion in ThisBuild := "1.6"
 
 developers in ThisBuild ++= List(
   Developer(
