@@ -15,12 +15,12 @@
  */
 
 package shims
-package effect
 
-import shims.effect.instances._
+import shims.conversions.{AsCats, AsScalaz}
 
-trait ShimsEffect extends ShimsCore
-    with TaskInstances
-    with IOInstances
-    with MTLConcurrentEffect
-    with MTLContextShift
+trait AsSyntaxModule {
+  implicit final class AsSyntax[A](val self: A) {
+    def asScalaz[B](implicit A: AsScalaz[A, B]): B = A.c2s(self)
+    def asCats[B](implicit A: AsCats[A, B]): B = A.s2c(self)
+  }
+}
