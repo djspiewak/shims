@@ -28,7 +28,7 @@ import cats.instances.tuple._
 import cats.instances.unit._
 import cats.syntax.functor._
 
-import scalaz.{EitherT, Kleisli, OptionT, StateT}
+import scalaz.{EitherT, Kleisli, OptionT, StateT, WriterT}
 
 import org.scalacheck.{Arbitrary, Prop}
 
@@ -50,7 +50,8 @@ object MTLSpecs extends Specification with Discipline {
     br ^ checkAllAsync("OptionT[IO, ?]", implicit ctx => ConcurrentTests[OptionT[IO, ?]].concurrent[Int, Int, Int]) ^
     br ^ checkAllAsync("Kleisli[IO, Int, ?]", implicit ctx => ConcurrentTests[Kleisli[IO, Int, ?]].concurrent[Int, Int, Int]) ^
     br ^ checkAllAsync("EitherT[IO, Throwable, ?]", implicit ctx => ConcurrentEffectTests[EitherT[IO, Throwable, ?]].concurrentEffect[Int, Int, Int]) ^
-    br ^ checkAllAsync("StateT[IO, Int, ?]", implicit ctx => AsyncTests[StateT[IO, Int, ?]].async[Int, Int, Int])
+    br ^ checkAllAsync("StateT[IO, Int, ?]", implicit ctx => AsyncTests[StateT[IO, Int, ?]].async[Int, Int, Int]) ^
+    br ^ checkAllAsync("WriterT[IO, Int, ?]", implicit ctx => ConcurrentEffectTests[WriterT[IO, Int, ?]].concurrentEffect[Int, Int, Int])
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
@@ -76,6 +77,9 @@ object MTLSpecs extends Specification with Discipline {
 
   implicit def stateTArbitrary[F[_]: Monad, S, A](implicit arbSFA: Arbitrary[S => F[(S, A)]]): Arbitrary[StateT[F, S, A]] =
     Arbitrary(arbSFA.arbitrary.map(StateT(_)))
+
+  implicit def writerTArbitrary[F[_], L, A](implicit arbFLA: Arbitrary[F[(L, A)]]): Arbitrary[WriterT[F, L, A]] =
+    Arbitrary(arbFLA.arbitrary.map(WriterT(_)))
 
   implicit def kleisliEq[F[_], A](implicit eqv: Eq[F[A]]): Eq[Kleisli[F, Int, A]] =
     Eq.by(_(42))   // totally random and comprehensive seed

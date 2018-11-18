@@ -16,7 +16,7 @@
 
 package shims.effect.instances
 
-import cats.{Functor, Monad}
+import cats.{Functor, Monad, Monoid}
 import cats.effect.{
   Async,
   Bracket,
@@ -33,7 +33,7 @@ import cats.effect.{
 }
 import cats.syntax.all._
 
-import scalaz.{\/, -\/, \/-, EitherT, IndexedStateT, Kleisli, OptionT, StateT}
+import scalaz.{\/, -\/, \/-, EitherT, IndexedStateT, Kleisli, OptionT, StateT, WriterT}
 
 import shims.AsSyntaxModule
 import shims.conversions.{EitherConverters, MonadConversions, MonadErrorConversions}
@@ -94,6 +94,9 @@ trait MTLSync extends MTLBracket {
 
   implicit def scalazStateTSync[F[_]: Sync, S]: Sync[StateT[F, S, ?]] =
     new StateTSync[F, S] { def F = Sync[F] }
+
+  implicit def scalazWriterTSync[F[_]: Sync, L: Monoid]: Sync[WriterT[F, L, ?]] =
+    new WriterTSync[F, L] { def F = Sync[F]; def L = Monoid[L] }
 
   protected[this] trait OptionTSync[F[_]] extends Sync[OptionT[F, ?]] {
     protected implicit def F: Sync[F]
@@ -232,6 +235,45 @@ trait MTLSync extends MTLBracket {
     def suspend[A](thunk: => StateT[F, S, A]): StateT[F, S, A] =
       StateT(s => F.suspend(thunk.run(s)))
   }
+
+  protected[this] trait WriterTSync[F[_], L] extends Sync[WriterT[F, L, ?]] {
+    protected implicit def F: Sync[F]
+    protected implicit def L: Monoid[L]
+
+    def pure[A](x: A): WriterT[F, L, A] =
+      WriterT.put(F.pure(x))(L.empty)
+
+    def handleErrorWith[A](fa: WriterT[F, L, A])(f: Throwable => WriterT[F, L, A]): WriterT[F, L, A] =
+      WriterT.writerTMonadError[F, Throwable, L].handleError(fa)(f)
+
+    def raiseError[A](e: Throwable): WriterT[F, L, A] =
+      WriterT.writerTMonadError[F, Throwable, L].raiseError(e)
+
+    def bracketCase[A, B](acquire: WriterT[F, L, A])
+      (use: A => WriterT[F, L, B])
+      (release: (A, ExitCase[Throwable]) => WriterT[F, L, Unit]): WriterT[F, L, B] = {
+
+      uncancelable(acquire).flatMap { a =>
+        WriterT(
+          F.bracketCase(F.pure(a))(use.andThen(_.run)){ (a, res) =>
+            release(a, res).value
+          }
+        )
+      }
+    }
+
+    override def uncancelable[A](fa: WriterT[F, L, A]): WriterT[F, L, A] =
+      WriterT(F.uncancelable(fa.run))
+
+    def flatMap[A, B](fa: WriterT[F, L, A])(f: A => WriterT[F, L, B]): WriterT[F, L, B] =
+      fa.flatMap(f)
+
+    def tailRecM[A, B](a: A)(f: A => WriterT[F, L, Either[A, B]]): WriterT[F, L, B] =
+      WriterT.writerTBindRec[F, L].tailrecM(f.andThen(_.map(_.asScalaz)))(a)
+
+    def suspend[A](thunk: => WriterT[F, L, A]): WriterT[F, L, A] =
+      WriterT(F.suspend(thunk.run))
+  }
 }
 
 trait MTLAsync extends MTLSync {
@@ -248,11 +290,14 @@ trait MTLAsync extends MTLSync {
   implicit def scalazStateTAsync[F[_]: Async, S]: Async[StateT[F, S, ?]] =
     new StateTAsync[F, S] { def F = Async[F] }
 
+  implicit def scalazWriterTAsync[F[_]: Async, L: Monoid]: Async[WriterT[F, L, ?]] =
+    new WriterTAsync[F, L] { def F = Async[F]; def L = Monoid[L] }
+
   protected[this] trait OptionTAsync[F[_]] extends OptionTSync[F] with Async[OptionT[F, ?]] {
     protected implicit def F: Async[F]
 
     def asyncF[A](k: (Either[Throwable, A] => Unit) => OptionT[F, Unit]): OptionT[F, A] =
-      OptionT.optionTMonadTrans.liftM(F.asyncF((cb: Either[Throwable, A] => Unit) => F.as(k(cb).run, ())))
+      OptionT.optionTMonadTrans.liftM(F.asyncF((cb: Either[Throwable, A] => Unit) => k(cb).run.void))
 
     def async[A](k: (Either[Throwable, A] => Unit) => Unit): OptionT[F, A] =
       OptionT.optionTMonadTrans.liftM(F.async(k))
@@ -275,7 +320,7 @@ trait MTLAsync extends MTLSync {
       EitherT.rightT(F.async(k))
 
     def asyncF[A](k: (Either[Throwable, A] => Unit) => EitherT[F, L, Unit]): EitherT[F, L, A] =
-      EitherT.rightT(F.asyncF(cb => F.as(k(cb).run, ())))
+      EitherT.rightT(F.asyncF(cb => k(cb).run.void))
   }
 
   protected[this] trait StateTAsync[F[_], S] extends StateTSync[F, S] with Async[StateT[F, S, ?]] {
@@ -287,12 +332,25 @@ trait MTLAsync extends MTLSync {
     override def async[A](k: (Either[Throwable, A] => Unit) => Unit): StateT[F, S, A] =
       StateT.liftM(F.async(k))
   }
+
+  protected[this] trait WriterTAsync[F[_], L] extends WriterTSync[F, L] with Async[WriterT[F, L, ?]] {
+    protected implicit def F: Async[F]
+
+    override def asyncF[A](k: (Either[Throwable, A] => Unit) => WriterT[F, L, Unit]): WriterT[F, L, A] =
+      WriterT.put(F.asyncF((cb: Either[Throwable, A] => Unit) => k(cb).run.void))(L.empty)
+
+    override def async[A](k: (Either[Throwable, A] => Unit) => Unit): WriterT[F, L, A] =
+      WriterT.put(F.async(k))(L.empty)
+  }
 }
 
 trait MTLEffect extends MTLAsync {
 
   implicit def scalazEitherTEffect[F[_]: Effect]: Effect[EitherT[F, Throwable, ?]] =
     new EitherTEffect[F] { def F = Effect[F] }
+
+  implicit def scalazWriterTEffect[F[_]: Effect, L: Monoid]: Effect[WriterT[F, L, ?]] =
+    new WriterTEffect[F, L] { def F = Effect[F]; def L = Monoid[L] }
 
   protected[this] trait EitherTEffect[F[_]] extends EitherTAsync[F, Throwable] with Effect[EitherT[F, Throwable, ?]] {
     protected implicit def F: Effect[F]
@@ -303,6 +361,16 @@ trait MTLEffect extends MTLAsync {
     override def toIO[A](fa: EitherT[F, Throwable, A]): IO[A] =
       F.toIO(F.rethrow(fa.run.map(_.asCats)))
   }
+
+  protected[this] trait WriterTEffect[F[_], L] extends WriterTAsync[F, L] with Effect[WriterT[F, L, ?]] {
+    protected implicit def F: Effect[F]
+
+    def runAsync[A](fa: WriterT[F, L, A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] =
+      F.runAsync(fa.run)(cb.compose(_.right.map(_._2)))
+
+    override def toIO[A](fa: WriterT[F, L, A]): IO[A] =
+      F.toIO(fa.value)
+  }
 }
 
 trait MTLConcurrent extends MTLAsync {
@@ -312,6 +380,9 @@ trait MTLConcurrent extends MTLAsync {
 
   implicit def scalazKleisliConcurrent[F[_]: Concurrent, R]: Concurrent[Kleisli[F, R, ?]] =
     new KleisliConcurrent[F, R] { def F = Concurrent[F] }
+
+  implicit def scalazWriterTConcurrent[F[_]: Concurrent, L: Monoid]: Concurrent[WriterT[F, L, ?]] =
+    new WriterTConcurrent[F, L] { def F = Concurrent[F]; def L = Monoid[L] }
 
   protected[this] trait OptionTConcurrent[F[_]] extends OptionTAsync[F] with Concurrent[OptionT[F, ?]] {
     protected implicit def F: Concurrent[F]
@@ -400,12 +471,45 @@ trait MTLConcurrent extends MTLAsync {
     protected def fiberT[A](fiber: Fiber[F, L \/ A]): Fiber[EitherT[F, L, ?], A] =
       Fiber(EitherT.eitherT(fiber.join), EitherT.rightT(fiber.cancel))
   }
+
+  protected[this] trait WriterTConcurrent[F[_], L] extends WriterTAsync[F, L] with Concurrent[WriterT[F, L, ?]] {
+    protected implicit def F: Concurrent[F]
+
+    override def cancelable[A](k: (Either[Throwable, A] => Unit) => CancelToken[WriterT[F, L, ?]]): WriterT[F, L, A] =
+      WriterT.put(F.cancelable(k.andThen(_.run.void)))(L.empty)
+
+    override def start[A](fa: WriterT[F, L, A]) = {
+      WriterT(F.start(fa.run) map { fiber =>
+        (L.empty, fiberT[A](fiber))
+      })
+    }
+
+    override def racePair[A, B](
+        fa: WriterT[F, L, A],
+        fb: WriterT[F, L, B])
+        : WriterT[F, L, Either[(A, Fiber[WriterT[F, L, ?], B]), (Fiber[WriterT[F, L, ?], A], B)]] = {
+
+      WriterT(F.racePair(fa.run, fb.run) map {
+        case Left(((l, value), fiber)) =>
+          (l, Left((value, fiberT(fiber))))
+
+        case Right((fiber, (l, value))) =>
+          (l, Right((fiberT(fiber), value)))
+      })
+    }
+
+    protected def fiberT[A](fiber: Fiber[F, (L, A)]): Fiber[WriterT[F, L, ?], A] =
+      Fiber(WriterT(fiber.join), WriterT.put(fiber.cancel)(L.empty))
+  }
 }
 
 trait MTLConcurrentEffect extends MTLEffect with MTLConcurrent {
 
   implicit def scalazEitherTConcurrentEffect[F[_]: ConcurrentEffect]: ConcurrentEffect[EitherT[F, Throwable, ?]] =
     new EitherTConcurrentEffect[F] { def F = ConcurrentEffect[F] }
+
+  implicit def scalazWriterTConcurrentEffect[F[_]: ConcurrentEffect, L: Monoid]: ConcurrentEffect[WriterT[F, L, ?]] =
+    new WriterTConcurrentEffect[F, L] { def F = ConcurrentEffect[F]; def L = Monoid[L] }
 
   protected[this] trait EitherTConcurrentEffect[F[_]]
       extends EitherTEffect[F]
@@ -420,6 +524,20 @@ trait MTLConcurrentEffect extends MTLEffect with MTLConcurrent {
         : SyncIO[CancelToken[EitherT[F, Throwable, ?]]] =
       F.runCancelable(fa.run)(cb.compose(_.right.flatMap(x => x.asCats))).map(EitherT.rightT(_))
   }
+
+  protected[this] trait WriterTConcurrentEffect[F[_], L]
+      extends WriterTEffect[F, L]
+      with WriterTConcurrent[F, L]
+      with ConcurrentEffect[WriterT[F, L, ?]] {
+
+    protected implicit def F: ConcurrentEffect[F]
+
+    override def runCancelable[A](
+        fa: WriterT[F, L, A])(
+        cb: Either[Throwable, A] => IO[Unit])
+        : SyncIO[CancelToken[WriterT[F, L, ?]]] =
+      F.runCancelable(fa.run)(cb.compose(_.right.map(_._2))).map(WriterT.put(_)(L.empty))
+  }
 }
 
 trait MTLContextShift extends MonadConversions {
@@ -427,6 +545,7 @@ trait MTLContextShift extends MonadConversions {
   implicit def scalazOptionTContextShift[F[_]: Monad](
       implicit cs: ContextShift[F])
       : ContextShift[OptionT[F, ?]] = {
+
     new ContextShift[OptionT[F, ?]] {
       def shift: OptionT[F, Unit] =
         OptionT.optionTMonadTrans.liftM(cs.shift)
@@ -439,6 +558,7 @@ trait MTLContextShift extends MonadConversions {
   implicit def scalazKleisliContextShift[F[_], R](
       implicit cs: ContextShift[F])
       : ContextShift[Kleisli[F, R, ?]] = {
+
     new ContextShift[Kleisli[F, R, ?]] {
       def shift: Kleisli[F, R, Unit] =
         Kleisli(_ => cs.shift)
@@ -451,6 +571,7 @@ trait MTLContextShift extends MonadConversions {
   implicit def scalazEitherTContextShift[F[_]: Functor, L](
       implicit cs: ContextShift[F])
       : ContextShift[EitherT[F, L, ?]] = {
+
     new ContextShift[EitherT[F, L, ?]] {
       def shift: EitherT[F, L, Unit] =
         EitherT.rightT(cs.shift)
@@ -470,6 +591,19 @@ trait MTLContextShift extends MonadConversions {
 
       def evalOn[A](ec: ExecutionContext)(fa: StateT[F, S, A]): StateT[F, S, A] =
         StateT(s => cs.evalOn(ec)(fa.run(s)))
+    }
+  }
+
+  implicit def scalazWriterTContextShift[F[_]: Monad, L: Monoid](
+      implicit cs: ContextShift[F])
+      : ContextShift[WriterT[F, L, ?]] = {
+
+    new ContextShift[WriterT[F, L, ?]] {
+      def shift: WriterT[F, L, Unit] =
+        WriterT.put(cs.shift)(Monoid[L].empty)
+
+      def evalOn[A](ec: ExecutionContext)(fa: WriterT[F, L, A]): WriterT[F, L, A] =
+        WriterT(cs.evalOn(ec)(fa.run))
     }
   }
 }
