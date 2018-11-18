@@ -33,7 +33,7 @@ import cats.effect.{
 }
 import cats.syntax.all._
 
-import scalaz.{\/, -\/, \/-, EitherT, Kleisli, OptionT}
+import scalaz.{\/, -\/, \/-, EitherT, IndexedStateT, Kleisli, OptionT, StateT}
 
 import shims.AsSyntaxModule
 import shims.conversions.{EitherConverters, MonadConversions, MonadErrorConversions}
@@ -92,6 +92,9 @@ trait MTLSync extends MTLBracket {
   implicit def scalazEitherTSync[F[_]: Sync, L]: Sync[EitherT[F, L, ?]] =
     new EitherTSync[F, L] { def F = Sync[F] }
 
+  implicit def scalazStateTSync[F[_]: Sync, S]: Sync[StateT[F, S, ?]] =
+    new StateTSync[F, S] { def F = Sync[F] }
+
   protected[this] trait OptionTSync[F[_]] extends Sync[OptionT[F, ?]] {
     protected implicit def F: Sync[F]
 
@@ -127,6 +130,9 @@ trait MTLSync extends MTLBracket {
 
     def suspend[A](thunk: => OptionT[F, A]): OptionT[F, A] =
       OptionT(F.suspend(thunk.run))
+
+    override def uncancelable[A](fa: OptionT[F, A]): OptionT[F, A] =
+      OptionT(F.uncancelable(fa.run))
   }
 
   protected[this] trait KleisliSync[F[_], R]
@@ -188,6 +194,44 @@ trait MTLSync extends MTLBracket {
     override def uncancelable[A](fa: EitherT[F, L, A]): EitherT[F, L, A] =
       EitherT.eitherT(F.uncancelable(fa.run))
   }
+
+  protected[this] trait StateTSync[F[_], S] extends Sync[StateT[F, S, ?]] {
+    protected implicit def F: Sync[F]
+
+    def pure[A](x: A): StateT[F, S, A] = StateT.stateT(x)
+
+    def handleErrorWith[A](fa: StateT[F, S, A])(f: Throwable => StateT[F, S, A]): StateT[F, S, A] =
+      StateT(s => F.handleErrorWith(fa.run(s))(e => f(e).run(s)))
+
+    def raiseError[A](e: Throwable): StateT[F, S, A] =
+      StateT.liftM(F.raiseError(e))
+
+    def bracketCase[A, B](acquire: StateT[F, S, A])
+      (use: A => StateT[F, S, B])
+      (release: (A, ExitCase[Throwable]) => StateT[F, S, Unit]): StateT[F, S, B] = {
+
+      StateT { startS =>
+        F.bracketCase(acquire.run(startS)) { case (s, a) =>
+          use(a).run(s)
+        } { case ((s, a), br) =>
+          release(a, br).run(s).void
+        }
+      }
+    }
+
+    override def uncancelable[A](fa: StateT[F, S, A]): StateT[F, S, A] =
+      fa.mapT(F.uncancelable)
+
+    def flatMap[A, B](fa: StateT[F, S, A])(f: A => StateT[F, S, B]): StateT[F, S, B] =
+      fa.flatMap(f)
+
+    // overwriting the pre-existing one, since flatMap is guaranteed stack-safe
+    def tailRecM[A, B](a: A)(f: A => StateT[F, S, Either[A, B]]): StateT[F, S, B] =
+      IndexedStateT.stateTBindRec[S, F].tailrecM(f.andThen(_.map(_.asScalaz)))(a)
+
+    def suspend[A](thunk: => StateT[F, S, A]): StateT[F, S, A] =
+      StateT(s => F.suspend(thunk.run(s)))
+  }
 }
 
 trait MTLAsync extends MTLSync {
@@ -200,6 +244,9 @@ trait MTLAsync extends MTLSync {
 
   implicit def scalazEitherTAsync[F[_]: Async, L]: Async[EitherT[F, L, ?]] =
     new EitherTAsync[F, L] { def F = Async[F] }
+
+  implicit def scalazStateTAsync[F[_]: Async, S]: Async[StateT[F, S, ?]] =
+    new StateTAsync[F, S] { def F = Async[F] }
 
   protected[this] trait OptionTAsync[F[_]] extends OptionTSync[F] with Async[OptionT[F, ?]] {
     protected implicit def F: Async[F]
@@ -229,6 +276,16 @@ trait MTLAsync extends MTLSync {
 
     def asyncF[A](k: (Either[Throwable, A] => Unit) => EitherT[F, L, Unit]): EitherT[F, L, A] =
       EitherT.rightT(F.asyncF(cb => F.as(k(cb).run, ())))
+  }
+
+  protected[this] trait StateTAsync[F[_], S] extends StateTSync[F, S] with Async[StateT[F, S, ?]] {
+    protected implicit def F: Async[F]
+
+    override def asyncF[A](k: (Either[Throwable, A] => Unit) => StateT[F, S, Unit]): StateT[F, S, A] =
+      StateT(s => F.asyncF[A](cb => k(cb).eval(s)).map(a => (s, a)))
+
+    override def async[A](k: (Either[Throwable, A] => Unit) => Unit): StateT[F, S, A] =
+      StateT.liftM(F.async(k))
   }
 }
 
@@ -400,6 +457,19 @@ trait MTLContextShift extends MonadConversions {
 
       def evalOn[A](ec: ExecutionContext)(fa: EitherT[F, L, A]): EitherT[F, L, A] =
         EitherT.eitherT(cs.evalOn(ec)(fa.run))
+    }
+  }
+
+  implicit def scalazStateTContextShift[F[_]: Monad, S](
+      implicit cs: ContextShift[F])
+      : ContextShift[StateT[F, S, ?]] = {
+
+    new ContextShift[StateT[F, S, ?]] {
+      def shift: StateT[F, S, Unit] =
+        StateT.liftM(cs.shift)
+
+      def evalOn[A](ec: ExecutionContext)(fa: StateT[F, S, A]): StateT[F, S, A] =
+        StateT(s => cs.evalOn(ec)(fa.run(s)))
     }
   }
 }
