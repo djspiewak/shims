@@ -42,6 +42,48 @@ The reason for this is implicit ambiguity. `Effect` is a subtype of `cats.Monad`
 
 Don't use `scalaz.effect.IO`. Honestly. It's strictly worse than every other option out there. Search/replace your imports today.
 
+#### MTL
+
+Just as cats-effect provides lifted versions of its core typeclasses (`Sync`, `Async`, etc) for the cats monad transformers, so to does shims-effect provide such lifted instances for the scalaz monad transformers. Specifically:
+
+- `OptionT`
+  + `ContextShift`
+  + `LiftIO`
+  + `Sync`
+  + `Async`
+  + `Concurrent`
+- `Kleisli`
+  + `ContextShift`
+  + `LiftIO`
+  + `Sync`
+  + `Async`
+  + `Concurrent`
+- `EitherT`
+  + `ContextShift`
+  + `LiftIO`
+  + `Sync`
+  + `Async`
+  + `Concurrent`
+  + `Effect` (for `L = Throwable`)
+  + `ConcurrentEffect` (for `L = Throwable`)
+- `StateT`
+  + `ContextShift`
+  + `LiftIO`
+  + `Sync`
+  + `Async`
+- `WriterT` (given `Monoid[W]`)
+  + `ContextShift`
+  + `LiftIO`
+  + `Sync`
+  + `Async`
+  + `Concurrent`
+  + `Effect`
+  + `ConcurrentEffect`
+
+You'll notice that several `StateT`-related instances are missing (specifically: `Concurrent`, `Effect`, and `ConcurrentEffect` given `Monoid[S]`). This is intentional. These instances are highly dubious and I never should have added them to cats-effect.
+
+As a caveat, `scalaz.StateT` is *not* stack safe under repeated `bind`s. This is problematic because all `Sync`s are assumed to be stack-safe. Be very careful with this instance. It is included mostly because it's quite useful, but do not assume you can run arbitrarily long computational chains in the way that you can with `cats.StateT`.
+
 ### Typeclasses
 
 - `scalaz.effect.LiftIO`
@@ -53,6 +95,7 @@ This is sort of a quick FAQ on why this subproject doesn't do *more* than it cur
 
 - **Why not `ConcurrentEffect[Task]`?**
   + Because it's unsound. `Task` doesn't provide particularly robust or safe cancellation support, and it has absolutely no notion of guaranteed finalization. Therefore, it would not be able to lawfully implement the functions in `Concurrent`. Yes, this does mean that there are certain things you cannot do with `Task`, but they wouldn't be safe anyway.
+  + As an aside, it is *theoretically* possible to do this, but it would require reimplementing a lot of the safe preemption mechanisms which are built into `cats.effect.IO`, and frankly I just don't feel like there's a particular need for this. Just don't use `Task` if you can avoid it.
 - **Why not materialize `cats.effect.LiftIO`?**
   + Because it's unsound (this is a common theme). There's really no way to convert a `cats.effect.IO` to a `scalaz.effect.IO` without blocking a thread, due to the `async` constructor. We can go in the other direction only because `scalaz.effect.IO` is strictly less powerful than `cats.effect.IO`.
 - **Why not do something with `scalaz.Nondeterminism`?**
