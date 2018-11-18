@@ -28,6 +28,7 @@ import cats.effect.{
   ExitCase,
   Fiber,
   IO,
+  LiftIO,
   Sync,
   SyncIO
 }
@@ -276,7 +277,65 @@ trait MTLSync extends MTLBracket {
   }
 }
 
-trait MTLAsync extends MTLSync {
+trait MTLLiftIO extends MonadConversions {
+
+  implicit def scalazOptionTLiftIO[F[_]: LiftIO: Functor]: LiftIO[OptionT[F, ?]] =
+    new OptionTLiftIO[F] { def F = LiftIO[F]; def FF = Functor[F] }
+
+  implicit def scalazKleisliLiftIO[F[_]: LiftIO, R]: LiftIO[Kleisli[F, R, ?]] =
+    new KleisliLiftIO[F, R] { def F = LiftIO[F] }
+
+  implicit def scalazEitherTLiftIO[F[_]: LiftIO: Functor, L]: LiftIO[EitherT[F, L, ?]] =
+    new EitherTLiftIO[F, L] { def F = LiftIO[F]; def FF = Functor[F] }
+
+  implicit def scalazStateTLiftIO[F[_]: LiftIO: Monad, S]: LiftIO[StateT[F, S, ?]] =
+    new StateTLiftIO[F, S] { def F = LiftIO[F]; def FF = Monad[F] }
+
+  implicit def scalazWriterTLiftIO[F[_]: LiftIO: Functor, L: Monoid]: LiftIO[WriterT[F, L, ?]] =
+    new WriterTLiftIO[F, L] { def F = LiftIO[F]; def L = Monoid[L]; def FF = Functor[F] }
+
+  protected[this] trait OptionTLiftIO[F[_]] extends LiftIO[OptionT[F, ?]] {
+    protected implicit def F: LiftIO[F]
+    protected implicit def FF: Functor[F]
+
+    def liftIO[A](ioa: IO[A]): OptionT[F, A] =
+      OptionT(F.liftIO(ioa).map(Option(_)))
+  }
+
+  protected[this] trait KleisliLiftIO[F[_], R] extends LiftIO[Kleisli[F, R, ?]] {
+    protected implicit def F: LiftIO[F]
+
+    def liftIO[A](ioa: IO[A]): Kleisli[F, R, A] =
+      Kleisli(_ => F.liftIO(ioa))
+  }
+
+  protected[this] trait EitherTLiftIO[F[_], L] extends LiftIO[EitherT[F, L, ?]] {
+    protected implicit def F: LiftIO[F]
+    protected implicit def FF: Functor[F]
+
+    def liftIO[A](ioa: IO[A]): EitherT[F, L, A] =
+      EitherT.rightT(F.liftIO(ioa))
+  }
+
+  protected[this] trait StateTLiftIO[F[_], S] extends LiftIO[StateT[F, S, ?]] {
+    protected implicit def F: LiftIO[F]
+    protected implicit def FF: Monad[F]
+
+    def liftIO[A](ioa: IO[A]): StateT[F, S, A] =
+      StateT.liftM(F.liftIO(ioa))
+  }
+
+  protected[this] trait WriterTLiftIO[F[_], L] extends LiftIO[WriterT[F, L, ?]] {
+    protected implicit def F: LiftIO[F]
+    protected implicit def FF: Functor[F]
+    protected implicit def L: Monoid[L]
+
+    def liftIO[A](ioa: IO[A]): WriterT[F, L, A] =
+      WriterT.put(F.liftIO(ioa))(L.empty)
+  }
+}
+
+trait MTLAsync extends MTLSync with MTLLiftIO {
 
   implicit def scalazOptionTAsync[F[_]: Async]: Async[OptionT[F, ?]] =
     new OptionTAsync[F] { def F = Async[F] }
@@ -293,8 +352,13 @@ trait MTLAsync extends MTLSync {
   implicit def scalazWriterTAsync[F[_]: Async, L: Monoid]: Async[WriterT[F, L, ?]] =
     new WriterTAsync[F, L] { def F = Async[F]; def L = Monoid[L] }
 
-  protected[this] trait OptionTAsync[F[_]] extends OptionTSync[F] with Async[OptionT[F, ?]] {
+  protected[this] trait OptionTAsync[F[_]]
+      extends OptionTSync[F]
+      with OptionTLiftIO[F]
+      with Async[OptionT[F, ?]] {
+
     protected implicit def F: Async[F]
+    protected final def FF = F
 
     def asyncF[A](k: (Either[Throwable, A] => Unit) => OptionT[F, Unit]): OptionT[F, A] =
       OptionT.optionTMonadTrans.liftM(F.asyncF((cb: Either[Throwable, A] => Unit) => k(cb).run.void))
@@ -303,7 +367,11 @@ trait MTLAsync extends MTLSync {
       OptionT.optionTMonadTrans.liftM(F.async(k))
   }
 
-  protected[this] trait KleisliAsync[F[_], R] extends KleisliSync[F, R] with Async[Kleisli[F, R, ?]] {
+  protected[this] trait KleisliAsync[F[_], R]
+      extends KleisliSync[F, R]
+      with KleisliLiftIO[F, R]
+      with Async[Kleisli[F, R, ?]] {
+
     protected implicit def F: Async[F]
 
     override def asyncF[A](k: (Either[Throwable, A] => Unit) => Kleisli[F, R, Unit]): Kleisli[F, R, A] =
@@ -313,8 +381,13 @@ trait MTLAsync extends MTLSync {
       Kleisli(_ => F.async(k))
   }
 
-  protected[this] trait EitherTAsync[F[_], L] extends EitherTSync[F, L] with Async[EitherT[F, L, ?]] {
+  protected[this] trait EitherTAsync[F[_], L]
+      extends EitherTSync[F, L]
+      with EitherTLiftIO[F, L]
+      with Async[EitherT[F, L, ?]] {
+
     protected implicit def F: Async[F]
+    protected final def FF = F
 
     def async[A](k: (Either[Throwable, A] => Unit) => Unit): EitherT[F, L, A] =
       EitherT.rightT(F.async(k))
@@ -323,8 +396,13 @@ trait MTLAsync extends MTLSync {
       EitherT.rightT(F.asyncF(cb => k(cb).run.void))
   }
 
-  protected[this] trait StateTAsync[F[_], S] extends StateTSync[F, S] with Async[StateT[F, S, ?]] {
+  protected[this] trait StateTAsync[F[_], S]
+      extends StateTSync[F, S]
+      with StateTLiftIO[F, S]
+      with Async[StateT[F, S, ?]] {
+
     protected implicit def F: Async[F]
+    protected final def FF = F
 
     override def asyncF[A](k: (Either[Throwable, A] => Unit) => StateT[F, S, Unit]): StateT[F, S, A] =
       StateT(s => F.asyncF[A](cb => k(cb).eval(s)).map(a => (s, a)))
@@ -333,8 +411,13 @@ trait MTLAsync extends MTLSync {
       StateT.liftM(F.async(k))
   }
 
-  protected[this] trait WriterTAsync[F[_], L] extends WriterTSync[F, L] with Async[WriterT[F, L, ?]] {
+  protected[this] trait WriterTAsync[F[_], L]
+      extends WriterTSync[F, L]
+      with WriterTLiftIO[F, L]
+      with Async[WriterT[F, L, ?]] {
+
     protected implicit def F: Async[F]
+    protected final def FF = F
 
     override def asyncF[A](k: (Either[Throwable, A] => Unit) => WriterT[F, L, Unit]): WriterT[F, L, A] =
       WriterT.put(F.asyncF((cb: Either[Throwable, A] => Unit) => k(cb).run.void))(L.empty)
