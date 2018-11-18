@@ -18,7 +18,7 @@ Add the following to your SBT configuration:
 libraryDependencies += "com.codecommit" %% "shims" % "<version>"
 ```
 
-If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11 and 2.12.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  [Details here](https://github.com/typelevel/cats/tree/b23c7fbc117856910fa43de205457d8637eef8c6#getting-started).  A large number of conversions will simply *not work* without partial unification.
+If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11, 2.12, and 2.13-M4.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build.  [Details here](https://github.com/typelevel/cats/tree/b23c7fbc117856910fa43de205457d8637eef8c6#getting-started).  A large number of conversions will simply *not work* without partial unification.
 
 Once you have the dependency installed, simply add the following import to any scopes which require cats-scalaz interop:
 
