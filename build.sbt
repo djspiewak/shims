@@ -25,7 +25,9 @@ developers in ThisBuild ++= List(
     "@christopherdavenport",
     url("https://github.com/christopherdavenport")))
 
-homepage in ThisBuild := Some(url("https://github.com/djspiewak/shims"))
+organization in ThisBuild := "com.codecommit"
+publishGithubUser in ThisBuild := "djspiewak"
+publishFullName in ThisBuild := "Daniel Spiewak"
 
 scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
   "git@github.com:djspiewak/shims.git"))
