@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Daniel Spiewak
+ * Copyright 2019 Daniel Spiewak
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.1.0-M7")
+addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.1.0-M8")

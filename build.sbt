@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Daniel Spiewak
+ * Copyright 2019 Daniel Spiewak
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@
 
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-baseVersion in ThisBuild := "1.6"
+ThisBuild / baseVersion := "1.6"
 
-strictSemVer in ThisBuild := false     // 😢 maybe in 2.0...
+ThisBuild / strictSemVer := false     // 😢 maybe in 2.0...
 
-developers in ThisBuild ++= List(
+ThisBuild / developers ++= List(
   Developer(
     "christopherdavenport",
     "ChristopherDavenport",
     "@christopherdavenport",
     url("https://github.com/christopherdavenport")))
 
-organization in ThisBuild := "com.codecommit"
-publishGithubUser in ThisBuild := "djspiewak"
-publishFullName in ThisBuild := "Daniel Spiewak"
+ThisBuild / organization := "com.codecommit"
+ThisBuild / publishGithubUser := "djspiewak"
+ThisBuild / publishFullName := "Daniel Spiewak"
 
-scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
+ThisBuild / scmInfo := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
   "git@github.com:djspiewak/shims.git"))
 
 val CatsVersion = "1.4.0"
