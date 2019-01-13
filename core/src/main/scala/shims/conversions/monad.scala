@@ -114,7 +114,7 @@ trait RepresentableConversions extends FunctorConversions {
     new RepresentableC2S[F, X](functorToScalaz(Capture(FC.value.F))) { val FR = FC.value }
 }
 
-trait ApplyConversions extends FunctorConversions {
+trait ApplyConversions extends RepresentableConversions {
 
   private[conversions] trait ApplyShimS2C[F[_]] extends cats.Apply[F] with FunctorShimS2C[F] {
     val F: scalaz.Apply[F]
@@ -342,7 +342,7 @@ trait FlatMapConversions extends ApplyConversions with ComonadConversions {
     new BindRecShimC2S[F] { val F = FC.value }
 }
 
-trait MonadConversions extends ApplicativeConversions with FlatMapConversions {
+trait MonadConversions extends AlternativeConversions with DistributiveConversions with FlatMapConversions {
 
   private[conversions] trait MonadShimS2C[F[_]] extends cats.Monad[F] with ApplicativeShimS2C[F] with FlatMapShimS2C[F] {
     val F: scalaz.Monad[F]
