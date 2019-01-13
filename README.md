@@ -109,6 +109,7 @@ What follows is an alphabetized list (in terms of cats types) of typeclasses whi
 - `MonoidK`
 - `Order`
 - `Profunctor`
+- `Representable`
 - `Semigroup`
 - `SemigroupK`
 - `Show`

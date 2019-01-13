@@ -87,6 +87,33 @@ trait FunctorConversions extends IFunctorConversions with ContravariantConversio
     new FunctorShimC2S[F] { val F = FC.value }
 }
 
+trait RepresentableConversions extends FunctorConversions {
+
+  private[conversions] trait RepresentableS2C[F[_], X] extends cats.Representable[F] with Synthetic {
+    type Representation = X
+
+    val FR: scalaz.Representable[F, X]
+
+    def index[A](f: F[A]): X => A = FR.unrep(f)
+
+    def tabulate[A](f: X => A): F[A] = FR.rep(f)
+  }
+
+  implicit def representableToCats[F[_], X](implicit FC: Capture[scalaz.Representable[F, X]]): cats.Representable[F] with Synthetic { type Representation = X } =
+    new RepresentableS2C[F, X] { val FR = FC.value; val F = functorToCats(Capture(FC.value.F)) }
+
+  private[conversions] abstract class RepresentableC2S[F[_], X](F0: scalaz.Functor[F]) extends scalaz.Representable[F, X]()(F0) with Synthetic {
+    val FR: cats.Representable[F] { type Representation = X }
+
+    def rep[A](f: X => A): F[A] = FR.tabulate(f)
+
+    def unrep[A](f: F[A]): X => A = FR.index(f)
+  }
+
+  implicit def representableToScalaz[F[_], X](implicit FC: Capture[cats.Representable[F] { type Representation = X }]): scalaz.Representable[F, X] with Synthetic =
+    new RepresentableC2S[F, X](functorToScalaz(Capture(FC.value.F))) { val FR = FC.value }
+}
+
 trait ApplyConversions extends FunctorConversions {
 
   private[conversions] trait ApplyShimS2C[F[_]] extends cats.Apply[F] with FunctorShimS2C[F] {
