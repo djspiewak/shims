@@ -102,6 +102,48 @@ trait MonoidConversions extends SemigroupConversions {
     new MonoidShimC2S[A] { val A = FC.value }
 }
 
+trait SemigroupKConversions {
+
+  private[conversions] trait SemigroupKShimS2C[F[_]] extends cats.SemigroupK[F] with Synthetic {
+    val F: scalaz.Plus[F]
+
+    def combineK[A](x: F[A], y: F[A]): F[A] = F.plus(x, y)
+  }
+
+  implicit def plusToCats[F[_]](implicit FC: Capture[scalaz.Plus[F]]): cats.SemigroupK[F] with Synthetic =
+    new SemigroupKShimS2C[F] { val F = FC.value }
+
+  private[conversions] trait PlusShimC2S[F[_]] extends scalaz.Plus[F] with Synthetic {
+    val F: cats.SemigroupK[F]
+
+    def plus[A](a: F[A], b: => F[A]): F[A] = F.combineK(a, b)
+  }
+
+  implicit def semigroupKToScalaz[F[_]](implicit FC: Capture[cats.SemigroupK[F]]): scalaz.Plus[F] with Synthetic =
+    new PlusShimC2S[F] { val F = FC.value }
+}
+
+trait MonoidKConversions extends SemigroupKConversions {
+
+  private[conversions] trait MonoidKShimS2C[F[_]] extends cats.MonoidK[F] with SemigroupKShimS2C[F] {
+    val F: scalaz.PlusEmpty[F]
+
+    def empty[A]: F[A] = F.empty[A]
+  }
+
+  implicit def plusEmptyToCats[F[_]](implicit FC: Capture[scalaz.PlusEmpty[F]]): cats.MonoidK[F] with Synthetic =
+    new MonoidKShimS2C[F] { val F = FC.value }
+
+  private[conversions] trait PlusEmptyShimC2S[F[_]] extends scalaz.PlusEmpty[F] with PlusShimC2S[F] {
+    val F: cats.MonoidK[F]
+
+    def empty[A]: F[A] = F.empty[A]
+  }
+
+  implicit def monoidKToScalaz[F[_]](implicit FC: Capture[cats.MonoidK[F]]): scalaz.PlusEmpty[F] with Synthetic =
+    new PlusEmptyShimC2S[F] { val F = FC.value }
+}
+
 // "kernel" is such an ill-defined thing...
 trait ShowConversions {
 

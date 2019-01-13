@@ -131,6 +131,23 @@ trait ApplicativeConversions extends ApplyConversions {
     new ApplicativeShimC2S[F] { val F = FC.value }
 }
 
+trait AlternativeConversions extends ApplicativeConversions with MonoidKConversions {
+
+  private[conversions] trait AlternativeShimS2C[F[_]] extends cats.Alternative[F] with ApplicativeShimS2C[F] with MonoidKShimS2C[F] {
+    val F: scalaz.ApplicativePlus[F]
+  }
+
+  implicit def applicativePlusToCats[F[_]](implicit FC: Capture[scalaz.ApplicativePlus[F]]): cats.Alternative[F] with Synthetic =
+    new AlternativeShimS2C[F] { val F = FC.value }
+
+  private[conversions] trait ApplicativePlusShimC2S[F[_]] extends scalaz.ApplicativePlus[F] with ApplicativeShimC2S[F] with PlusEmptyShimC2S[F] {
+    val F: cats.Alternative[F]
+  }
+
+  implicit def alternativeToScalaz[F[_]](implicit FC: Capture[cats.Alternative[F]]): scalaz.ApplicativePlus[F] with Synthetic =
+    new ApplicativePlusShimC2S[F] { val F = FC.value }
+}
+
 trait FoldableConversions extends MonoidConversions with ApplicativeConversions {
 
   private[conversions] trait FoldableShimS2C[F[_]] extends cats.Foldable[F] with Synthetic {

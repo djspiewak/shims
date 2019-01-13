@@ -21,6 +21,7 @@ import shims.conversions._
 trait ShimsCore extends MonadErrorConversions
     with MonoidConversions
     with ShowConversions
+    with AlternativeConversions
     with BitraverseConversions
     with ChoiceConversions
     with InjectConversions

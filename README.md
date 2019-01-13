@@ -74,6 +74,8 @@ Typeclass conversions are *transparent*, meaning that they will materialize full
 
 What follows is an alphabetized list (in terms of cats types) of typeclasses which are bidirectionally converted.  In all cases except where noted, the conversion is exactly as trivial as it seems.
 
+- `Alternative`
+  + Note that `MonadPlus` doesn't exist in Cats. I'm not sure if this is an oversight. At present, no conversions are attempted, even when `Alternative` and `FlatMap` are present for a given `F[_]`. Change my mind.
 - `Applicative`
 - `Apply`
 - `Arrow`
@@ -103,9 +105,11 @@ What follows is an alphabetized list (in terms of cats types) of typeclasses whi
 - `MonadError`
   + Similar requirements to `Monad`
 - `Monoid`
+- `MonoidK`
 - `Order`
 - `Profunctor`
 - `Semigroup`
+- `SemigroupK`
 - `Show`
   + The cats → scalaz conversion requires a `Show.ContravariantShow` (which is the supertype of `Show`), just for extra flexibility. This should be invisible to users 99% of the time.
 - `Strong`
