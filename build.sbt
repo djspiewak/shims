@@ -16,7 +16,7 @@
 
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-ThisBuild / baseVersion := "1.6"
+ThisBuild / baseVersion := "1.7"
 
 ThisBuild / strictSemVer := false     // 😢 maybe in 2.0...
 
