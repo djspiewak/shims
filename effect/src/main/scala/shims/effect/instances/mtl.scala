@@ -439,7 +439,7 @@ trait MTLEffect extends MTLAsync {
     protected implicit def F: Effect[F]
 
     def runAsync[A](fa: EitherT[F, Throwable, A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] =
-      F.runAsync(fa.run)(cb.compose(_.right.flatMap(x => x.asCats)))
+      F.runAsync(fa.run)(cb.compose(_.flatMap(x => x.asCats)))
 
     override def toIO[A](fa: EitherT[F, Throwable, A]): IO[A] =
       F.toIO(F.rethrow(fa.run.map(_.asCats)))
@@ -449,7 +449,7 @@ trait MTLEffect extends MTLAsync {
     protected implicit def F: Effect[F]
 
     def runAsync[A](fa: WriterT[F, L, A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] =
-      F.runAsync(fa.run)(cb.compose(_.right.map(_._2)))
+      F.runAsync(fa.run)(cb.compose(_.map(_._2)))
 
     override def toIO[A](fa: WriterT[F, L, A]): IO[A] =
       F.toIO(fa.value)
@@ -605,7 +605,7 @@ trait MTLConcurrentEffect extends MTLEffect with MTLConcurrent {
         fa: EitherT[F, Throwable, A])(
         cb: Either[Throwable, A] => IO[Unit])
         : SyncIO[CancelToken[EitherT[F, Throwable, ?]]] =
-      F.runCancelable(fa.run)(cb.compose(_.right.flatMap(x => x.asCats))).map(EitherT.rightT(_))
+      F.runCancelable(fa.run)(cb.compose(_.flatMap(x => x.asCats))).map(EitherT.rightT(_))
   }
 
   protected[this] trait WriterTConcurrentEffect[F[_], L]
@@ -619,7 +619,7 @@ trait MTLConcurrentEffect extends MTLEffect with MTLConcurrent {
         fa: WriterT[F, L, A])(
         cb: Either[Throwable, A] => IO[Unit])
         : SyncIO[CancelToken[WriterT[F, L, ?]]] =
-      F.runCancelable(fa.run)(cb.compose(_.right.map(_._2))).map(WriterT.put(_)(L.empty))
+      F.runCancelable(fa.run)(cb.compose(_.map(_._2))).map(WriterT.put(_)(L.empty))
   }
 }
 

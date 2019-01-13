@@ -44,8 +44,8 @@ For more information, see the [**shims-effect** subproject readme](effect/README
 
 ### Upstream Dependencies
 
-- cats 1.4.0
-- scalaz 7.2.26
+- cats 1.5.0
+- scalaz 7.2.27
 
 At present, there is no complex build matrix of craziness to provide support for other major versions of each library.  This will probably come in time, when I've become sad and jaded, and possibly when I have received a pull request for it.
 

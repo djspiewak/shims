@@ -20,7 +20,10 @@ package shims.conversions
 import shims.util.{Capture, OptionCapture}
 
 import scalaz.{~>, \/, \&/}
+
 import cats.arrow.FunctionK
+import cats.instances.either._
+import cats.syntax.bifunctor._
 
 trait AsScalaz[-I, +O] {
   def c2s(i: I): O
@@ -170,10 +173,10 @@ trait ValidatedNELConverters extends ValidatedConverters with NELConverters {
   implicit def validatedNelAs[E, A] = new AsScalaz[cats.data.ValidatedNel[E, A], scalaz.ValidationNel[E, A]] with AsCats[scalaz.ValidationNel[E, A], cats.data.ValidatedNel[E, A]] {
 
     def s2c(i: scalaz.ValidationNel[E, A]): cats.data.ValidatedNel[E, A] =
-      cats.data.Validated.fromEither(i.disjunction.toEither.left.map(nelAs[E].s2c(_)))
+      cats.data.Validated.fromEither(i.disjunction.toEither.leftMap(nelAs[E].s2c(_)))
 
     def c2s(i: cats.data.ValidatedNel[E, A]): scalaz.ValidationNel[E, A] =
-      scalaz.Validation.fromEither(i.toEither.left.map(nelAs[E].c2s(_)))
+      scalaz.Validation.fromEither(i.toEither.leftMap(nelAs[E].c2s(_)))
   }
 }
 

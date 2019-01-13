@@ -17,12 +17,16 @@
 package shims.conversions
 
 import cats.Eval
+import cats.instances.either._
+import cats.syntax.bifunctor._
+
 import scalaz.\/
 
 import shims.AsSyntax
-import shims.util.{Capture, EitherCapture, OptionCapture}
+import shims.util.{Capture, EitherCapture, EitherBiasing, OptionCapture}, EitherBiasing._
 
 trait IFunctorConversions {
+  Derp    // workaround for the workaround to either biasing changing every friggin release
 
   private[conversions] trait IFunctorShimS2C[F[_]] extends cats.Invariant[F] with Synthetic {
     val F: scalaz.InvariantFunctor[F]
@@ -312,8 +316,8 @@ trait FlatMapConversions extends ApplyConversions with ComonadConversions {
     override def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] = F.bind(fa)(f)
 
     override def tailRecM[A, B](a: A)(f: A => F[Either[A, B]]): F[B] = {
-      val unsafe = AppOrBindRec.left.map(unsafeTailRecM(_)(a)(f))
-      val delegate = unsafe.right.map(_.tailrecM((a: A) => F.map(f(a))(_.asScalaz))(a))
+      val unsafe = AppOrBindRec.leftMap(unsafeTailRecM(_)(a)(f))
+      val delegate = unsafe.map(_.tailrecM((a: A) => F.map(f(a))(_.asScalaz))(a))
 
       delegate.merge
     }

@@ -34,15 +34,15 @@ ThisBuild / publishFullName := "Daniel Spiewak"
 ThisBuild / scmInfo := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
   "git@github.com:djspiewak/shims.git"))
 
-val CatsVersion = "1.4.0"
-val ScalazVersion = "7.2.26"
+val CatsVersion = "1.5.0"
+val ScalazVersion = "7.2.27"
 
-val CatsEffectVersion = "1.0.0"
+val CatsEffectVersion = "1.1.0"
 
 val Specs2Version = Def setting {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, v)) if v <= 12 => "4.1.2"
-    case _ => "4.3.4"
+    case _ => "4.3.5"
   }
 }
 

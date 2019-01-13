@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-package shims
+package shims.util
 
-import shims.util.EitherCapture
-
-object Test {
-  trait Foo
-  implicit case object Foo extends Foo
-  trait Bar
-
-  implicitly[EitherCapture[Foo, Bar]]
+private[shims] object EitherBiasing {
+  object Derp
 }

@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package shims
+package shims.util
 
-import shims.util.EitherCapture
+private[shims] object EitherBiasing {
+  object Derp
 
-object Test {
-  trait Foo
-  implicit case object Foo extends Foo
-  trait Bar
-
-  implicitly[EitherCapture[Foo, Bar]]
+  implicit final class RightBiasedSyntax[A, B](val self: Either[A, B]) extends AnyVal {
+    def map[C](f: B => C): Either[A, C] = self.right.map(f)
+    def flatMap[C](f: B => Either[A, C]): Either[A, C] = self.right.flatMap(f)
+  }
 }

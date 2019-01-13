@@ -93,19 +93,24 @@ object MonadConversionSpecs extends Specification with Discipline {
 
   "traverse" >> {
     import scalaz.std.list._
+    import shims.conversions.Synthetic
 
     // bonkers-unsafe lifting here, but idc
     // these functions are needed because cats has a
     // nominatively abelean hierarchy, while scalaz
     // does not
 
-    implicit def unsafeLiftApp[F[_]](implicit F: cats.Applicative[F]): cats.CommutativeApplicative[F] =
+    // the `with Synthetic` is required here to work around an interesting
+    // bug in 2.13 that I couldn't really minimize, likely caused by even
+    // more shenanigans in the diverging implicit checks inside NSC
+
+    implicit def unsafeLiftApp[F[_]](implicit F: cats.Applicative[F] with Synthetic): cats.CommutativeApplicative[F] =
       new cats.CommutativeApplicative[F] {
         def pure[A](a: A) = F.pure(a)
         def ap[A, B](ff: F[A => B])(fa: F[A]) = F.ap(ff)(fa)
       }
 
-    implicit def unsafeLiftMonoid[A](implicit A: cats.kernel.Monoid[A]): cats.kernel.CommutativeMonoid[A] =
+    implicit def unsafeLiftMonoid[A](implicit A: cats.kernel.Monoid[A] with Synthetic): cats.kernel.CommutativeMonoid[A] =
       new cats.kernel.CommutativeMonoid[A] {
         def empty = A.empty
         def combine(x: A, y: A) = A.combine(x, y)
