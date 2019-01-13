@@ -148,6 +148,29 @@ trait AlternativeConversions extends ApplicativeConversions with MonoidKConversi
     new ApplicativePlusShimC2S[F] { val F = FC.value }
 }
 
+trait DistributiveConversions extends FunctorConversions {
+
+  private[conversions] trait DistributiveShimS2C[F[_]] extends cats.Distributive[F] with FunctorShimS2C[F] {
+    val F: scalaz.Distributive[F]
+
+    def distribute[G[_]: cats.Functor, A, B](ga: G[A])(f: A => F[B]): F[G[B]] =
+      F.distribute[G, A, B](ga)(f)(functorToScalaz(Capture(cats.Functor[G])))
+  }
+
+  implicit def distributiveToCats[F[_]](implicit FC: Capture[scalaz.Distributive[F]]): cats.Distributive[F] with Synthetic =
+    new DistributiveShimS2C[F] { val F = FC.value }
+
+  private[conversions] trait DistributiveShimC2S[F[_]] extends scalaz.Distributive[F] with FunctorShimC2S[F] {
+    val F: cats.Distributive[F]
+
+    def distributeImpl[G[_]: scalaz.Functor, A, B](ga: G[A])(f: A => F[B]): F[G[B]] =
+      F.distribute[G, A, B](ga)(f)(functorToCats(Capture(scalaz.Functor[G])))
+  }
+
+  implicit def distributiveToScalaz[F[_]](implicit FC: Capture[cats.Distributive[F]]): scalaz.Distributive[F] with Synthetic =
+    new DistributiveShimC2S[F] { val F = FC.value }
+}
+
 trait FoldableConversions extends MonoidConversions with ApplicativeConversions {
 
   private[conversions] trait FoldableShimS2C[F[_]] extends cats.Foldable[F] with Synthetic {

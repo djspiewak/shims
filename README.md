@@ -90,6 +90,7 @@ What follows is an alphabetized list (in terms of cats types) of typeclasses whi
 - `Comonad`
 - `Compose`
 - `Contravariant`
+- `Distributive`
 - `Eq`
 - `FlatMap`
   + Requires `Bind[F]` and *either* `BindRec[F]` *or* `Applicative[F]`.  This is because the cats equivalent of `scalaz.Bind` is actually `scalaz.BindRec`.  If an instance of `BindRec` is visible, it will be used to implement the `tailRecM` function.  Otherwise, a stack-*unsafe* `tailRecM` will be implemented in terms of `flatMap` and `point`.
