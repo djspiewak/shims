@@ -31,7 +31,8 @@ ThisBuild / organization := "com.codecommit"
 ThisBuild / publishGithubUser := "djspiewak"
 ThisBuild / publishFullName := "Daniel Spiewak"
 
-ThisBuild / scmInfo := Some(ScmInfo(url("https://github.com/djspiewak/shims"),
+ThisBuild / homepage := Some(url("https://github.com/djspiewak/shims"))
+ThisBuild / scmInfo := Some(ScmInfo(homepage.value.get,
   "git@github.com:djspiewak/shims.git"))
 
 val CatsVersion = "1.5.0"
