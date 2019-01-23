@@ -16,8 +16,9 @@
 
 package shims.effect
 
-import scalaz.\/
+import scalaz.{Tag, \/}
 import scalaz.concurrent.Task
+import scalaz.concurrent.Task.ParallelTask
 
 import org.scalacheck._
 
@@ -25,6 +26,9 @@ object TaskArbitrary {
 
   implicit def arbitraryTask[A: Arbitrary: Cogen]: Arbitrary[Task[A]] =
     Arbitrary(Gen.delay(genTask[A]))
+
+  implicit def arbitraryParallelTask[A: Arbitrary: Cogen]: Arbitrary[ParallelTask[A]] =
+    Tag.subst(arbitraryTask[A])
 
   // TODO
   implicit def cogenTask[A]: Cogen[Task[A]] =

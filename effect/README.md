@@ -38,6 +38,7 @@ The reason for this is implicit ambiguity. `Effect` is a subtype of `cats.Monad`
 ### Instances
 
 - `Effect[scalaz.concurrent.Task]`
+- `Parallel[scalaz.concurrent.Task, scalaz.concurrent.Task.ParallelTask]`
 - `Sync[scalaz.effect.IO]`
 
 Don't use `scalaz.effect.IO`. Honestly. It's strictly worse than every other option out there. Search/replace your imports today.

@@ -16,10 +16,11 @@
 
 package shims.effect.instances
 
-import cats.StackSafeMonad
+import cats.{Applicative, Monad, Parallel, StackSafeMonad, ~>}
 import cats.effect.{Effect, ExitCase, IO, SyncIO}
 
-import scalaz.{\/, -\/, \/-}
+import scalaz.{Tag, -\/, \/, \/-}
+import scalaz.concurrent.Task.ParallelTask
 import scalaz.concurrent.{Future, Task}
 
 import shims.conversions.MonadErrorConversions
@@ -93,6 +94,15 @@ trait TaskInstances extends MonadErrorConversions {
     override def delay[A](thunk: => A): Task[A] = Task.delay(thunk)
 
     def suspend[A](thunk: => Task[A]): Task[A] = Task.suspend(thunk)
+  }
+
+  implicit val taskParallel: Parallel[Task, ParallelTask] = new Parallel[Task, ParallelTask] {
+    import Task.taskParallelApplicativeInstance
+
+    val monad: Monad[Task] = taskEffect
+    val applicative: Applicative[ParallelTask] = Applicative[ParallelTask]
+    val sequential: ParallelTask ~> Task = λ[ParallelTask ~> Task](Tag.unwrap(_))
+    val parallel: Task ~> ParallelTask = λ[Task ~> ParallelTask](Tag(_))
   }
 
   private def functionToPartial[A, B](f: A => B): PartialFunction[A, B] = _ match {

@@ -17,6 +17,7 @@
 package shims.effect
 
 import cats.Eq
+import cats.laws.discipline.{ApplicativeTests, ParallelTests}
 
 import cats.effect.IO
 import cats.effect.laws.discipline.{arbitrary, EffectTests}, arbitrary._
@@ -27,7 +28,9 @@ import cats.instances.int._
 import cats.instances.tuple._
 import cats.instances.unit._
 
+import scalaz.Tag
 import scalaz.concurrent.Task
+import scalaz.concurrent.Task.ParallelTask
 
 import org.specs2.Specification
 import org.specs2.scalacheck.Parameters
@@ -38,9 +41,20 @@ import org.typelevel.discipline.specs2.Discipline
 
 object TaskInstancesSpecs extends Specification with Discipline {
   import TaskArbitrary._
+  import Task.taskParallelApplicativeInstance
 
-  def is =
-    br ^ checkAllAsync("Task", implicit ctx => EffectTests[Task].effect[Int, Int, Int])
+  def is = br ^ taskEff ^ br ^ taskPar ^ br ^ parTaskApp
+
+  def taskEff = checkAllAsync("Effect[Task]",
+    implicit ctx => EffectTests[Task].effect[Int, Int, Int])
+
+  def taskPar = checkAllAsync("Parallel[Task, ParallelTask]",
+    implicit ctx => ParallelTests[Task, ParallelTask].parallel[Int, Int])
+
+  def parTaskApp = checkAllAsync("Parallel[Task, ParallelTask]", { implicit ctx =>
+    val tests = ApplicativeTests[ParallelTask]
+    tests.applicative[Int, Int, Int]
+  })
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
@@ -54,4 +68,7 @@ object TaskInstancesSpecs extends Specification with Discipline {
 
   implicit def taskEq[A: Eq](implicit ctx: TestContext): Eq[Task[A]] =
     Eq.by(ta => IO.async[A](k => ta.unsafePerformAsync(e => k(e.toEither))))
+
+  implicit def parallelTaskEq[A: Eq](implicit ctx: TestContext): Eq[ParallelTask[A]] =
+    Tag.subst(taskEq[A])
 }
