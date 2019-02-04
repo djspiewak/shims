@@ -27,6 +27,8 @@ import shims.conversions.MonadErrorConversions
 
 import java.util.concurrent.atomic.AtomicBoolean
 
+import scala.util.control.NonFatal
+
 trait TaskInstances extends MonadErrorConversions {
 
   // cribbed from quasar, where it was mostly cribbed from scalaz-task-effect
@@ -42,11 +44,14 @@ trait TaskInstances extends MonadErrorConversions {
     // In order to comply with `repeatedCallbackIgnored` law
     // on async, a custom AtomicBoolean is required to ignore
     // second callbacks.
-    def async[A](k: (Either[Throwable, A] => Unit) => Unit): Task[A] =
-      Task.async(singleUseCallback(k))
+    def async[A](k: (Either[Throwable, A] => Unit) => Unit): Task[A] = Task.async { registered =>
+      val a = new AtomicBoolean(true)
+      try k(e => if (a.getAndSet(false)) registered(\/.fromEither(e)) else ())
+      catch { case NonFatal(t) => registered(-\/(t)) }
+    }
 
     def asyncF[A](k: (Either[Throwable, A] => Unit) => Task[Unit]): Task[A] =
-      Task.async(cb => singleUseCallback(k)(cb).unsafePerformSync)
+      async(k.andThen(_.unsafePerformAsync(forget)))
 
     // emulates using attempt
     def bracketCase[A, B](acquire: Task[A])(use: A => Task[B])(release: (A, ExitCase[Throwable]) => Task[Unit]): Task[B] = {
@@ -55,7 +60,7 @@ trait TaskInstances extends MonadErrorConversions {
         bOr <- use(a).attempt
         ec = bOr.fold(ExitCase.Error(_), _ => ExitCase.Completed)
         _ <- release(a, ec)
-        b <- bOr.fold(Task.fail(_), Task.now(_))
+        b <- bOr.fold(Task.fail, Task.now)
       } yield b
     }
 
@@ -70,7 +75,7 @@ trait TaskInstances extends MonadErrorConversions {
     def runAsync[A](fa: Task[A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] =
       SyncIO {
         fa unsafePerformAsync { disjunction =>
-          cb(disjunction.toEither).unsafeRunAsync(_ => ())
+          cb(disjunction.toEither).unsafeRunAsync(forget)
         }
       }
 
@@ -105,12 +110,9 @@ trait TaskInstances extends MonadErrorConversions {
     val parallel: Task ~> ParallelTask = λ[Task ~> ParallelTask](Tag(_))
   }
 
-  private def functionToPartial[A, B](f: A => B): PartialFunction[A, B] = _ match {
+  private def functionToPartial[A, B](f: A => B): PartialFunction[A, B] = {
     case a => f(a)
   }
 
-  private def singleUseCallback[A, B](f: (Either[Throwable, A] => Unit) => B): (Throwable \/ A => Unit) => B = { registered =>
-    val a = new AtomicBoolean(true)
-    f(e => if (a.getAndSet(false)) { registered(\/.fromEither(e)) } else ())
-  }
+  private def forget[A](x: A): Unit = ()
 }

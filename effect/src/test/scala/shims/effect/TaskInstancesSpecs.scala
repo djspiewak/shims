@@ -19,7 +19,7 @@ package shims.effect
 import cats.Eq
 import cats.laws.discipline.{ApplicativeTests, ParallelTests}
 
-import cats.effect.IO
+import cats.effect.{Async, IO}
 import cats.effect.laws.discipline.{arbitrary, EffectTests}, arbitrary._
 import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances._
 
@@ -39,11 +39,15 @@ import org.specs2.specification.core.Fragments
 import org.typelevel.discipline.Laws
 import org.typelevel.discipline.specs2.Discipline
 
+import java.util.concurrent.RejectedExecutionException
+
+import scala.concurrent.ExecutionContext
+
 object TaskInstancesSpecs extends Specification with Discipline {
   import TaskArbitrary._
   import Task.taskParallelApplicativeInstance
 
-  def is = br ^ taskEff ^ br ^ taskPar ^ br ^ parTaskApp
+  def is = br ^ taskEff ^ br ^ taskPar ^ br ^ parTaskApp ^ br ^ asyncShiftTask
 
   def taskEff = checkAllAsync("Effect[Task]",
     implicit ctx => EffectTests[Task].effect[Int, Int, Int])
@@ -55,6 +59,19 @@ object TaskInstancesSpecs extends Specification with Discipline {
     val tests = ApplicativeTests[ParallelTask]
     tests.applicative[Int, Int, Int]
   })
+
+  def asyncShiftTask = {
+    implicit val context: TestContext = TestContext()
+    val boom = new RejectedExecutionException("Boom")
+    val rejectingEc = new ExecutionContext {
+      def execute(runnable: Runnable): Unit = throw boom
+      def reportFailure(cause: Throwable): Unit = ()
+    }
+
+    "async.shift on rejecting execution context" ! {
+      Eq[Task[Unit]].eqv(Async.shift[Task](rejectingEc), Task.fail(boom)) must beTrue
+    }
+  }
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
