@@ -38,7 +38,7 @@ ThisBuild / scmInfo := Some(ScmInfo(homepage.value.get,
 val CatsVersion = "1.6.0"
 val ScalazVersion = "7.2.27"
 
-val CatsEffectVersion = "1.3.0"
+val CatsEffectVersion = "1.3.1"
 
 val Specs2Version = Def setting {
   CrossVersion.partialVersion(scalaVersion.value) match {
