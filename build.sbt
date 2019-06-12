@@ -35,31 +35,16 @@ ThisBuild / homepage := Some(url("https://github.com/djspiewak/shims"))
 ThisBuild / scmInfo := Some(ScmInfo(homepage.value.get,
   "git@github.com:djspiewak/shims.git"))
 
-val CatsVersion = "1.6.0"
+val CatsVersion = "2.0.0-M4"
 val ScalazVersion = "7.2.27"
 
-val CatsEffectVersion = "1.3.0"
+val CatsEffectVersion = "2.0.0-M3"
 
-val Specs2Version = Def setting {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, v)) if v <= 12 => "4.1.2"
-    case _ => "4.3.5"
-  }
-}
+val Specs2Version = Def setting { "4.5.1" }
 
-val ScalaCheckVersion = Def setting {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, v)) if v <= 12 => "1.13.5"
-    case _ => "1.14.0"
-  }
-}
+val ScalaCheckVersion = Def setting { "1.14.0" }
 
-val DisciplineVersion = Def setting {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, v)) if v <= 12 => "0.9.0"
-    case _ => "0.10.0"
-  }
-}
+val DisciplineVersion = Def setting { "0.12.0-M3" }
 
 val testFrameworkSettings = Seq(
   libraryDependencies ++= Seq(
@@ -81,13 +66,16 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "shims",
 
+    // TODO https://github.com/djspiewak/sbt-spiewak/pull/4
+    addCompilerPlugin("org.typelevel" % "kind-projector" % "0.10.3" cross CrossVersion.binary),
+
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-core"   % CatsVersion,
       "org.typelevel" %%% "cats-free"   % CatsVersion,
       "org.scalaz"    %%% "scalaz-core" % ScalazVersion,
 
-      "org.typelevel"  %%  "discipline"       % DisciplineVersion.value % Test,
-      "org.typelevel"  %%% "cats-laws"        % CatsVersion             % Test),
+      "org.typelevel"  %%  "discipline-specs2" % DisciplineVersion.value % Test,
+      "org.typelevel"  %%% "cats-laws"         % CatsVersion             % Test),
 
     // cribbed from shapeless
     libraryDependencies ++= Seq(
@@ -126,8 +114,12 @@ lazy val effect = project
       "org.typelevel" %% "cats-effect"       % CatsEffectVersion,
       "org.scalaz"    %% "scalaz-concurrent" % ScalazVersion,
 
-      "org.typelevel" %% "discipline"        % DisciplineVersion.value % Test,
+      "org.typelevel" %% "discipline-specs2" % DisciplineVersion.value % Test,
       "org.typelevel" %% "cats-effect-laws"  % CatsEffectVersion       % Test))
 
 // intentionally not in the aggregation
 lazy val scratch = project.dependsOn(coreJVM)
+ .settings(
+   // TODO https://github.com/djspiewak/sbt-spiewak/pull/4
+   addCompilerPlugin("org.typelevel" % "kind-projector" % "0.10.3" cross CrossVersion.binary),
+ )

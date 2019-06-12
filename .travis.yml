@@ -3,9 +3,13 @@ language: scala
 matrix:
   include:
     - jdk: oraclejdk8
-      scala: '2.13.0-M5'
+      scala: '2.13.0'
+      script:
+      - sbt "++${TRAVIS_SCALA_VERSION}!" coreJVM/test coreJS/test scratch/test # TODO cats-effect for Scala 2.13
     - jdk: oraclejdk11
-      scala: '2.13.0-M5'
+      scala: '2.13.0'
+      script:
+      - sbt "++${TRAVIS_SCALA_VERSION}!" coreJVM/test coreJS/test scratch/test # TODO cats-effect for Scala 2.13
     - jdk: oraclejdk8
       scala: '2.11.12'
     - jdk: oraclejdk11
