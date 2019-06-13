@@ -66,9 +66,6 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "shims",
 
-    // TODO https://github.com/djspiewak/sbt-spiewak/pull/4
-    addCompilerPlugin("org.typelevel" % "kind-projector" % "0.10.3" cross CrossVersion.binary),
-
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-core"   % CatsVersion,
       "org.typelevel" %%% "cats-free"   % CatsVersion,
@@ -120,6 +117,4 @@ lazy val effect = project
 // intentionally not in the aggregation
 lazy val scratch = project.dependsOn(coreJVM)
  .settings(
-   // TODO https://github.com/djspiewak/sbt-spiewak/pull/4
-   addCompilerPlugin("org.typelevel" % "kind-projector" % "0.10.3" cross CrossVersion.binary),
  )
