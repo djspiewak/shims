@@ -2,17 +2,17 @@ language: scala
 
 matrix:
   include:
-    - jdk: oraclejdk8
+    - jdk: openjdk8
       scala: '2.13.0'
-    - jdk: oraclejdk11
+    - jdk: openjdk11
       scala: '2.13.0'
-    - jdk: oraclejdk8
+    - jdk: openjdk8
       scala: '2.11.12'
-    - jdk: oraclejdk11
+    - jdk: openjdk11
       scala: '2.11.12'
-    - jdk: oraclejdk8
+    - jdk: openjdk8
       scala: '2.12.8'
-    - jdk: oraclejdk11
+    - jdk: openjdk11
       scala: '2.12.8'
 
 script:
