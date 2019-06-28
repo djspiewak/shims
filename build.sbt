@@ -36,7 +36,7 @@ ThisBuild / scmInfo := Some(ScmInfo(homepage.value.get,
   "git@github.com:djspiewak/shims.git"))
 
 val CatsVersion = "2.0.0-M4"
-val ScalazVersion = "7.2.27"
+val ScalazVersion = "7.2.28"
 
 val CatsEffectVersion = "2.0.0-M4"
 
