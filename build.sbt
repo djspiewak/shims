@@ -44,7 +44,7 @@ val Specs2Version = Def setting { "4.7.0" }
 
 val ScalaCheckVersion = Def setting { "1.14.0" }
 
-val DisciplineVersion = Def setting { "0.12.0-M3" }
+val DisciplineVersion = Def setting { "1.0.0-RC1" }
 
 val testFrameworkSettings = Seq(
   libraryDependencies ++= Seq(
