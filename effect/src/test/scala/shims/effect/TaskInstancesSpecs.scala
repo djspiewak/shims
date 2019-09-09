@@ -52,10 +52,10 @@ object TaskInstancesSpecs extends Specification with Discipline {
   def taskEff = checkAllAsync("Effect[Task]",
     implicit ctx => EffectTests[Task].effect[Int, Int, Int])
 
-  def taskPar = checkAllAsync("Parallel[Task, ParallelTask]",
+  def taskPar = checkAllAsync("Parallel[Task]",
     implicit ctx => ParallelTests[Task, ParallelTask].parallel[Int, Int])
 
-  def parTaskApp = checkAllAsync("Parallel[Task, ParallelTask]", { implicit ctx =>
+  def parTaskApp = checkAllAsync("Parallel[Task]", { implicit ctx =>
     val tests = ApplicativeTests[ParallelTask]
     tests.applicative[Int, Int, Int]
   })

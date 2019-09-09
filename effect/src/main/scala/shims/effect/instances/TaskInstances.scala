@@ -101,8 +101,10 @@ trait TaskInstances extends MonadErrorConversions {
     def suspend[A](thunk: => Task[A]): Task[A] = Task.suspend(thunk)
   }
 
-  implicit val taskParallel: Parallel[Task, ParallelTask] = new Parallel[Task, ParallelTask] {
+  implicit val taskParallel: Parallel.Aux[Task, ParallelTask] = new Parallel[Task] {
     import Task.taskParallelApplicativeInstance
+
+    type F[A] = ParallelTask[A]
 
     val monad: Monad[Task] = taskEffect
     val applicative: Applicative[ParallelTask] = Applicative[ParallelTask]
