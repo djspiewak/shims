@@ -11,9 +11,9 @@ matrix:
     - jdk: openjdk11
       scala: '2.11.12'
     - jdk: openjdk8
-      scala: '2.12.8'
+      scala: '2.12.9'
     - jdk: openjdk11
-      scala: '2.12.8'
+      scala: '2.12.9'
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION ci
