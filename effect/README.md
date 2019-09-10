@@ -23,6 +23,8 @@ import shims._         // no no no!
 import shims.effect._  // no no no!
 ```
 
+No no no no...
+
 **One or the other, not both.**
 
 The reason for this is implicit ambiguity. `Effect` is a subtype of `cats.Monad`. This means that, if we just naively define an `Effect[Task]` in a scope which also has `import shims._`, then the `Monad[Task]` which we get through `Effect` is ambiguous with the `Monad` which is automatically materialized from the `scalaz.Monad[Task]` instance. This is also why these instances are being provided by shims, instead of by a third-party project (as it was originally).
@@ -30,15 +32,15 @@ The reason for this is implicit ambiguity. `Effect` is a subtype of `cats.Monad`
 ### Upstream Dependencies
 
 - Obviously, the core **shims** subproject
-- cats-effect 1.1.0
-- scalaz-concurrent 7.2.27
+- cats-effect 2.0.0
+- scalaz-concurrent 7.2.28
 
 ## Conversions
 
 ### Instances
 
 - `Effect[scalaz.concurrent.Task]`
-- `Parallel[scalaz.concurrent.Task, scalaz.concurrent.Task.ParallelTask]`
+- `Parallel[scalaz.concurrent.Task]`
 - `Sync[scalaz.effect.IO]`
 
 Don't use `scalaz.effect.IO`. Honestly. It's strictly worse than every other option out there. Search/replace your imports today.
