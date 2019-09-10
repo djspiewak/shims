@@ -20,6 +20,8 @@ libraryDependencies += "com.codecommit" %% "shims" % "<version>"
 
 If you're using scala.js, use `%%%` instead.  Cross-builds are available for Scala 2.11, 2.12, and 2.13.  It is *strongly* recommended that you enable the relevant SI-2712 fix in your build if using 2.11 or 2.12.  [Details here](https://github.com/typelevel/cats/tree/b23c7fbc117856910fa43de205457d8637eef8c6#getting-started).  A large number of conversions will simply *not work* without partial unification.
 
+Note that shims generally follows `epoch.major.minor` versioning schemes, meaning that changes in the second component may be breaking. This is mostly because maintaining strict semver with shims would be *immensely* difficult due to the way the conversions interact. Shims is more of a leaf-level project, anyway, so semantic versioning is somewhat less critical here. Feel free to open an issue and make your case if you disagree, though.
+
 Once you have the dependency installed, simply add the following import to any scopes which require cats-scalaz interop:
 
 ```scala
