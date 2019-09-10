@@ -18,7 +18,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 ThisBuild / baseVersion := "2.0"
 
-ThisBuild / strictSemVer := false     // 😢
+ThisBuild / strictSemVer := true
 
 ThisBuild / developers ++= List(
   Developer(
@@ -40,18 +40,16 @@ val ScalazVersion = "7.2.28"
 
 val CatsEffectVersion = "2.0.0"
 
-val Specs2Version = Def setting { "4.7.0" }
-
-val ScalaCheckVersion = Def setting { "1.14.0" }
-
-val DisciplineVersion = Def setting { "1.0.0-RC1" }
+val Specs2Version = "4.7.0"
+val ScalaCheckVersion = "1.14.0"
+val DisciplineVersion = "1.0.0-RC1"
 
 val testFrameworkSettings = Seq(
   libraryDependencies ++= Seq(
-    "org.specs2"     %% "specs2-core"       % Specs2Version.value     % Test,
-    "org.specs2"     %% "specs2-scalacheck" % Specs2Version.value     % Test,
+    "org.specs2"     %% "specs2-core"       % Specs2Version     % Test,
+    "org.specs2"     %% "specs2-scalacheck" % Specs2Version     % Test,
 
-    "org.scalacheck" %% "scalacheck"        % ScalaCheckVersion.value % Test))
+    "org.scalacheck" %% "scalacheck"        % ScalaCheckVersion % Test))
 
 lazy val root = project
   .in(file("."))
@@ -71,8 +69,8 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
       "org.typelevel" %%% "cats-free"   % CatsVersion,
       "org.scalaz"    %%% "scalaz-core" % ScalazVersion,
 
-      "org.typelevel"  %%  "discipline-specs2" % DisciplineVersion.value % Test,
-      "org.typelevel"  %%% "cats-laws"         % CatsVersion             % Test),
+      "org.typelevel"  %%  "discipline-specs2" % DisciplineVersion % Test,
+      "org.typelevel"  %%% "cats-laws"         % CatsVersion       % Test),
 
     // cribbed from shapeless
     libraryDependencies ++= Seq(
@@ -111,8 +109,8 @@ lazy val effect = project
       "org.typelevel" %% "cats-effect"       % CatsEffectVersion,
       "org.scalaz"    %% "scalaz-concurrent" % ScalazVersion,
 
-      "org.typelevel" %% "discipline-specs2" % DisciplineVersion.value % Test,
-      "org.typelevel" %% "cats-effect-laws"  % CatsEffectVersion       % Test))
+      "org.typelevel" %% "discipline-specs2" % DisciplineVersion % Test,
+      "org.typelevel" %% "cats-effect-laws"  % CatsEffectVersion % Test))
 
 // intentionally not in the aggregation
 lazy val scratch = project.dependsOn(coreJVM)
