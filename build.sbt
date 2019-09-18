@@ -41,7 +41,7 @@ val ScalazVersion = "7.2.28"
 val CatsEffectVersion = "2.0.0"
 
 val Specs2Version = "4.7.0"
-val ScalaCheckVersion = "1.14.0"
+val ScalaCheckVersion = "1.14.1"
 val DisciplineVersion = "1.0.0"
 
 val testFrameworkSettings = Seq(
