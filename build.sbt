@@ -16,7 +16,7 @@
 
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-ThisBuild / baseVersion := "2.0"
+ThisBuild / baseVersion := "2.1"
 
 ThisBuild / strictSemVer := false
 
@@ -41,7 +41,7 @@ val ScalazVersion = "7.2.28"
 val CatsEffectVersion = "2.0.0"
 
 val Specs2Version = "4.7.1"
-val ScalaCheckVersion = "1.14.1"
+val ScalaCheckVersion = "1.14.2"
 val DisciplineVersion = "1.0.0"
 
 val testFrameworkSettings = Seq(

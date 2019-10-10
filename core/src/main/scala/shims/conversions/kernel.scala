@@ -157,11 +157,11 @@ trait ShowConversions {
     new ShowShimS2C[A] { val A = FC.value }
 
   private[conversions] trait ShowShimC2S[A] extends scalaz.Show[A] with Synthetic {
-    val A: cats.Show.ContravariantShow[A]
+    val A: cats.Show[A]
 
     override def shows(a: A): String = A.show(a)
   }
 
-  implicit def showToScalaz[A](implicit FC: Capture[cats.Show.ContravariantShow[A]]): scalaz.Show[A] with Synthetic =
+  implicit def showToScalaz[A](implicit FC: Capture[cats.Show[A]]): scalaz.Show[A] with Synthetic =
     new ShowShimC2S[A] { val A = FC.value }
 }
