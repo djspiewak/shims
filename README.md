@@ -115,7 +115,6 @@ What follows is an alphabetized list (in terms of cats types) of typeclasses whi
 - `Semigroup`
 - `SemigroupK`
 - `Show`
-  + The cats → scalaz conversion requires a `Show.ContravariantShow` (which is the supertype of `Show`), just for extra flexibility. This should be invisible to users 99% of the time.
 - `Strong`
 - `Traverse`
 
