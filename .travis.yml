@@ -3,17 +3,17 @@ language: scala
 matrix:
   include:
     - jdk: openjdk8
-      scala: '2.13.0'
+      scala: '2.13.1'
     - jdk: openjdk11
-      scala: '2.13.0'
+      scala: '2.13.1'
     - jdk: openjdk8
       scala: '2.11.12'
     - jdk: openjdk11
       scala: '2.11.12'
     - jdk: openjdk8
-      scala: '2.12.9'
+      scala: '2.12.10'
     - jdk: openjdk11
-      scala: '2.12.9'
+      scala: '2.12.10'
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION ci
@@ -27,7 +27,3 @@ cache:
     - $HOME/.coursier
     - $HOME/.ivy2/cache
     - $HOME/.sbt
-
-before_cache:
-  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
-  - find $HOME/.sbt        -name "*.lock"               -print -delete
