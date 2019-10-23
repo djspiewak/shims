@@ -25,13 +25,17 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
   val Synthetic = weakTypeOf[shims.conversions.Synthetic]
 
   def materializeCapture[A: WeakTypeTag]: Tree = {
-    val A = openImplicitTpeParam.getOrElse(weakTypeOf[A])
+    val A = openImplicitTpeParam.getOrElse(
+      c.abort(c.enclosingPosition, "couldn't materialize specific implicit; pruning branch"))
+
     q"""_root_.shims.util.Capture[$A](${reconstructImplicit(A)})"""
   }
 
   def materializeEitherCapture[A: WeakTypeTag, B: WeakTypeTag]: Tree = {
     val treeAM = try {
-      val A = leftImplicitTpeParam.getOrElse(weakTypeOf[A])
+      val A = leftImplicitTpeParam.getOrElse(
+        c.abort(c.enclosingPosition, "couldn't materialize specific implicit; pruning branch"))
+
       val B = weakTypeOf[B]
       Right(q"""_root_.shims.util.EitherCapture[$A, $B](_root_.scala.util.Left[$A, $B](${reconstructImplicit(A)}))""")
     } catch {
@@ -41,7 +45,9 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
 
     val treeBM = try {
       val A = weakTypeOf[A]
-      val B = rightImplicitTpeParam.getOrElse(weakTypeOf[B])
+
+      val B = rightImplicitTpeParam.getOrElse(
+        c.abort(c.enclosingPosition, "couldn't materialize specific implicit; pruning branch"))
       Right(q"""_root_.shims.util.EitherCapture[$A, $B](_root_.scala.util.Right[$A, $B](${reconstructImplicit(B)}))""")
     } catch {
       // ok it's actually an Error, not an Exception 🤦‍♀️
@@ -55,7 +61,9 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
 
   def materializeOptionCapture[A: WeakTypeTag]: Tree = {
     try {
-      val A = openImplicitTpeParam.getOrElse(weakTypeOf[A])
+      val A = openImplicitTpeParam.getOrElse(
+        c.abort(c.enclosingPosition, "couldn't materialize specific implicit; pruning branch"))
+
       q"""_root_.shims.util.OptionCapture[$A](_root_.scala.Some(${reconstructImplicit(A)}))"""
     } catch {
       // ok it's actually an Error, not an Exception 🤦‍♀️
