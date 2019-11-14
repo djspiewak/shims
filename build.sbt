@@ -40,7 +40,7 @@ val ScalazVersion = "7.2.28"
 
 val CatsEffectVersion = "2.0.0"
 
-val Specs2Version = "4.7.1"
+val Specs2Version = "4.8.1"
 val ScalaCheckVersion = "1.14.2"
 val DisciplineVersion = "1.0.0"
 
