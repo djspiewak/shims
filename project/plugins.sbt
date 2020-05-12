@@ -15,7 +15,7 @@
  */
 
 val scalaJSVersion =
-  Option(System.getenv("SCALAJS_VERSION")).filter(_.nonEmpty).getOrElse("0.6.32")
+  Option(System.getenv("SCALAJS_VERSION")).filter(_.nonEmpty).getOrElse("0.6.33")
 
 addSbtPlugin("com.codecommit"     % "sbt-spiewak-sonatype"     % "0.12.0")
 addSbtPlugin("org.scala-js"       % "sbt-scalajs"              % scalaJSVersion)
