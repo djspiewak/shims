@@ -317,7 +317,7 @@ trait FlatMapConversions extends ApplyConversions with ComonadConversions {
 
     override def tailRecM[A, B](a: A)(f: A => F[Either[A, B]]): F[B] = {
       val unsafe = AppOrBindRec.leftMap(unsafeTailRecM(_)(a)(f))
-      val delegate = unsafe.map(_.tailrecM((a: A) => F.map(f(a))(_.asScalaz))(a))
+      val delegate = unsafe.map(_.tailrecM(a) { (a: A) => F.map(f(a))(_.asScalaz) })
 
       delegate.merge
     }
@@ -338,7 +338,7 @@ trait FlatMapConversions extends ApplyConversions with ComonadConversions {
 
     override def bind[A, B](fa: F[A])(f: A => F[B]): F[B] = F.flatMap(fa)(f)
 
-    override def tailrecM[A, B](f: A => F[A \/ B])(a: A): F[B] =
+    override def tailrecM[A, B](a: A)(f: A => F[A \/ B]): F[B] =
       F.tailRecM(a)((a: A) => F.map(f(a))(_.asCats))
   }
 

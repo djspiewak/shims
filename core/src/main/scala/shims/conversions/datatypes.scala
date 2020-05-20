@@ -131,10 +131,10 @@ trait EitherKConverters {
 
 trait EitherTConverters extends EitherConverters {
 
-  implicit def eitherTAs[F[_], A, B](implicit F: cats.Functor[F]) = new AsScalaz[cats.data.EitherT[F, A, B], scalaz.EitherT[F, A, B]] with AsCats[scalaz.EitherT[F, A, B], cats.data.EitherT[F, A, B]] {
+  implicit def eitherTAs[F[_], A, B](implicit F: cats.Functor[F]) = new AsScalaz[cats.data.EitherT[F, A, B], scalaz.EitherT[A, F, B]] with AsCats[scalaz.EitherT[A, F, B], cats.data.EitherT[F, A, B]] {
 
-    def s2c(i: scalaz.EitherT[F, A, B]): cats.data.EitherT[F, A, B] = cats.data.EitherT(F.map(i.run)(eitherAs[A, B].s2c(_)))
-    def c2s(i: cats.data.EitherT[F, A, B]): scalaz.EitherT[F, A, B] = scalaz.EitherT(F.map(i.value)(eitherAs[A, B].c2s(_)))
+    def s2c(i: scalaz.EitherT[A, F, B]): cats.data.EitherT[F, A, B] = cats.data.EitherT(F.map(i.run)(eitherAs[A, B].s2c(_)))
+    def c2s(i: cats.data.EitherT[F, A, B]): scalaz.EitherT[A, F, B] = scalaz.EitherT(F.map(i.value)(eitherAs[A, B].c2s(_)))
   }
 }
 
@@ -161,7 +161,7 @@ trait ValidatedConverters {
   implicit def validatedAs[E, A] = new AsScalaz[cats.data.Validated[E, A], scalaz.Validation[E, A]] with AsCats[scalaz.Validation[E, A], cats.data.Validated[E, A]] {
 
     def s2c(i: scalaz.Validation[E, A]): cats.data.Validated[E, A] =
-      cats.data.Validated.fromEither(i.disjunction.toEither)
+      cats.data.Validated.fromEither(i.toDisjunction.toEither)
 
     def c2s(i: cats.data.Validated[E, A]): scalaz.Validation[E, A] =
       scalaz.Validation.fromEither(i.toEither)
@@ -173,7 +173,7 @@ trait ValidatedNELConverters extends ValidatedConverters with NELConverters {
   implicit def validatedNelAs[E, A] = new AsScalaz[cats.data.ValidatedNel[E, A], scalaz.ValidationNel[E, A]] with AsCats[scalaz.ValidationNel[E, A], cats.data.ValidatedNel[E, A]] {
 
     def s2c(i: scalaz.ValidationNel[E, A]): cats.data.ValidatedNel[E, A] =
-      cats.data.Validated.fromEither(i.disjunction.toEither.leftMap(nelAs[E].s2c(_)))
+      cats.data.Validated.fromEither(i.toDisjunction.toEither.leftMap(nelAs[E].s2c(_)))
 
     def c2s(i: cats.data.ValidatedNel[E, A]): scalaz.ValidationNel[E, A] =
       scalaz.Validation.fromEither(i.toEither.leftMap(nelAs[E].c2s(_)))
@@ -207,10 +207,10 @@ trait MaybeTConverters {
 
 trait WriterTConverters {
 
-  implicit def writerTAs[F[_], W, A] = new AsScalaz[cats.data.WriterT[F, W, A], scalaz.WriterT[F, W, A]] with AsCats[scalaz.WriterT[F, W, A], cats.data.WriterT[F, W, A]] {
+  implicit def writerTAs[F[_], W, A] = new AsScalaz[cats.data.WriterT[F, W, A], scalaz.WriterT[W, F, A]] with AsCats[scalaz.WriterT[W, F, A], cats.data.WriterT[F, W, A]] {
 
-    def s2c(i: scalaz.WriterT[F, W, A]): cats.data.WriterT[F, W, A] = cats.data.WriterT(i.run)
-    def c2s(i: cats.data.WriterT[F, W, A]): scalaz.WriterT[F, W, A] = scalaz.WriterT(i.run)
+    def s2c(i: scalaz.WriterT[W, F, A]): cats.data.WriterT[F, W, A] = cats.data.WriterT(i.run)
+    def c2s(i: cats.data.WriterT[F, W, A]): scalaz.WriterT[W, F, A] = scalaz.WriterT(i.run)
   }
 }
 
