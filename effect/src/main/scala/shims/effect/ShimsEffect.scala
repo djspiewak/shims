@@ -17,10 +17,8 @@
 package shims
 package effect
 
-import shims.effect.instances._
-
 trait ShimsEffect extends ShimsCore
-    with TaskInstances
-    with IOInstances
-    with MTLConcurrentEffect
-    with MTLContextShift
+    with shims.effect.instances.TaskInstances
+    with shims.effect.instances.IOInstances
+    with shims.effect.instances.MTLConcurrentEffect
+    with shims.effect.instances.MTLContextShift

@@ -66,7 +66,7 @@ object TaskArbitrary {
       .arbitrary[(Either[Throwable, Task[A]] => Unit) => Unit]
       .map(f =>
         Task
-          .async { registered: ((Throwable \/ Task[A]) => Unit) =>
+          .async { (registered: ((Throwable \/ Task[A]) => Unit)) =>
             f(e => registered(\/.fromEither(e)))
           }
           .flatMap(x => x))
