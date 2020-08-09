@@ -1,4 +1,4 @@
-# shims [![Build Status](https://travis-ci.org/djspiewak/shims.svg?branch=master)](https://travis-ci.org/djspiewak/shims) [![Gitter](https://img.shields.io/gitter/room/djspiewak/shims.svg)](https://gitter.im/djspiewak/shims) [![Latest version](https://index.scala-lang.org/djspiewak/shims/shims/latest.svg?color=orange)](https://index.scala-lang.org/djspiewak/shims/shims)
+# shims [![Gitter](https://img.shields.io/gitter/room/djspiewak/shims.svg)](https://gitter.im/djspiewak/shims) [![Latest version](https://index.scala-lang.org/djspiewak/shims/shims/latest.svg?color=orange)](https://index.scala-lang.org/djspiewak/shims/shims)
 
 Shims aims to provide a convenient, bidirectional, and transparent set of conversions between scalaz and cats, covering typeclasses (e.g. `Monad`) and data types (e.g. `\/`).  By that I mean, with shims, anything that has a `cats.Functor` instance also has a `scalaz.Functor` instance, *and vice versa*.  Additionally, every convertible scalaz datatype – such as `scalaz.State` – has an implicitly-added `asCats` function, while every convertible cats datatype – such as `cats.free.Free` – has an implicitly-added `asScalaz` function.
 
