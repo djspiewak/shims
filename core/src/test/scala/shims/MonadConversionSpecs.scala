@@ -41,8 +41,8 @@ object MonadConversionSpecs extends Specification with Discipline {
   }
 
   /*"contravariant" >> {
-    cats.Contravariant[???]
-    scalaz.Contravariant[???]
+    cats.Contravariant[***]
+    scalaz.Contravariant[***]
 
     "scalaz -> cats" >> ok
   }*/
@@ -157,11 +157,11 @@ object MonadConversionSpecs extends Specification with Discipline {
       }
     }
 
-    cats.CoflatMap[Boolean \&/ ?]
-    scalaz.Cobind[Boolean \&/ ?]
+    cats.CoflatMap[\&/[Boolean, *]]
+    scalaz.Cobind[\&/[Boolean, *]]
 
     "scalaz -> cats" >>
-      checkAll("Boolean \\&/ ?", CoflatMapTests[Boolean \&/ ?].coflatMap[Int, Int, Int])
+      checkAll("Boolean \\&/ *", CoflatMapTests[\&/[Boolean, *]].coflatMap[Int, Int, Int])
   }
 
   "comonad" >> {
@@ -213,7 +213,7 @@ object MonadConversionSpecs extends Specification with Discipline {
 
   "monaderror" >> {
     "scalaz -> cats" >> {
-      "Throwable \\/ ?" >> {
+      "Throwable \\/ *" >> {
         implicit def arbEitherT[A: Arbitrary, B: Arbitrary]: Arbitrary[A \/ B] = {
           val genEitherT: Gen[A \/ B] =
             Arbitrary.arbitrary[Either[A, B]].map(\/.fromEither(_))
@@ -223,8 +223,8 @@ object MonadConversionSpecs extends Specification with Discipline {
 
         implicit val eqThrowable: Eq[Throwable] = Eq.fromUniversalEquals[Throwable]
 
-        cats.Monad[Throwable \/ ?]
-        scalaz.Monad[Throwable \/ ?]
+        cats.Monad[\/[Throwable, *]]
+        scalaz.Monad[\/[Throwable, *]]
 
         /*
          * This is an interesting test btw because of where the Eq instances are coming from.
@@ -232,7 +232,7 @@ object MonadConversionSpecs extends Specification with Discipline {
          * inductively from BOTH.  This approximates pretty closely a real-world inductive
          * coercion scenario.
          */
-        checkAll("Option", MonadErrorTests[Throwable \/ ?, Throwable].monadError[Int, Int, Int])
+        checkAll("Option", MonadErrorTests[\/[Throwable, *], Throwable].monadError[Int, Int, Int])
       }
     }
   }

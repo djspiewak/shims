@@ -108,8 +108,8 @@ trait TaskInstances extends MonadErrorConversions {
 
     val monad: Monad[Task] = taskEffect
     val applicative: Applicative[ParallelTask] = Applicative[ParallelTask]
-    val sequential: ParallelTask ~> Task = λ[ParallelTask ~> Task](Tag.unwrap(_))
-    val parallel: Task ~> ParallelTask = λ[Task ~> ParallelTask](Tag(_))
+    val sequential: ParallelTask ~> Task = new (ParallelTask ~> Task) { def apply[a](pta: ParallelTask[a]) = Tag.unwrap(pta) }
+    val parallel: Task ~> ParallelTask = new (Task ~> ParallelTask) { def apply[a](ta: Task[a]) = Tag(ta) }
   }
 
   private def functionToPartial[A, B](f: A => B): PartialFunction[A, B] = {

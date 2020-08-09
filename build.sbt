@@ -16,7 +16,7 @@
 
 ThisBuild / baseVersion := "2.2"
 
-ThisBuild / crossScalaVersions := List("2.12.11", "2.13.3")
+ThisBuild / crossScalaVersions := List("0.26.0-RC1", "2.12.11", "2.13.3")
 
 ThisBuild / githubWorkflowJavaVersions := List("adopt@1.8", "adopt@14")
 
@@ -66,6 +66,15 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "shims",
 
+    Compile / unmanagedSourceDirectories += {
+      val component = if (scalaVersion.value.startsWith("0.") || scalaVersion.value.startsWith("3."))
+        "scala-3.x"
+      else
+        "scala-2.x"
+
+      baseDirectory.value / ".." / "src" / "main" / component
+    },
+
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-core"   % CatsVersion,
       "org.typelevel" %%% "cats-free"   % CatsVersion,
@@ -75,9 +84,14 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
       "org.typelevel"  %%% "cats-laws"         % CatsVersion       % Test),
 
     // cribbed from shapeless
-    libraryDependencies ++= Seq(
-      scalaOrganization.value % "scala-reflect" % scalaVersion.value % "provided",
-      scalaOrganization.value % "scala-compiler" % scalaVersion.value % "provided"),
+    libraryDependencies ++= {
+      if (isDotty.value)
+        Seq()
+      else
+        Seq(
+          scalaOrganization.value % "scala-reflect" % scalaVersion.value % "provided",
+          scalaOrganization.value % "scala-compiler" % scalaVersion.value % "provided")
+    },
 
     mimaBinaryIssueFilters ++= {
       import com.typesafe.tools.mima.core._
@@ -93,8 +107,9 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
         exclude[DirectMissingMethodProblem]("shims.util.OpenImplicitMacros.secondOpenImplicitTpe"),
         exclude[ReversedMissingMethodProblem]("shims.util.OpenImplicitMacros.rightImplicitTpeParam"),
         exclude[ReversedMissingMethodProblem]("shims.util.OpenImplicitMacros.leftImplicitTpeParam"))
-    }
-  )
+    })
+  .settings(dottyLibrarySettings)
+  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
 
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
@@ -113,8 +128,7 @@ lazy val effect = project
 
       "org.typelevel" %% "discipline-specs2" % DisciplineVersion % Test,
       "org.typelevel" %% "cats-effect-laws"  % CatsEffectVersion % Test))
+  .settings(dottyLibrarySettings)
 
 // intentionally not in the aggregation
 lazy val scratch = project.dependsOn(coreJVM)
- .settings(
- )

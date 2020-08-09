@@ -1,4 +1,4 @@
-# shims [![Gitter](https://img.shields.io/gitter/room/djspiewak/shims.svg)](https://gitter.im/djspiewak/shims) [![Latest version](https://index.scala-lang.org/djspiewak/shims/shims/latest.svg?color=orange)](https://index.scala-lang.org/djspiewak/shims/shims)
+# shims [![Gitter](https://img.shields.io/gitter/room/djspiewak/shims.svg)](https://gitter.im/djspiewak/shims) [![Latest version](https://index.scala-lang.org/djspiewak/shims/shims/latest.svg*color=orange)](https://index.scala-lang.org/djspiewak/shims/shims)
 
 Shims aims to provide a convenient, bidirectional, and transparent set of conversions between scalaz and cats, covering typeclasses (e.g. `Monad`) and data types (e.g. `\/`).  By that I mean, with shims, anything that has a `cats.Functor` instance also has a `scalaz.Functor` instance, *and vice versa*.  Additionally, every convertible scalaz datatype – such as `scalaz.State` – has an implicitly-added `asCats` function, while every convertible cats datatype – such as `cats.free.Free` – has an implicitly-added `asScalaz` function.
 
@@ -129,7 +129,7 @@ Let me know if I missed anything!  Comprehensive lists of typeclasses in either 
 Datatype conversions are *explicit*, meaning that users must insert syntax which triggers the conversion.  In other words, there is no implicit coercion between data types: a method call is required.  For example, converting between `scalaz.Free` and `cats.free.Free` is done via the following:
 
 ```scala
-val f1: scalaz.Free[F, A] = ???
+val f1: scalaz.Free[F, A] = ***
 val f2: cats.free.Free[F, A] = f1.asCats
 val f3: scalaz.Free[F, A] = f2.asScalaz
 ```
@@ -169,19 +169,19 @@ Wherever extra constraints are required (e.g. the various `StateT` conversions r
 At present, the `asScalaz`/`asCats` mechanism does not recursively convert nested structures.  This situation most commonly occurs with monad transformer stacks.  For example:
 
 ```scala
-val stuff: EitherT[OptionT[Foo, ?], Errs, Int] = ???
+val stuff: EitherT[OptionT[Foo, *], Errs, Int] = ***
 
 stuff.asCats
 ```
 
-The type of the final line is `cats.data.EitherT[scalaz.OptionT[Foo, ?], Errs, Int]`, whereas you might *expect* that it would be `cats.data.EitherT[cats.data.OptionT[Foo, ?], Errs, Int]`.  It is technically possible to apply conversions in depth, though it require some extra functor constraints in places.  The primary reason why this isn't done (now) is compile time performance, which would be adversely affected by the non-trivial inductive solution space.
+The type of the final line is `cats.data.EitherT[scalaz.OptionT[Foo, *], Errs, Int]`, whereas you might *expect* that it would be `cats.data.EitherT[cats.data.OptionT[Foo, *], Errs, Int]`.  It is technically possible to apply conversions in depth, though it require some extra functor constraints in places.  The primary reason why this isn't done (now) is compile time performance, which would be adversely affected by the non-trivial inductive solution space.
 
 It shouldn't be too much of a hindrance in any case, since the typeclass instances for the nested type will be materialized for both scalaz and cats, and so it doesn't matter as much *exactly* which nominal structure is in use.  It would really only matter if you had a function which explicitly expected one thing or another.
 
 The only exception to this rule is `ValidationNel` in scalaz and `ValidatedNel` in cats.  Converting this composite type is a very common use case, and thus an specialized converter is defined:
 
 ```scala
-val v: ValidationNel[Errs, Int] = ???
+val v: ValidationNel[Errs, Int] = ***
 
 v.asCats   // => v2: ValidatedNel[Errs, Int]
 ```

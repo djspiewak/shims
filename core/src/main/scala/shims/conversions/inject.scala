@@ -25,8 +25,8 @@ trait InjectConversions {
   private[conversions] trait InjectShimS2C[F[_], G[_]] extends cats.InjectK[F, G] with Synthetic {
     val FG: scalaz.Inject[F, G]
 
-    override def inj: FunctionK[F, G] = λ[FunctionK[F, G]](FG.inj(_))
-    override def prj: FunctionK[G, λ[α => Option[F[α]]]] = λ[FunctionK[G, λ[α => Option[F[α]]]]](FG.prj(_))
+    override def inj: FunctionK[F, G] = new FunctionK[F, G] { def apply[a](fa: F[a]) = FG.inj(fa) }
+    override def prj: FunctionK[G, λ[α => Option[F[α]]]] = new FunctionK[G, λ[α => Option[F[α]]]] { def apply[a](ga: G[a]) = FG.prj(ga) }
   }
 
   implicit def injectToCats[F[_], G[_]](implicit FC: Capture[scalaz.Inject[F, G]]): cats.InjectK[F, G] with Synthetic =

@@ -47,11 +47,11 @@ import java.io.{ByteArrayOutputStream, PrintStream}
 object MTLSpecs extends Specification with Discipline {
 
   def is =
-    br ^ checkAllAsync("OptionT[IO, ?]", implicit ctx => ConcurrentTests[OptionT[IO, ?]].concurrent[Int, Int, Int]) ^
-    br ^ checkAllAsync("Kleisli[IO, Int, ?]", implicit ctx => ConcurrentTests[Kleisli[IO, Int, ?]].concurrent[Int, Int, Int]) ^
-    br ^ checkAllAsync("EitherT[IO, Throwable, ?]", implicit ctx => ConcurrentEffectTests[EitherT[IO, Throwable, ?]].concurrentEffect[Int, Int, Int]) ^
-    br ^ checkAllAsync("StateT[IO, Int, ?]", implicit ctx => AsyncTests[StateT[IO, Int, ?]].async[Int, Int, Int]) ^
-    br ^ checkAllAsync("WriterT[IO, Int, ?]", implicit ctx => ConcurrentEffectTests[WriterT[IO, Int, ?]].concurrentEffect[Int, Int, Int])
+    br ^ checkAllAsync("OptionT[IO, *]", implicit ctx => ConcurrentTests[OptionT[IO, *]].concurrent[Int, Int, Int]) ^
+    br ^ checkAllAsync("Kleisli[IO, Int, *]", implicit ctx => ConcurrentTests[Kleisli[IO, Int, *]].concurrent[Int, Int, Int]) ^
+    br ^ checkAllAsync("EitherT[IO, Throwable, *]", implicit ctx => ConcurrentEffectTests[EitherT[IO, Throwable, *]].concurrentEffect[Int, Int, Int]) ^
+    br ^ checkAllAsync("StateT[IO, Int, *]", implicit ctx => AsyncTests[StateT[IO, Int, *]].async[Int, Int, Int]) ^
+    br ^ checkAllAsync("WriterT[IO, Int, *]", implicit ctx => ConcurrentEffectTests[WriterT[IO, Int, *]].concurrentEffect[Int, Int, Int])
 
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()

@@ -23,10 +23,9 @@ import cats.syntax.bifunctor._
 import scalaz.\/
 
 import shims.AsSyntax
-import shims.util.{Capture, EitherCapture, EitherBiasing, OptionCapture}, EitherBiasing._
+import shims.util.{Capture, EitherCapture, OptionCapture}
 
 trait IFunctorConversions {
-  Derp    // workaround for the workaround to either biasing changing every friggin release
 
   private[conversions] trait IFunctorShimS2C[F[_]] extends cats.Invariant[F] with Synthetic {
     val F: scalaz.InvariantFunctor[F]

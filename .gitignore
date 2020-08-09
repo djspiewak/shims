@@ -2,7 +2,7 @@ target/
 .idea/
 
 # vim
-*.sw?
+*.sw*
 
 # Ignore [ce]tags files
 tags
