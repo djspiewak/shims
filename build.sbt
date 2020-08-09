@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+ThisBuild / baseVersion := "2.2"
 
-ThisBuild / baseVersion := "2.1"
+ThisBuild / crossScalaVersions := List("2.12.11", "2.13.3")
+
+ThisBuild / githubWorkflowJavaVersions := List("adopt@1.8", "adopt@14")
 
 ThisBuild / strictSemVer := false
 
@@ -35,14 +37,14 @@ ThisBuild / homepage := Some(url("https://github.com/djspiewak/shims"))
 ThisBuild / scmInfo := Some(ScmInfo(homepage.value.get,
   "git@github.com:djspiewak/shims.git"))
 
-val CatsVersion = "2.0.0"
+val CatsVersion = "2.1.1"
 val ScalazVersion = "7.2.30"
 
-val CatsEffectVersion = "2.0.0"
+val CatsEffectVersion = "2.1.4"
 
-val Specs2Version = "4.8.1"
+val Specs2Version = "4.10.2"
 val ScalaCheckVersion = "1.14.3"
-val DisciplineVersion = "1.1.0"
+val DisciplineVersion = "1.0.3"
 
 val testFrameworkSettings = Seq(
   libraryDependencies ++= Seq(
