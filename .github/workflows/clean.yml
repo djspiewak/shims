@@ -48,11 +48,11 @@ jobs:
             for ((i=0; $i < $COUNT; i++)); do
 
               # Get name of artifact and count instances of this name.
-              name=$(jq <<<$JSON -r ".artifacts[$i].name*")
+              name=$(jq <<<$JSON -r ".artifacts[$i].name?")
               ARTCOUNT[$name]=$(( $(( ${ARTCOUNT[$name]} )) + 1))
 
-              id=$(jq <<<$JSON -r ".artifacts[$i].id*")
-              size=$(( $(jq <<<$JSON -r ".artifacts[$i].size_in_bytes*") ))
+              id=$(jq <<<$JSON -r ".artifacts[$i].id?")
+              size=$(( $(jq <<<$JSON -r ".artifacts[$i].size_in_bytes?") ))
               printf "Deleting '%s' #%d, %'d bytes\n" $name ${ARTCOUNT[$name]} $size
               ghapi -X DELETE $REPO/actions/artifacts/$id
             done

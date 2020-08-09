@@ -16,7 +16,7 @@
 
 ThisBuild / baseVersion := "2.2"
 
-ThisBuild / crossScalaVersions := List("0.26.0-RC1", "2.12.11", "2.13.3")
+ThisBuild / crossScalaVersions := List("0.25.0", "0.26.0-RC1", "2.12.11", "2.13.3")
 
 ThisBuild / githubWorkflowJavaVersions := List("adopt@1.8", "adopt@14")
 
