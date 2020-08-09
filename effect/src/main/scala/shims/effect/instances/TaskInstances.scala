@@ -116,5 +116,8 @@ trait TaskInstances extends MonadErrorConversions {
     case a => f(a)
   }
 
-  private def forget[A](x: A): Unit = ()
+  private def forget[A](x: A): Unit = {
+    val _ = x
+    ()
+  }
 }

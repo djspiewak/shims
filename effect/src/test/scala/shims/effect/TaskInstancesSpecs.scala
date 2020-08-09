@@ -76,6 +76,7 @@ object TaskInstancesSpecs extends Specification with Discipline {
   def checkAllAsync(name: String, f: TestContext => Laws#RuleSet)(implicit p: Parameters) = {
     val context = TestContext()
     val ruleSet = f(context)
+    val _ = name
 
     Fragments.foreach(ruleSet.all.properties.toList) {
       case (id, prop) =>
