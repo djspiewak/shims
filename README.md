@@ -129,7 +129,7 @@ Let me know if I missed anything!  Comprehensive lists of typeclasses in either 
 Datatype conversions are *explicit*, meaning that users must insert syntax which triggers the conversion.  In other words, there is no implicit coercion between data types: a method call is required.  For example, converting between `scalaz.Free` and `cats.free.Free` is done via the following:
 
 ```scala
-val f1: scalaz.Free[F, A] = ***
+val f1: scalaz.Free[F, A] = ???
 val f2: cats.free.Free[F, A] = f1.asCats
 val f3: scalaz.Free[F, A] = f2.asScalaz
 ```
@@ -169,7 +169,7 @@ Wherever extra constraints are required (e.g. the various `StateT` conversions r
 At present, the `asScalaz`/`asCats` mechanism does not recursively convert nested structures.  This situation most commonly occurs with monad transformer stacks.  For example:
 
 ```scala
-val stuff: EitherT[OptionT[Foo, *], Errs, Int] = ***
+val stuff: EitherT[OptionT[Foo, *], Errs, Int] = ???
 
 stuff.asCats
 ```
@@ -181,7 +181,7 @@ It shouldn't be too much of a hindrance in any case, since the typeclass instanc
 The only exception to this rule is `ValidationNel` in scalaz and `ValidatedNel` in cats.  Converting this composite type is a very common use case, and thus an specialized converter is defined:
 
 ```scala
-val v: ValidationNel[Errs, Int] = ***
+val v: ValidationNel[Errs, Int] = ???
 
 v.asCats   // => v2: ValidatedNel[Errs, Int]
 ```
