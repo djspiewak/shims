@@ -59,7 +59,7 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
       q"""_root_.shims.util.OptionCapture[$A](_root_.scala.Some(${reconstructImplicit(A)}))"""
     } catch {
       // ok it's actually an Error, not an Exception 🤦‍♀️
-      case t: Throwable =>
+      case _: Throwable =>
         q"""_root_.shims.util.OptionCapture[${weakTypeOf[A]}](_root_.scala.None)"""
     }
   }
@@ -71,7 +71,7 @@ class CaptureMacros(val c: whitebox.Context) extends OpenImplicitMacros {
       try {
         c.inferImplicitValue(A)
       } catch {
-        case t: Throwable => c.abort(c.enclosingPosition, s"implicit $A not found")
+        case _: Throwable => c.abort(c.enclosingPosition, s"implicit $A not found")
       }
     }
 

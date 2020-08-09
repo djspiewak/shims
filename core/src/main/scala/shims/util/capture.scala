@@ -16,8 +16,6 @@
 
 package shims.util
 
-import scala.language.experimental.macros
-
 import scala.annotation.implicitNotFound
 import scala.util.Either
 

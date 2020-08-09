@@ -199,9 +199,12 @@ object MonadConversionSpecs extends Specification with Discipline {
 
       "F[_]" >> {
         def foo[F[_]](implicit F: scalaz.Monad[F]) = {
+          val _ = F
           cats.Applicative[F]
           cats.Monad[F]
         }
+
+        val _ = foo[Option]
 
         ok
       }
