@@ -23,11 +23,6 @@ import cats.effect.{Async, IO}
 import cats.effect.laws.discipline.{arbitrary, EffectTests}, arbitrary._
 import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances._
 
-import cats.instances.either._
-import cats.instances.int._
-import cats.instances.tuple._
-import cats.instances.unit._
-
 import scalaz.Tag
 import scalaz.concurrent.Task
 import scalaz.concurrent.Task.ParallelTask

@@ -20,11 +20,6 @@ import cats.Eq
 import cats.effect.laws.discipline.SyncTests
 import cats.effect.laws.util.TestInstances.eqThrowable
 
-import cats.instances.either._
-import cats.instances.int._
-import cats.instances.tuple._
-import cats.instances.unit._
-
 import scalaz.effect.IO
 
 import org.specs2.Specification

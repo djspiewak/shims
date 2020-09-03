@@ -22,7 +22,6 @@ import shims.util.{Capture, OptionCapture}
 import scalaz.{~>, \/, \&/}
 
 import cats.arrow.FunctionK
-import cats.instances.either._
 import cats.syntax.bifunctor._
 
 trait AsScalaz[-I, +O] {
