@@ -17,7 +17,6 @@
 package shims.conversions
 
 import cats.Eval
-import cats.instances.either._
 import cats.syntax.bifunctor._
 
 import scalaz.\/

@@ -21,11 +21,6 @@ import cats.effect.laws.discipline.{arbitrary, AsyncTests, ConcurrentEffectTests
 import cats.effect.laws.util.{TestContext, TestInstances}, TestInstances._
 
 import cats.{Eq, Functor, Monad}
-import cats.instances.either._
-import cats.instances.int._
-import cats.instances.option._
-import cats.instances.tuple._
-import cats.instances.unit._
 import cats.syntax.functor._
 
 import scalaz.{EitherT, Kleisli, OptionT, StateT, WriterT}

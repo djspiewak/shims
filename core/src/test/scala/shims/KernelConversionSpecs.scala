@@ -18,7 +18,6 @@ package shims
 
 import cats.kernel.laws.discipline._
 import scalaz.std.anyVal._
-import cats.instances.option._
 
 import org.specs2.mutable._
 import org.typelevel.discipline.specs2.mutable.Discipline
