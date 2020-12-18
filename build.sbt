@@ -37,7 +37,7 @@ ThisBuild / homepage := Some(url("https://github.com/djspiewak/shims"))
 ThisBuild / scmInfo := Some(ScmInfo(homepage.value.get,
   "git@github.com:djspiewak/shims.git"))
 
-val CatsVersion = "2.1.1"
+val CatsVersion = "2.3.1"
 val ScalazVersion = "7.2.30"
 
 val CatsEffectVersion = "2.2.0"
