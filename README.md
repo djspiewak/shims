@@ -1,5 +1,9 @@
 # shims [![Gitter](https://img.shields.io/gitter/room/djspiewak/shims.svg)](https://gitter.im/djspiewak/shims) [![Latest version](https://index.scala-lang.org/djspiewak/shims/shims/latest.svg*color=orange)](https://index.scala-lang.org/djspiewak/shims/shims)
 
+**As of Cats 2.3.0 (and above), most major instances are included in the implicit scope without requiring extra imports. This is tremendously convenient for users, but it *fundamentally* breaks Shims, since any scope in which shims is imported along with instances from scalaz results in an unprioritized ambiguity. However, no one really complained about this, despite it being broken for months, which leads me to conclude that this library is no longer needed and may be archived.**
+
+**This repository is left up for pedagogical reasons, as it is quite interesting to see what techniques are necessary to do something like this in Scala's type system (both Scala 2 and Scala 3). However, I will no longer be maintaining Shims going forward. I recommend everyone who *was* depending on it to upgrade to Cats at your earliest convenience, as it will provide a generally better experience all around within a more modern ecosystem.**
+
 Shims aims to provide a convenient, bidirectional, and transparent set of conversions between scalaz and cats, covering typeclasses (e.g. `Monad`) and data types (e.g. `\/`).  By that I mean, with shims, anything that has a `cats.Functor` instance also has a `scalaz.Functor` instance, *and vice versa*.  Additionally, every convertible scalaz datatype – such as `scalaz.State` – has an implicitly-added `asCats` function, while every convertible cats datatype – such as `cats.free.Free` – has an implicitly-added `asScalaz` function.
 
 Only a single import is required to enable any and all functionality:
