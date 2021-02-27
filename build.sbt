@@ -40,7 +40,7 @@ ThisBuild / scmInfo := Some(ScmInfo(homepage.value.get,
 val CatsVersion = "2.1.1"
 val ScalazVersion = "7.2.30"
 
-val CatsEffectVersion = "2.2.0"
+val CatsEffectVersion = "2.3.3"
 
 val Specs2Version = "4.10.5"
 val ScalaCheckVersion = "1.15.1"
